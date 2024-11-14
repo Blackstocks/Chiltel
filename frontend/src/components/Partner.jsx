@@ -2,17 +2,17 @@ import React from "react";
 
 const Partner = () => {
   const partnerLogos = [
-    { name: "Samsung", src: "/src/assets/samsung.svg" },
-    { name: "Daikin", src: "/src/assets/daikin.svg" },
-    { name: "Blue Star", src: "/src/assets/bluestar.svg" },
-    { name: "Godrej", src: "/src/assets/godrej.svg" },
-    { name: "Electrolux", src: "/src/assets/electrolux.svg" },
-    { name: "Haier", src: "/src/assets/haier.svg" },
-    { name: "Panasonic", src: "/src/assets/panasonic.svg" },
-    { name: "Voltas", src: "/src/assets/voltas.jpg" },
-    { name: "Whirlpool", src: "/src/assets/whirlpool.svg" },
-    { name: "LG", src: "/src/assets/lg.svg" },
-    { name: "Carrier", src: "/src/assets/carrier.svg" },
+    { name: "Samsung", src: "/assets/samsung.svg" },
+    { name: "Daikin", src: "/assets/daikin.svg" },
+    { name: "Blue Star", src: "/assets/bluestar.svg" },
+    { name: "Godrej", src: "/assets/godrej.svg" },
+    { name: "Electrolux", src: "/assets/electrolux.svg" },
+    { name: "Haier", src: "/assets/haier.svg" },
+    { name: "Panasonic", src: "/assets/panasonic.svg" },
+    { name: "Voltas", src: "/assets/voltas.jpg" },
+    { name: "Whirlpool", src: "/assets/whirlpool.svg" },
+    { name: "LG", src: "/assets/lg.svg" },
+    { name: "Carrier", src: "/assets/carrier.svg" },
   ];
 
   return (

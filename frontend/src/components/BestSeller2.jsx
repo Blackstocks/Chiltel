@@ -5,39 +5,39 @@ const BestSeller2 = () => {
     {
       name: "Air Conditioner Repair",
       icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
-      image: "/src/assets/air_conditioner.jpeg",
+      image: "/assets/air_conditioner.jpeg",
       description:
         "Professional AC services including installation, repair, and maintenance",
     },
     {
       name: "Water Purifier Repair",
       icon: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z",
-      image: "/src/assets/water_purifier.jpeg",
+      image: "/assets/water_purifier.jpeg",
       description:
         "Expert water purifier installation and maintenance services",
     },
     {
       name: "Geyser Repair",
       icon: "M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z",
-      image: "/src/assets/geyser.jpg",
+      image: "/assets/geyser.jpg",
       description: "Comprehensive geyser repair and installation services",
     },
     {
       name: "Microwave Repair",
       icon: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4",
-      image: "/src/assets/microwave.jpeg",
+      image: "/assets/microwave.jpeg",
       description: "Expert microwave repair and maintenance services",
     },
     {
       name: "Refrigerator Repair",
       icon: "M7 2v11m0 0a2 2 0 104 0m-4 0a2 2 0 114 0m5-11v11m0 0a2 2 0 104 0m-4 0a2 2 0 114 0",
-      image: "/src/assets/refrigwrator.jpeg",
+      image: "/assets/refrigwrator.jpeg",
       description: "Professional refrigerator repair and maintenance services",
     },
     {
       name: "Washing Machine Repair",
       icon: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4",
-      image: "/src/assets/washing_machine.jpeg",
+      image: "/assets/washing_machine.jpeg",
       description: "Expert washing machine repair and maintenance services",
     },
   ];
@@ -143,7 +143,7 @@ const BestSeller2 = () => {
       {/* Banner Section */}
       <div className="flex justify-center my-8">
         <img
-          src={isMobile ? "/src/assets/banner.png" : "/src/assets/banner3.png"}
+          src={isMobile ? "/assets/banner.png" : "/assets/banner3.png"}
           alt="Service Banner"
           className="object-cover w-full transition-transform duration-500 ease-in-out max-h-80 hover:scale-105 hover:shadow-lg"
         />
