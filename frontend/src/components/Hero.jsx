@@ -221,7 +221,7 @@ const Hero = () => {
         <div className="relative order-1 w-full lg:order-2">
           <div className="w-full h-56 overflow-hidden rounded-lg sm:h-64 md:h-80 lg:h-full">
             <img
-              src="/src/assets/home.png"
+              src="/public/home.png"
               alt="Home Appliance Professional"
               className="object-cover w-full h-full lg:object-contain"
             />
