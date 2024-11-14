@@ -74,8 +74,8 @@ const ServiceCategories = () => {
     <div className="container max-w-full mx-auto overflow-hidden">
       <div className="py-8 text-3xl text-center">
         <h2 className="text-3xl">
-          <span className="text-gray-500">NEW AND</span>{" "}
-          <span className="text-gray-900">NOTEWORTHY</span>
+          <span className="text-gray-500">DOMESTIC</span>{" "}
+          <span className="text-gray-900">APPLIANCES</span>
         </h2>
         <p className="w-3/4 m-auto text-xs text-gray-600 sm:text-sm md:text-base">
           Discover our latest and most popular services tailored to meet your

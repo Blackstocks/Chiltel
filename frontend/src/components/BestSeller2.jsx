@@ -3,42 +3,40 @@ import React, { useState, useEffect } from "react";
 const BestSeller2 = () => {
   const categories = [
     {
-      name: "Air Conditioner Repair",
+      name: "Deep Freezer",
       icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
-      image: "/assets/air_conditioner.jpeg",
-      description:
-        "Professional AC services including installation, repair, and maintenance",
+      image: "/assets/deep_freeze.png",
+      description: "High-quality deep freezers for your storage needs.",
     },
     {
-      name: "Water Purifier Repair",
+      name: "Visi Cooler",
       icon: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z",
-      image: "/assets/water_purifier.jpeg",
-      description:
-        "Expert water purifier installation and maintenance services",
+      image: "/assets/Visi _Coole.png",
+      description: "Reliable visi coolers for commercial use.",
     },
     {
-      name: "Geyser Repair",
+      name: "Cassette AC",
       icon: "M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z",
-      image: "/assets/geyser.jpg",
-      description: "Comprehensive geyser repair and installation services",
+      image: "/assets/Cassett.jpg",
+      description: "Efficient cooling with cassette air conditioners.",
     },
     {
-      name: "Microwave Repair",
+      name: "Water Cooler Cum Purifier",
       icon: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4",
-      image: "/assets/microwave.jpeg",
-      description: "Expert microwave repair and maintenance services",
+      image: "/assets/water_cooler.jpg",
+      description: "Dual-function water cooler and purifier.",
     },
     {
-      name: "Refrigerator Repair",
+      name: "Water Dispenser",
       icon: "M7 2v11m0 0a2 2 0 104 0m-4 0a2 2 0 114 0m5-11v11m0 0a2 2 0 104 0m-4 0a2 2 0 114 0",
-      image: "/assets/refrigwrator.jpeg",
-      description: "Professional refrigerator repair and maintenance services",
+      image: "/assets/Water-dis.jpg",
+      description: "Convenient and portable water dispensers.",
     },
     {
-      name: "Washing Machine Repair",
+      name: "Display Counter",
       icon: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4",
-      image: "/assets/washing_machine.jpeg",
-      description: "Expert washing machine repair and maintenance services",
+      image: "/assets/display-counter.png",
+      description: "Attractive display counters for showcasing products.",
     },
   ];
 
@@ -48,7 +46,6 @@ const BestSeller2 = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // Update screen size state on resize
   useEffect(() => {
     const handleResize = () => {
       setVisibleItems(window.innerWidth < 640 ? 1 : 4);
@@ -61,11 +58,10 @@ const BestSeller2 = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto-advance carousel
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % totalItems);
-    }, 3000); // Change card every 3 seconds
+    }, 3000);
 
     return () => clearInterval(timer);
   }, [totalItems]);
@@ -74,13 +70,12 @@ const BestSeller2 = () => {
     <div className="container max-w-full mx-auto overflow-hidden">
       <div className="py-8 text-3xl text-center">
         <h2 className="text-3xl">
-          <span className="text-gray-500">QUICK HOME</span>{" "}
-          <span className="text-gray-900">REPAIR</span>
+          <span className="text-gray-500">RETAIL</span>{" "}
+          <span className="text-gray-900">APPLIANCES</span>
         </h2>
         <p className="w-3/4 m-auto text-lg text-gray-600">
-            Professional repair services for all your home appliances - Available 24/7
-          </p>
-
+          Discover a wide range of retail appliances available for booking.
+        </p>
       </div>
 
       <div
@@ -92,12 +87,9 @@ const BestSeller2 = () => {
         }}
       >
         {duplicatedCategories.map((category, index) => (
-          <div
-            key={index}
-            className="flex-shrink-0 w-full p-2 sm:w-1/4" // Full width on mobile, quarter width on larger screens
-          >
-            <div className="overflow-hidden bg-white rounded-lg shadow-md hover:shadow-lg">
-              <div className="relative pb-[60%] overflow-hidden group">
+          <div key={index} className="flex-shrink-0 w-full p-2 sm:w-1/4">
+            <div className="overflow-hidden bg-white rounded-lg shadow-md hover:shadow-lg h-[400px] flex flex-col">
+              <div className="relative h-[60%] overflow-hidden group">
                 <img
                   src={category.image}
                   alt={category.name}
@@ -122,7 +114,7 @@ const BestSeller2 = () => {
                   </div>
                 </div>
               </div>
-              <div className="p-4">
+              <div className="p-4 h-[40%] flex flex-col justify-between">
                 <h3 className="mb-2 text-lg font-semibold text-center text-gray-900">
                   {category.name}
                 </h3>
@@ -140,7 +132,6 @@ const BestSeller2 = () => {
         ))}
       </div>
 
-      {/* Banner Section */}
       <div className="flex justify-center my-8">
         <img
           src={isMobile ? "/assets/banner.png" : "/assets/banner3.png"}
