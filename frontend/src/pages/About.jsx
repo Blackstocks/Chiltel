@@ -3,9 +3,9 @@ import Title from "../components/Title";
 import NewsletterBox from "../components/NewsletterBox";
 
 const images = [
-  "/src/assets/aboutus.png",
-  "/src/assets/aboutus2.png",
-  "/src/assets/aboutus3.png"
+  "/assets/aboutus.png",
+  "/assets/aboutus2.png",
+  "/assets/aboutus3.png"
 ];
 
 const About = () => {
