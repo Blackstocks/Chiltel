@@ -134,7 +134,7 @@ const BestSeller2 = () => {
 
       <div className="flex justify-center my-8">
         <img
-          src={isMobile ? "/assets/banner.png" : "/assets/banner3.png"}
+          src={isMobile ? "/assets/banner7.png" : "/assets/banner8.png"}
           alt="Service Banner"
           className="object-cover w-full transition-transform duration-500 ease-in-out max-h-80 hover:scale-105 hover:shadow-lg"
         />
