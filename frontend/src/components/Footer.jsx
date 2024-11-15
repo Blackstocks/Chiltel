@@ -18,7 +18,7 @@ const Footer = () => {
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img
-                src="assets/google.png"
+                src="/assets/google.png"
                 alt="Google"
                 className="w-5 h-5"
               />
@@ -28,7 +28,7 @@ const Footer = () => {
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img
-                src="assets/facebook.png"
+                src="/assets/facebook.png"
                 alt="Facebook"
                 className="w-5 h-5"
               />
@@ -38,7 +38,7 @@ const Footer = () => {
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img
-                src="assets/instagram.png"
+                src="/assets/instagram.png"
                 alt="Instagram"
                 className="w-5 h-5"
               />
@@ -48,7 +48,7 @@ const Footer = () => {
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img
-                src="assets/linkedin.png"
+                src="/assets/linkedin.png"
                 alt="LinkedIn"
                 className="w-5 h-5"
               />
