@@ -1,5 +1,3 @@
-// src/components/ServiceCollection.js
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,18 +5,18 @@ const ServiceCollection = () => {
   const navigate = useNavigate();
 
   const categories = [
-    { id: 1, name: "Air Conditioner", mainCategory: "Appliance", type: "Cooling", image: "/assets/air_conditioner.jpeg", description: "Professional AC services including installation, repair, and maintenance" },
-    { id: 2, name: "Water Purifier", mainCategory: "Appliance", type: "Water", image: "/assets/water_purifier.jpeg", description: "Expert water purifier installation and maintenance services" },
-    { id: 3, name: "Geyser", mainCategory: "Appliance", type: "Heating", image: "/assets/geyser.jpg", description: "Comprehensive geyser repair and installation services" },
-    { id: 4, name: "Microwave", mainCategory: "Appliance", type: "Cooking", image: "/assets/microwave.jpeg", description: "Expert microwave repair and maintenance services" },
-    { id: 5, name: "Refrigerator", mainCategory: "Appliance", type: "Cooling", image: "/assets/refrigerator.jpeg", description: "Professional refrigerator repair and maintenance services" },
-    { id: 6, name: "Washing Machine", mainCategory: "Appliance", type: "Cleaning", image: "/assets/washing_machine.jpeg", description: "Expert washing machine repair and maintenance services" },
-    { id: 7, name: "Deep Freezer", mainCategory: "Retail", type: "Cooling", image: "/assets/deep_freeze.png", description: "High-quality deep freezers for your storage needs." },
-    { id: 8, name: "Visi Cooler", mainCategory: "Retail", type: "Cooling", image: "/assets/visi_cooler.png", description: "Reliable visi coolers for commercial use." },
-    { id: 9, name: "Cassette AC", mainCategory: "Retail", type: "Cooling", image: "/assets/cassette_ac.jpg", description: "Efficient cooling with cassette air conditioners." },
-    { id: 10, name: "Water Cooler Cum Purifier", mainCategory: "Retail", type: "Water", image: "/assets/water_cooler.jpg", description: "Dual-function water cooler and purifier." },
-    { id: 11, name: "Water Dispenser", mainCategory: "Retail", type: "Water", image: "/assets/water_dispenser.jpg", description: "Convenient and portable water dispensers." },
-    { id: 12, name: "Display Counter", mainCategory: "Retail", type: "Display", image: "/assets/display_counter.png", description: "Attractive display counters for showcasing products." },
+    { name: "Air Conditioner", mainCategory: "Appliance", type: "Cooling", image: "/assets/air_conditioner.jpeg", description: "Professional AC services including installation, repair, and maintenance" },
+    { name: "Water Purifier", mainCategory: "Appliance", type: "Water", image: "/assets/water_purifier.jpeg", description: "Expert water purifier installation and maintenance services" },
+    { name: "Geyser", mainCategory: "Appliance", type: "Heating", image: "/assets/geyser.jpg", description: "Comprehensive geyser repair and installation services" },
+    { name: "Microwave", mainCategory: "Appliance", type: "Cooking", image: "/assets/microwave.jpeg", description: "Expert microwave repair and maintenance services" },
+    { name: "Refrigerator", mainCategory: "Appliance", type: "Cooling", image: "/assets/refrigwrator.jpeg", description: "Professional refrigerator repair and maintenance services" },
+    { name: "Washing Machine", mainCategory: "Appliance", type: "Cleaning", image: "/assets/washing_machine.jpeg", description: "Expert washing machine repair and maintenance services" },
+    { name: "Deep Freezer", mainCategory: "Retail", type: "Cooling", image: "/assets/deep_freeze.png", description: "High-quality deep freezers for your storage needs." },
+    { name: "Visi Cooler", mainCategory: "Retail", type: "Cooling", image: "/assets/Visi _Coole.png", description: "Reliable visi coolers for commercial use." },
+    { name: "Cassette AC", mainCategory: "Retail", type: "Cooling", image: "/assets/Cassett.jpg", description: "Efficient cooling with cassette air conditioners." },
+    { name: "Water Cooler Cum Purifier", mainCategory: "Retail", type: "Water", image: "/assets/water_cooler.jpg", description: "Dual-function water cooler and purifier." },
+    { name: "Water Dispenser", mainCategory: "Retail", type: "Water", image: "/assets/Water-dis.jpg", description: "Convenient and portable water dispensers." },
+    { name: "Display Counter", mainCategory: "Retail", type: "Display", image: "/assets/display-counter.png", description: "Attractive display counters for showcasing products." },
   ];
 
   const [filteredCategories, setFilteredCategories] = useState(categories);
@@ -57,6 +55,10 @@ const ServiceCollection = () => {
     setFilteredCategories(sortedCategories);
   };
 
+  const handleButtonClick = (category, type) => {
+    navigate(`/products/${category.toLowerCase().replace(/ /g, '-')}?type=${type}`);
+  };
+
   useEffect(() => {
     filterCategories();
   }, [mainCategoryFilter, typeFilter]);
@@ -85,11 +87,23 @@ const ServiceCollection = () => {
           <div className="p-4 mb-6 border rounded-lg">
             <h3 className="mb-4 text-lg font-semibold">MAIN CATEGORY</h3>
             <div className="flex flex-col space-y-2">
-              <label>
-                <input type="radio" name="mainCategory" checked={mainCategoryFilter === "Appliance"} onChange={() => toggleMainCategory("Appliance")} /> Appliance
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="mainCategory"
+                  checked={mainCategoryFilter === "Appliance"}
+                  onChange={() => toggleMainCategory("Appliance")}
+                />
+                <span>Appliance</span>
               </label>
-              <label>
-                <input type="radio" name="mainCategory" checked={mainCategoryFilter === "Retail"} onChange={() => toggleMainCategory("Retail")} /> Retail
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="mainCategory"
+                  checked={mainCategoryFilter === "Retail"}
+                  onChange={() => toggleMainCategory("Retail")}
+                />
+                <span>Retail</span>
               </label>
             </div>
           </div>
@@ -99,8 +113,13 @@ const ServiceCollection = () => {
               <h3 className="mb-4 text-lg font-semibold">TYPE</h3>
               <div className="flex flex-col space-y-2">
                 {Array.from(new Set(categories.filter(cat => cat.mainCategory === mainCategoryFilter).map(cat => cat.type))).map(type => (
-                  <label key={type}>
-                    <input type="checkbox" onChange={() => toggleType(type)} /> {type}
+                  <label key={type} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={typeFilter.includes(type)}
+                      onChange={() => toggleType(type)}
+                    />
+                    <span>{type}</span>
                   </label>
                 ))}
               </div>
@@ -110,15 +129,15 @@ const ServiceCollection = () => {
 
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="px-4 py-2 mb-4 text-white bg-blue-600 rounded-md md:hidden hover:bg-blue-700"
+          className="px-4 py-2 mb-4 text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white md:hidden"
         >
           {showFilters ? 'Hide Filters' : 'Show Filters'}
         </button>
 
         <main className="md:w-3/4">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredCategories.map((category) => (
-              <div key={category.id} className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg">
+            {filteredCategories.map((category, index) => (
+              <div key={index} className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg">
                 <img
                   src={category.image}
                   alt={category.name}
@@ -126,12 +145,20 @@ const ServiceCollection = () => {
                 />
                 <h3 className="text-lg font-semibold">{category.name}</h3>
                 <p className="text-sm text-gray-600">{category.description}</p>
-                <button
-                  className="w-full px-4 py-2 mt-4 text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                  onClick={() => navigate(`/services/${category.id}`)}
-                >
-                  Book Now
-                </button>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => handleButtonClick(category.name, 'purchase')}
+                    className="flex-1 px-4 py-2 text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white"
+                  >
+                    Purchase
+                  </button>
+                  <button
+                    onClick={() => handleButtonClick(category.name, 'service')}
+                    className="flex-1 px-4 py-2 text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white"
+                  >
+                    Service
+                  </button>
+                </div>
               </div>
             ))}
           </div>
