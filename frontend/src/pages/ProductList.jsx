@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Star, StarHalf, Menu, X } from "lucide-react";
@@ -9,8 +8,6 @@ const ProductList = () => {
   const type = searchParams.get("type");
 
   // Product Data
-  // Replace the productsData in your code with this:
-
   const productsData = {
     "air-conditioner": [
       {
@@ -26,9 +23,9 @@ const ProductList = () => {
         specifications: {
           brand: "Daikin",
           capacity: "1 Tons",
-          cooling: "12K BTU",
-          model: "MTKL35UV16",
           starRating: "3 Star Inverter",
+          model: "MTKL35UV16",
+          cooling: "12000 BTU",
           ambientOperation: "High Ambient up to 52°C",
         },
         features: [
@@ -53,9 +50,9 @@ const ProductList = () => {
         specifications: {
           brand: "Daikin",
           capacity: "1 Tons",
-          cooling: "12K BTU",
-          model: "MTKM35U",
           starRating: "5 Star Inverter",
+          model: "MTKM35U",
+          cooling: "12000 BTU",
           ambientOperation: "High Ambient Operation",
         },
         features: [
@@ -80,9 +77,9 @@ const ProductList = () => {
         specifications: {
           brand: "Daikin",
           capacity: "1 Tons",
-          cooling: "3.35 KW",
-          model: "FTL35U",
           starRating: "3 Star Non-Inverter",
+          model: "FTL35U",
+          cooling: "3.35 Kilowatts",
           ambientOperation: "High Ambient up to 50°C",
         },
         features: [
@@ -391,118 +388,6 @@ const ProductList = () => {
           "Wide Angle Louver",
           "Temperature Display",
           "Good Sleep Off Timer",
-        ],
-      },
-      {
-        id: 15,
-        name: "Blue Star 1.5 Ton 3 Star Window AC",
-        image:
-          "https://www.chiltel.com/admin/product_image/Bluie%20Star%20Window_1701105917.png",
-        originalPrice: "40000",
-        discountedPrice: "30800",
-        brand: "Blue Star",
-        rating: 4.2,
-        reviews: 756,
-        specifications: {
-          brand: "Blue Star",
-          capacity: "1.5 Tons",
-          starRating: "3 Star",
-          model: "3W18GA",
-          cooling: "4900 Watt",
-          powerConsumption: "Efficient",
-          compressor: "Rotary",
-        },
-        features: [
-          "3 Star BEE Rating 2020",
-          "Copper Condenser",
-          "4900W Cooling Capacity",
-          "Rotary Compressor",
-          "Energy Efficient",
-          "Durable Build Quality",
-        ],
-      },
-      {
-        id: 16,
-        name: "Lloyd 1.5 Ton 3 Star Window AC",
-        image:
-          "https://www.chiltel.com/admin/product_image/s08x8v2k%20(1)_1701110241.png",
-        originalPrice: "30900",
-        discountedPrice: "30282",
-        brand: "Lloyd",
-        rating: 4.1,
-        reviews: 678,
-        specifications: {
-          brand: "Lloyd",
-          capacity: "1.5 Tons",
-          starRating: "3 Star",
-          model: "GLW18C3YWSEW",
-          cooling: "4800 W",
-          compressor: "Rotary",
-          refrigerant: "R32",
-        },
-        features: [
-          "Copper Condenser Coil",
-          "Remote Control",
-          "Multiple Operating Modes",
-          "4800W Cooling Capacity",
-          "Fan, Cool, Turbo Modes",
-          "Energy Efficient Operation",
-        ],
-      },
-      {
-        id: 17,
-        name: "Lloyd Window AC 1.5 Ton 5 Star",
-        image:
-          "https://www.chiltel.com/admin/product_image/s08x8v2k%20(2)_1701110962.png",
-        originalPrice: "54999",
-        discountedPrice: "40699",
-        brand: "Lloyd",
-        rating: 4.5,
-        reviews: 1124,
-        specifications: {
-          brand: "Lloyd",
-          capacity: "1.5 Tons",
-          starRating: "5 Star",
-          model: "GLW18C5XWGMR",
-          cooling: "4950 W",
-          refrigerant: "R32",
-          powerConsumption: "High Efficiency",
-        },
-        features: [
-          "5 Star BEE Rating 2022",
-          "4950W Cooling Capacity",
-          "Copper Condenser Coil",
-          "Multiple Operating Modes",
-          "Sleep Mode Function",
-          "Turbo Cooling Mode",
-        ],
-      },
-      {
-        id: 18,
-        name: "Lloyd Window Inverter AC 1.5 Ton 3 Star",
-        image:
-          "https://www.chiltel.com/admin/product_image/a3ybyd0a_1701112901.png",
-        originalPrice: "52990",
-        discountedPrice: "31794",
-        brand: "Lloyd",
-        rating: 4.4,
-        reviews: 892,
-        specifications: {
-          brand: "Lloyd",
-          capacity: "1.5 Tons",
-          starRating: "3 Star",
-          model: "GLW18I3FWCEV",
-          cooling: "4950 W",
-          compressor: "Rotary",
-          refrigerant: "R32",
-        },
-        features: [
-          "Inverter Technology",
-          "3 Star BEE Rating",
-          "Copper Condenser Coil",
-          "Remote Control Operation",
-          "4950W Cooling Power",
-          "Rotary Compressor",
         ],
       },
     ],
@@ -1508,7 +1393,7 @@ const ProductList = () => {
     const hasHalfStar = rating % 1 !== 0;
 
     return (
-      <div className="flex items-center">
+      <div className="flex flex-wrap items-center">
         {[...Array(fullStars)].map((_, i) => (
           <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
         ))}
@@ -1546,7 +1431,7 @@ const ProductList = () => {
   }, [filters, items]);
 
   return (
-    <div className="container px-4 py-8 mx-auto">
+    <div className="w-full max-w-screen-xl px-2 py-8 mx-auto sm:px-4 md:px-4 lg:px-2 xl:px-2">
       <header className="mb-8">
         <h1 className="text-2xl font-bold capitalize md:text-3xl">
           {category.replace(/-/g, " ")} {type === "purchase" ? "Products" : "Services"}
@@ -1705,7 +1590,7 @@ const ProductList = () => {
           {filteredItems.length === 0 ? (
             <p className="text-center text-gray-600">No products found.</p>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
@@ -1724,7 +1609,7 @@ const ProductList = () => {
                   <div className="flex flex-col flex-1 p-4">
                     {/* Title and Rating */}
                     <div className="mb-2">
-                      <h2 className="text-lg font-medium">{item.name}</h2>
+                      <h2 className="text-lg font-medium break-words">{item.name}</h2>
                       <div className="flex items-center mt-1 space-x-2">
                         <RatingStars rating={item.rating} />
                         <span className="text-sm text-gray-600">
@@ -1766,7 +1651,7 @@ const ProductList = () => {
                               <span className="text-gray-600 capitalize">
                                 {key.replace(/([A-Z])/g, " $1").trim()}:
                               </span>
-                              <span className="ml-1 font-medium">{value}</span>
+                              <span className="ml-1 font-medium break-words">{value}</span>
                             </div>
                           )
                         )}
