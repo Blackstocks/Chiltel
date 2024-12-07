@@ -31,8 +31,8 @@ const ServiceCollection = () => {
   };
 
   const toggleType = (type) => {
-    setTypeFilter(prev =>
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    setTypeFilter((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     );
   };
 
@@ -50,7 +50,9 @@ const ServiceCollection = () => {
 
     // Apply main category filter
     if (mainCategoryFilter) {
-      updatedCategories = updatedCategories.filter(cat => cat.mainCategory === mainCategoryFilter);
+      updatedCategories = updatedCategories.filter(
+        (cat) => cat.mainCategory === mainCategoryFilter
+      );
     }
 
     // Apply type filter
@@ -85,7 +87,11 @@ const ServiceCollection = () => {
       </header>
 
       <div className="flex flex-col md:flex-row">
-        <aside className={`md:w-1/4 md:pr-4 ${showFilters ? 'block' : 'hidden md:block'}`}>
+        <aside
+          className={`md:w-1/4 md:pr-4 ${
+            showFilters ? "block" : "hidden md:block"
+          }`}
+        >
           <div className="p-4 mb-6 border rounded-lg">
             <h3 className="mb-4 text-lg font-semibold">MAIN CATEGORY</h3>
             <div className="flex flex-col space-y-2">
@@ -112,7 +118,13 @@ const ServiceCollection = () => {
             <div className="p-4 border rounded-lg">
               <h3 className="mb-4 text-lg font-semibold">TYPE</h3>
               <div className="flex flex-col space-y-2">
-                {Array.from(new Set(categories.filter(cat => cat.mainCategory === mainCategoryFilter).map(cat => cat.type))).map(type => (
+                {Array.from(
+                  new Set(
+                    categories
+                      .filter((cat) => cat.mainCategory === mainCategoryFilter)
+                      .map((cat) => cat.type)
+                  )
+                ).map((type) => (
                   <label key={type}>
                     <input
                       type="checkbox"
@@ -130,7 +142,7 @@ const ServiceCollection = () => {
           onClick={() => setShowFilters(!showFilters)}
           className="px-4 py-2 mb-4 text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white md:hidden"
         >
-          {showFilters ? 'Hide Filters' : 'Show Filters'}
+          {showFilters ? "Hide Filters" : "Show Filters"}
         </button>
 
         <main className="md:w-3/4">
