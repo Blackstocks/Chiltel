@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import ServiceModal from './ServiceModal';
 
 const ServiceCollection = () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const categories = [
     { name: "Air Conditioner", mainCategory: "Appliance", type: "Cooling", image: "/assets/air_conditioner.jpeg", description: "Professional Split AC services including installation, repair, and maintenance" },
     { name: "Air Cooler", mainCategory: "Appliance", type: "Cooling", image: "/assets/cooler.jpg", description: "Professional air cooler services for optimal cooling performance" },
+    { name: "Air Purifier", mainCategory: "Domestic", type: "Cooling", image: "/assets/air_puri.jpg", description: "Professional air purifier services for optimal cooling performance" },
     { name: "Water Purifier", mainCategory: "Appliance", type: "Water", image: "/assets/water_purifier.jpeg", description: "Expert water purifier installation and maintenance services" },
     { name: "Geyser", mainCategory: "Appliance", type: "Heating", image: "/assets/geyser.jpg", description: "Comprehensive geyser repair and installation services" },
     { name: "Microwave", mainCategory: "Appliance", type: "Cooking", image: "/assets/microwave.jpeg", description: "Expert microwave repair and maintenance services" },

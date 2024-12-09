@@ -874,6 +874,61 @@ const ProductList = () => {
         ],
       },
     ],
+    "air-purifier":[
+      {
+        id: 1,
+        name: "Daikin MC40XVM6 Air Purifier",
+        image: "/assets/puripic1.jpg",
+        originalPrice: "30990",
+        discountedPrice: "19990",
+        brand: "Daikin",
+        rating: 3.0,
+        reviews: 16,
+        specifications: {
+          brand: "Daikin",
+          coverage: "330 Sq. Feet",
+          model: "MC40XVM6",
+          filterType: "HEPA Filter",
+          technology: "Flash Streamer",
+          odourFilter: "Lifetime"
+        },
+        features: [
+          "Lifetime Supply of HEPA Filter",
+          "Lifetime Odour Filter",
+          "Flash Streamer Technology",
+          "330 Sq. Feet Coverage",
+          "Healthy air all year",
+          "EMI available starting ₹969"
+        ]
+      },
+      {
+        id: 2,
+        name: "Daikin MC55XVM6 Air Purifier",
+        image: "/assets/puripic2.jpg",
+        originalPrice: "Not visible in image",
+        discountedPrice: "Currently unavailable",
+        brand: "Daikin",
+        rating: 4.2,
+        reviews: 160,
+        specifications: {
+          brand: "Daikin",
+          coverage: "440 Sq. Feet",
+          model: "MC55XVM6",
+          filterType: "HEPA Filter", 
+          technology: "Flash Streamer & Active Plasma",
+          odourFilter: "Lifetime"
+        },
+        features: [
+          "Lifetime Supply of HEPA Filter",
+          "Lifetime Odour Filter",
+          "Dual Technology Flash Streamer & Active Plasma",
+          "440 Sq. Feet Coverage",
+          "Healthy air all year",
+          "1 Year Warranty",
+          "Returns Policy Available"
+        ]
+      }
+    ],
     microwave: [
       {
         id: 1,
@@ -1333,6 +1388,7 @@ const ProductList = () => {
           "Professional Usage",
         ],
       },
+      
     ],
     "visi-cooler": [
       {
