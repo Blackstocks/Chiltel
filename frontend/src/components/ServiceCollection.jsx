@@ -5,12 +5,12 @@ const ServiceCollection = () => {
   const navigate = useNavigate();
 
   const categories = [
-    { name: "Air Conditioner", mainCategory: "Appliance", type: "Cooling", image: "/assets/air_conditioner.jpeg", description: "Professional AC services including installation, repair, and maintenance" },
-    { name: "Water Purifier", mainCategory: "Appliance", type: "Water", image: "/assets/water_purifier.jpeg", description: "Expert water purifier installation and maintenance services" },
-    { name: "Geyser", mainCategory: "Appliance", type: "Heating", image: "/assets/geyser.jpg", description: "Comprehensive geyser repair and installation services" },
-    { name: "Microwave", mainCategory: "Appliance", type: "Cooking", image: "/assets/microwave.jpeg", description: "Expert microwave repair and maintenance services" },
-    { name: "Refrigerator", mainCategory: "Appliance", type: "Cooling", image: "/assets/refrigwrator.jpeg", description: "Professional refrigerator repair and maintenance services" },
-    { name: "Washing Machine", mainCategory: "Appliance", type: "Cleaning", image: "/assets/washing_machine.jpeg", description: "Expert washing machine repair and maintenance services" },
+    { name: "Air Conditioner", mainCategory: "Domestic", type: "Cooling", image: "/assets/air_conditioner.jpeg", description: "Professional AC services including installation, repair, and maintenance" },
+    { name: "Water Purifier", mainCategory: "Domestic", type: "Water", image: "/assets/water_purifier.jpeg", description: "Expert water purifier installation and maintenance services" },
+    { name: "Geyser", mainCategory: "Domestic", type: "Heating", image: "/assets/geyser.jpg", description: "Comprehensive geyser repair and installation services" },
+    { name: "Microwave", mainCategory: "Domestic", type: "Cooking", image: "/assets/microwave.jpeg", description: "Expert microwave repair and maintenance services" },
+    { name: "Refrigerator", mainCategory: "Domestic", type: "Cooling", image: "/assets/refrigwrator.jpeg", description: "Professional refrigerator repair and maintenance services" },
+    { name: "Washing Machine", mainCategory: "Domestic", type: "Cleaning", image: "/assets/washing_machine.jpeg", description: "Expert washing machine repair and maintenance services" },
     { name: "Deep Freezer", mainCategory: "Retail", type: "Cooling", image: "/assets/deep_freeze.png", description: "High-quality deep freezers for your storage needs." },
     { name: "Visi Cooler", mainCategory: "Retail", type: "Cooling", image: "/assets/Visi _Coole.png", description: "Reliable visi coolers for commercial use." },
     { name: "Cassette AC", mainCategory: "Retail", type: "Cooling", image: "/assets/Cassett.jpg", description: "Efficient cooling with cassette air conditioners." },
@@ -91,10 +91,10 @@ const ServiceCollection = () => {
                 <input
                   type="radio"
                   name="mainCategory"
-                  checked={mainCategoryFilter === "Appliance"}
-                  onChange={() => toggleMainCategory("Appliance")}
+                  checked={mainCategoryFilter === "Domestic"}
+                  onChange={() => toggleMainCategory("Domestic")}
                 />
-                <span>Appliance</span>
+                <span>Domestic</span>
               </label>
               <label className="flex items-center space-x-2">
                 <input

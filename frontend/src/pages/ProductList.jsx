@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Star, StarHalf, Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ProductList = () => {
   const { category } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const type = searchParams.get("type");
 
   // Product Data
@@ -874,7 +876,7 @@ const ProductList = () => {
         ],
       },
     ],
-    "air-purifier":[
+    "air-purifier": [
       {
         id: 1,
         name: "Daikin MC40XVM6 Air Purifier",
@@ -890,7 +892,7 @@ const ProductList = () => {
           model: "MC40XVM6",
           filterType: "HEPA Filter",
           technology: "Flash Streamer",
-          odourFilter: "Lifetime"
+          odourFilter: "Lifetime",
         },
         features: [
           "Lifetime Supply of HEPA Filter",
@@ -898,8 +900,8 @@ const ProductList = () => {
           "Flash Streamer Technology",
           "330 Sq. Feet Coverage",
           "Healthy air all year",
-          "EMI available starting ₹969"
-        ]
+          "EMI available starting ₹969",
+        ],
       },
       {
         id: 2,
@@ -914,9 +916,9 @@ const ProductList = () => {
           brand: "Daikin",
           coverage: "440 Sq. Feet",
           model: "MC55XVM6",
-          filterType: "HEPA Filter", 
+          filterType: "HEPA Filter",
           technology: "Flash Streamer & Active Plasma",
-          odourFilter: "Lifetime"
+          odourFilter: "Lifetime",
         },
         features: [
           "Lifetime Supply of HEPA Filter",
@@ -925,9 +927,9 @@ const ProductList = () => {
           "440 Sq. Feet Coverage",
           "Healthy air all year",
           "1 Year Warranty",
-          "Returns Policy Available"
-        ]
-      }
+          "Returns Policy Available",
+        ],
+      },
     ],
     microwave: [
       {
@@ -1388,7 +1390,6 @@ const ProductList = () => {
           "Professional Usage",
         ],
       },
-      
     ],
     "visi-cooler": [
       {
@@ -1553,6 +1554,21 @@ const ProductList = () => {
     priceRange: [],
     rating: null,
   });
+
+  const handleBuyNow = (item) => {
+    // Navigate to checkout with product details as state
+    navigate("/checkout", {
+      state: {
+        product: {
+          name: item.name,
+          price: item.discountedPrice,
+          image: item.image,
+          specifications: item.specifications,
+        },
+      },
+    });
+  };
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Rating Stars Component
@@ -1602,7 +1618,8 @@ const ProductList = () => {
     <div className="w-full max-w-screen-xl px-2 py-8 mx-auto sm:px-4 md:px-4 lg:px-2 xl:px-2">
       <header className="mb-8">
         <h1 className="text-2xl font-bold capitalize md:text-3xl">
-          {category.replace(/-/g, " ")} {type === "purchase" ? "Products" : "Services"}
+          {category.replace(/-/g, " ")}{" "}
+          {type === "purchase" ? "Products" : "Services"}
         </h1>
         <p className="mt-2 text-gray-600">
           Showing {filteredItems.length} results
@@ -1616,7 +1633,11 @@ const ProductList = () => {
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className="flex items-center px-4 py-2 text-gray-700 bg-gray-200 rounded-md focus:outline-none"
           >
-            {isFilterOpen ? <X className="w-5 h-5 mr-2" /> : <Menu className="w-5 h-5 mr-2" />}
+            {isFilterOpen ? (
+              <X className="w-5 h-5 mr-2" />
+            ) : (
+              <Menu className="w-5 h-5 mr-2" />
+            )}
             {isFilterOpen ? "Hide Filters" : "Show Filters"}
           </button>
         </div>
@@ -1777,7 +1798,9 @@ const ProductList = () => {
                   <div className="flex flex-col flex-1 p-4">
                     {/* Title and Rating */}
                     <div className="mb-2">
-                      <h2 className="text-lg font-medium break-words">{item.name}</h2>
+                      <h2 className="text-lg font-medium break-words">
+                        {item.name}
+                      </h2>
                       <div className="flex items-center mt-1 space-x-2">
                         <RatingStars rating={item.rating} />
                         <span className="text-sm text-gray-600">
@@ -1819,7 +1842,9 @@ const ProductList = () => {
                               <span className="text-gray-600 capitalize">
                                 {key.replace(/([A-Z])/g, " $1").trim()}:
                               </span>
-                              <span className="ml-1 font-medium break-words">{value}</span>
+                              <span className="ml-1 font-medium break-words">
+                                {value}
+                              </span>
                             </div>
                           )
                         )}
@@ -1841,7 +1866,10 @@ const ProductList = () => {
                       <button className="flex-1 px-4 py-2 text-center text-black transition-colors bg-white border border-black rounded-md hover:bg-black hover:text-white">
                         Add to Cart
                       </button>
-                      <button className="flex-1 px-4 py-2 text-center text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700">
+                      <button
+                        onClick={() => handleBuyNow(item)}
+                        className="flex-1 px-4 py-2 text-center text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+                      >
                         Buy Now
                       </button>
                     </div>

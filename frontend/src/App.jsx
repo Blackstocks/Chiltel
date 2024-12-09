@@ -18,7 +18,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ServiceCollection from "./components/ServiceCollection";
 import ServiceDetail from "./components/ServiceDetail";
-import ProductList from "./pages/ProductList"; // Let's use just this one
+import ProductList from "./pages/ProductList";
+import CheckoutPage from './components/Checkout'; // Let's use just this one
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="/services" element={<ServiceCollection />} />
         <Route path="/services/:id" element={<ServiceDetail />} />
         <Route path="/products/:category" element={<ProductList />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
       </Routes>
       <Footer />
     </div>
