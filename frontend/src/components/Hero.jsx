@@ -98,14 +98,14 @@ const Hero = () => {
       name: 'Microwave',
       icon: "/assets/microwave.jpg" // Example for replacing other icons
     },
-    {
-      name: 'Installation',
-      icon: "/assets/install.jpg" // Example for replacing other icons
-    },
-    {
-      name: 'Repair & Service',
-      icon: "/assets/install2.jpg" // Example for replacing other icons
-    }
+    // {
+    //   name: 'Installation',
+    //   icon: "/assets/install.jpg" // Example for replacing other icons
+    // },
+    // {
+    //   name: 'Repair & Service',
+    //   icon: "/assets/install2.jpg" // Example for replacing other icons
+    // }
   ];
 
   const stats = [

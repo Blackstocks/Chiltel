@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ServiceModal from './ServiceModal';
 
 const ServiceCollection = () => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const categories = [
     { name: "Air Conditioner", mainCategory: "Appliance", type: "Cooling", image: "/assets/air_conditioner.jpeg", description: "Professional Split AC services including installation, repair, and maintenance" },
     { name: "Air Cooler", mainCategory: "Appliance", type: "Cooling", image: "/assets/cooler.jpg", description: "Professional air cooler services for optimal cooling performance" },
     { name: "Water Purifier", mainCategory: "Appliance", type: "Water", image: "/assets/water_purifier.jpeg", description: "Expert water purifier installation and maintenance services" },
     { name: "Geyser", mainCategory: "Appliance", type: "Heating", image: "/assets/geyser.jpg", description: "Comprehensive geyser repair and installation services" },
     { name: "Microwave", mainCategory: "Appliance", type: "Cooking", image: "/assets/microwave.jpeg", description: "Expert microwave repair and maintenance services" },
-    { name: "Refrigerator", mainCategory: "Appliance", type: "Cooling", image: "/assets/refrigwrator.jpeg", description: "Professional refrigerator repair and maintenance services" }, // Fixed image name
+    { name: "Refrigerator", mainCategory: "Appliance", type: "Cooling", image: "/assets/refrigwrator.jpeg", description: "Professional refrigerator repair and maintenance services" },
     { name: "Washing Machine", mainCategory: "Appliance", type: "Cleaning", image: "/assets/washing_machine.jpeg", description: "Expert washing machine repair and maintenance services" },
-    { name: "Deep Freezer", mainCategory: "Retail", type: "Cooling", image: "/assets/deep_freeze.png", description: "High-quality deep freezers for your storage needs." }, // Fixed image name
-    { name: "Visi Cooler", mainCategory: "Retail", type: "Cooling", image: "/assets/Visi _Coole.png", description: "Reliable visi coolers for commercial use." }, // Fixed image name
-    { name: "Cassette AC", mainCategory: "Retail", type: "Cooling", image: "/assets/Cassett.jpg", description: "Efficient cooling with cassette air conditioners." }, // Fixed image name
+    { name: "Deep Freezer", mainCategory: "Retail", type: "Cooling", image: "/assets/deep_freeze.png", description: "High-quality deep freezers for your storage needs." },
+    { name: "Visi Cooler", mainCategory: "Retail", type: "Cooling", image: "/assets/Visi _Coole.png", description: "Reliable visi coolers for commercial use." },
+    { name: "Cassette AC", mainCategory: "Retail", type: "Cooling", image: "/assets/Cassett.jpg", description: "Efficient cooling with cassette air conditioners." },
     { name: "Water Cooler Cum Purifier", mainCategory: "Retail", type: "Water", image: "/assets/water_cooler.jpg", description: "Dual-function water cooler and purifier." },
-    { name: "Water Dispenser", mainCategory: "Retail", type: "Water", image: "/assets/Water-dis.jpg", description: "Convenient and portable water dispensers." }, // Fixed image name
+    { name: "Water Dispenser", mainCategory: "Retail", type: "Water", image: "/assets/Water-dis.jpg", description: "Convenient and portable water dispensers." },
     { name: "Display Counter", mainCategory: "Retail", type: "Display", image: "/assets/display-counter.png", description: "Attractive display counters for showcasing products." },
   ];
 
@@ -23,6 +23,9 @@ const ServiceCollection = () => {
   const [typeFilter, setTypeFilter] = useState([]);
   const [sortType, setSortType] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const navigate = useNavigate();
 
   const toggleMainCategory = (category) => {
@@ -37,34 +40,31 @@ const ServiceCollection = () => {
   };
 
   const handleButtonClick = (category, type) => {
-    // Convert category name to URL-friendly format
-    const categorySlug = category.toLowerCase().replace(/ /g, '-');
-    navigate(`/products/${categorySlug}?type=${type}`);
+    if (type === 'purchase') {
+      const categorySlug = category.toLowerCase().replace(/ /g, '-');
+      navigate(`/products/${categorySlug}?type=${type}`);
+    } else if (type === 'service') {
+      setSelectedCategory(categories.find(cat => cat.name === category));
+      setIsServiceModalOpen(true);
+    }
   };
-
-  // Combine filtering and sorting in a single useEffect
-  const [filteredCategories, setFilteredCategories] = useState([]);
 
   useEffect(() => {
     let updatedCategories = [...categories];
 
-    // Apply main category filter
     if (mainCategoryFilter) {
       updatedCategories = updatedCategories.filter(
         (cat) => cat.mainCategory === mainCategoryFilter
       );
     }
 
-    // Apply type filter
     if (typeFilter.length > 0) {
       updatedCategories = updatedCategories.filter(cat => typeFilter.includes(cat.type));
     }
 
-    // Apply sorting
     if (sortType === 'name') {
       updatedCategories.sort((a, b) => a.name.localeCompare(b.name));
     }
-    // You can add more sort types here if needed
 
     setFilteredCategories(updatedCategories);
   }, [mainCategoryFilter, typeFilter, sortType, categories]);
@@ -81,7 +81,6 @@ const ServiceCollection = () => {
             className="p-2 ml-2 border border-gray-300 rounded"
           >
             <option value="name">Relevance</option>
-            {/* Add more sort options if needed */}
           </select>
         </div>
       </header>
@@ -179,6 +178,12 @@ const ServiceCollection = () => {
           )}
         </main>
       </div>
+
+      <ServiceModal 
+        isOpen={isServiceModalOpen}
+        onClose={() => setIsServiceModalOpen(false)}
+        category={selectedCategory}
+      />
     </div>
   );
 };
