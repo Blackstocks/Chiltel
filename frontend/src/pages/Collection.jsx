@@ -46,8 +46,8 @@ const ServiceCollection = () => {
       const categorySlug = category.toLowerCase().replace(/ /g, '-');
       navigate(`/products/${categorySlug}?type=${type}`);
     } else if (type === 'service') {
-      setSelectedCategory(categories.find(cat => cat.name === category));
-      setIsServiceModalOpen(true);
+      const categorySlug = category.toLowerCase().replace(/ /g, '-');
+      navigate(`/services/${categorySlug}?type=${type}`);
     }
   };
 
