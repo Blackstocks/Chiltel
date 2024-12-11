@@ -25,7 +25,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     ],
     "Service": [
       { 
-        name: "Basic Service",
+        name: "Dry Service",
         price: 499,
         duration: "40 minutes",
         description: "Basic cleaning and maintenance" 
@@ -37,26 +37,37 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
         description: "Thorough cleaning with foam wash" 
       },
       { 
-        name: "Gas Refill",
-        price: 1500,
+        name: "Wet Service",
+        price: 599,
         duration: "1-2 hours",
-        description: "Complete gas charging with leak test" 
+        description: "Complete Wet Service with leak test" 
       }
     ],
     "Repair": [
       { 
-        name: "Repair Visit",
+        name: "Attending Charges",
         price: 499,
         duration: "30-60 minutes",
         description: "Diagnosis and minor repairs" 
       },
       { 
-        name: "PCB Repair",
-        price: 1200,
+        name: "Gas Refilling",
+        price: 1500,
         duration: "1-2 hours",
-        description: "Circuit board repair and testing" 
+        description: "Gas Refilling and testing" 
       }
     ]
+  };
+
+  // Regular service details for other categories
+  const serviceDetails = {
+    "Air Cooler": [
+      { name: "Installation", price: "₹500", duration: "1 hour", description: "Setup and testing included" },
+      { name: "General Service", price: "₹399", duration: "1 hour", description: "Complete cleaning and maintenance" },
+      { name: "Pad Replacement", price: "₹299", duration: "30 minutes", description: "High-quality cooling pad replacement" },
+      { name: "Motor Repair", price: "₹699", duration: "1-2 hours", description: "Expert motor repair service" }
+    ],
+    // ... other categories remain the same
   };
 
   // Function to add service with quantity
@@ -93,29 +104,65 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     }).filter(Boolean));
   };
 
-  const renderServiceCard = (service, categoryName) => (
-    <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
-      <div className="flex items-start justify-between">
-        <div className="flex-grow">
-          <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
-          <p className="mt-1 text-sm text-gray-600">{service.description}</p>
-          <div className="flex items-center gap-4 mt-2">
-            <div className="flex items-center text-gray-500">
-              <Clock className="w-4 h-4 mr-1" />
-              <span className="text-sm">{service.duration}</span>
+  const totalAmount = selectedServices.reduce((sum, service) => 
+    sum + (service.price * service.quantity), 0
+  );
+
+  const renderServiceCard = (service, categoryName) => {
+    const existingService = selectedServices.find(
+      s => s.name === service.name && s.category === categoryName
+    );
+    const quantity = existingService?.quantity || 0;
+
+    return (
+      <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
+        <div className="flex items-start justify-between">
+          <div className="flex-grow">
+            <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
+            <p className="mt-1 text-sm text-gray-600">{service.description}</p>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center text-gray-500">
+                <Clock className="w-4 h-4 mr-1" />
+                <span className="text-sm">{service.duration}</span>
+              </div>
+              <div className="font-medium text-gray-900">₹{service.price}</div>
             </div>
-            <div className="font-medium text-gray-900">₹{service.price}</div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            {quantity > 0 ? (
+              <div className="flex items-center gap-2 p-1 border rounded-md">
+                <button 
+                  onClick={() => updateQuantity(selectedServices.indexOf(existingService), false)}
+                  className="p-1 text-gray-500 hover:text-gray-700"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="w-8 text-center">{quantity}</span>
+                <button 
+                  onClick={() => updateQuantity(selectedServices.indexOf(existingService), true)}
+                  className="p-1 text-gray-500 hover:text-gray-700"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => addService(service, categoryName)}
+                className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
+              >
+                Add Service
+              </button>
+            )}
+            {quantity > 0 && (
+              <span className="text-sm font-medium text-gray-600">
+                ₹{service.price * quantity}
+              </span>
+            )}
           </div>
         </div>
-        <button
-          onClick={() => addService(service, categoryName)}
-          className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
-        >
-          Add Service
-        </button>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderAirConditionerServices = () => (
     <div className="space-y-4">
@@ -141,10 +188,6 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     </div>
   );
 
-  const totalAmount = selectedServices.reduce((sum, service) => 
-    sum + (service.price * service.quantity), 0
-  );
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="relative w-full max-w-3xl mx-4 my-6 bg-white rounded-lg shadow-xl">
@@ -157,66 +200,33 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
               </h2>
               <p className="mt-1 text-sm text-gray-500">Select from our professional service options</p>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-500 transition-colors rounded-full hover:text-gray-700 hover:bg-gray-100"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-4">
+              {totalAmount > 0 && (
+                <div className="text-right">
+                  <div className="text-sm text-gray-500">Total Amount</div>
+                  <div className="text-xl font-bold">₹{totalAmount}</div>
+                </div>
+              )}
+              <button
+                onClick={onClose}
+                className="p-2 text-gray-500 transition-colors rounded-full hover:text-gray-700 hover:bg-gray-100"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Scrollable content */}
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto p-6">
           {category?.name === "Air Conditioner" ? renderAirConditionerServices() : null}
-
-          {/* Selected Services Summary */}
-          {selectedServices.length > 0 && (
-            <div className="pt-6 mt-6 border-t">
-              <h3 className="mb-4 text-lg font-semibold">Selected Services</h3>
-              <div className="space-y-3">
-                {selectedServices.map((service, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                    <div className="flex-grow">
-                      <span className="font-medium">{service.name}</span>
-                      <span className="ml-2 text-sm text-gray-500">({service.category})</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center space-x-2">
-                        <button 
-                          onClick={() => updateQuantity(index, false)}
-                          className="p-1 text-gray-500 hover:text-gray-700"
-                        >
-                          <Minus size={16} />
-                        </button>
-                        <span className="w-8 text-center">{service.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(index, true)}
-                          className="p-1 text-gray-500 hover:text-gray-700"
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
-                      <span className="font-semibold min-w-[80px] text-right">
-                        ₹{service.price * service.quantity}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Fixed footer with total and checkout */}
+        {/* Proceed button */}
         {selectedServices.length > 0 && (
           <div className="sticky bottom-0 p-6 bg-white border-t">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-lg font-semibold">Total Amount:</span>
-              <span className="text-xl font-bold">₹{totalAmount}</span>
-            </div>
             <button
               onClick={() => alert('Proceeding to checkout...')}
               className="w-full px-6 py-3 text-white transition-colors bg-black rounded-md hover:bg-gray-800"
