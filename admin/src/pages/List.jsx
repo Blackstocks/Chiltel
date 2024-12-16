@@ -1,83 +1,78 @@
-import axios from 'axios'
-import React, { useEffect, useState } from 'react'
-import { backendUrl, currency } from '../App'
-import { toast } from 'react-toastify'
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const List = ({ token }) => {
+const ListProducts = ({token}) => {
+  const [products, setProducts] = useState([]); // State to store products
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
 
-  const [list, setList] = useState([])
-
-  const fetchList = async () => {
+  // Fetch Products from Backend
+  const fetchProducts = async () => {
     try {
-
-      const response = await axios.get(backendUrl + '/api/product/list')
-      if (response.data.success) {
-        setList(response.data.products.reverse());
-      }
-      else {
-        toast.error(response.data.message)
-      }
-
-    } catch (error) {
-      console.log(error)
-      toast.error(error.message)
+      const response = await axios.get("http://localhost:4000/api/product/list", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }); // Replace with your backend API endpoint
+      setProducts(response.data);
+      console.log(products)
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Failed to fetch products. Please try again later.");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const removeProduct = async (id) => {
-    try {
-
-      const response = await axios.post(backendUrl + '/api/product/remove', { id }, { headers: { token } })
-
-      if (response.data.success) {
-        toast.success(response.data.message)
-        await fetchList();
-      } else {
-        toast.error(response.data.message)
-      }
-
-    } catch (error) {
-      console.log(error)
-      toast.error(error.message)
-    }
-  }
-
+  // Fetch products on component mount
   useEffect(() => {
-    fetchList()
-  }, [])
+    fetchProducts();
+  }, []);
 
   return (
-    <>
-      <p className='mb-2'>All Products List</p>
-      <div className='flex flex-col gap-2'>
+    <div className="p-8 bg-gray-100 min-h-screen">
+      <h2 className="text-2xl font-semibold mb-4">Product List</h2>
 
-        {/* ------- List Table Title ---------- */}
-
-        <div className='hidden md:grid grid-cols-[1fr_3fr_1fr_1fr_1fr] items-center py-1 px-2 border bg-gray-100 text-sm'>
-          <b>Image</b>
-          <b>Name</b>
-          <b>Category</b>
-          <b>Price</b>
-          <b className='text-center'>Action</b>
+      {loading ? (
+        <p className="text-gray-700">Loading products...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : products.length === 0 ? (
+        <p className="text-gray-700">No products available.</p>
+      ) : (
+        <div className="overflow-x-auto bg-white p-6 rounded shadow-md">
+          <table className="min-w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="p-2 border">#</th>
+                <th className="p-2 border">Name</th>
+                <th className="p-2 border">Brand</th>
+                <th className="p-2 border">Category</th>
+                <th className="p-2 border">Price</th>
+                <th className="p-2 border">Rating</th>
+                <th className="p-2 border">Availability</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product, index) => (
+                <tr key={index} className="hover:bg-gray-100">
+                  <td className="p-2 border text-center">{index + 1}</td>
+                  <td className="p-2 border">{product.name}</td>
+                  <td className="p-2 border">{product.brand}</td>
+                  <td className="p-2 border">{product.category}</td>
+                  <td className="p-2 border">₹{product.price}</td>
+                  <td className="p-2 border text-center">{product.rating}</td>
+                  <td className="p-2 border text-center">
+                    {product.availability ? "Available" : "Out of Stock"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+      )}
+    </div>
+  );
+};
 
-        {/* ------ Product List ------ */}
-
-        {
-          list.map((item, index) => (
-            <div className='grid grid-cols-[1fr_3fr_1fr] md:grid-cols-[1fr_3fr_1fr_1fr_1fr] items-center gap-2 py-1 px-2 border text-sm' key={index}>
-              <img className='w-12' src={item.image[0]} alt="" />
-              <p>{item.name}</p>
-              <p>{item.category}</p>
-              <p>{currency}{item.price}</p>
-              <p onClick={()=>removeProduct(item._id)} className='text-right md:text-center cursor-pointer text-lg'>X</p>
-            </div>
-          ))
-        }
-
-      </div>
-    </>
-  )
-}
-
-export default List
+export default ListProducts;

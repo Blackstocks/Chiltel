@@ -1,161 +1,252 @@
-import React, { useState } from 'react'
-import {assets} from '../assets/assets'
-import axios from 'axios'
-import { backendUrl } from '../App'
-import { toast } from 'react-toastify'
+import { useState } from "react";
+import axios from "axios";
 
-const Add = ({token}) => {
+const AddProduct = ({token}) => {
+  // State for managing form inputs
+  const [product, setProduct] = useState({
+    name: "",
+    brand: "",
+    model: "",
+    category: "Air Conditioner",
+    price: "",
+    discount: 0,
+    rating: 0,
+    reviews: 0,
+    features: [],
+    specifications: {
+      capacity: "",
+      starRating: "",
+      powerConsumption: "",
+      cooling: "",
+      ambientOperation: "",
+      waterproofRating: "",
+    },
+    availability: true,
+    imageUrls: [],
+  });
 
-  const [image1,setImage1] = useState(false)
-  const [image2,setImage2] = useState(false)
-  const [image3,setImage3] = useState(false)
-  const [image4,setImage4] = useState(false)
+  const [featureInput, setFeatureInput] = useState(""); // Temporary state for adding features
+  const [productList, setProductList] = useState([]); // State to hold added products
+  const [loading, setLoading] = useState(false); // Loading State
+  const [message, setMessage] = useState(""); // Success/Error Message
 
-   const [name, setName] = useState("");
-   const [description, setDescription] = useState("");
-   const [price, setPrice] = useState("");
-   const [category, setCategory] = useState("Men");
-   const [subCategory, setSubCategory] = useState("Topwear");
-   const [bestseller, setBestseller] = useState(false);
-   const [sizes, setSizes] = useState([]);
+  // Handle Input Changes
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox") {
+      setProduct({ ...product, availability: checked });
+    } else {
+      setProduct({ ...product, [name]: value });
+    }
+  };
 
-   const onSubmitHandler = async (e) => {
-    e.preventDefault();
+  // Handle Specifications
+  const handleSpecChange = (e) => {
+    const { name, value } = e.target;
+    setProduct({
+      ...product,
+      specifications: { ...product.specifications, [name]: value },
+    });
+  };
+
+  // Add Feature
+  const addFeature = () => {
+    if (featureInput) {
+      setProduct({ ...product, features: [...product.features, featureInput] });
+      setFeatureInput("");
+    }
+  };
+
+  // Submit Product to Backend
+  const handleAddProduct = async () => {
+    setLoading(true);
+    setMessage("");
 
     try {
-      
-      const formData = new FormData()
+      const response = await axios.post("http://localhost:5000/api/products", product, {
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+      });
 
-      formData.append("name",name)
-      formData.append("description",description)
-      formData.append("price",price)
-      formData.append("category",category)
-      formData.append("subCategory",subCategory)
-      formData.append("bestseller",bestseller)
-      formData.append("sizes",JSON.stringify(sizes))
-
-      image1 && formData.append("image1",image1)
-      image2 && formData.append("image2",image2)
-      image3 && formData.append("image3",image3)
-      image4 && formData.append("image4",image4)
-
-      const response = await axios.post(backendUrl + "/api/product/add",formData,{headers:{token}})
-
-      if (response.data.success) {
-        toast.success(response.data.message)
-        setName('')
-        setDescription('')
-        setImage1(false)
-        setImage2(false)
-        setImage3(false)
-        setImage4(false)
-        setPrice('')
-      } else {
-        toast.error(response.data.message)
+      if (response.status === 201 || response.status === 200) {
+        setMessage("Product added successfully!");
+        setProduct({
+          name: "",
+          brand: "",
+          model: "",
+          category: "Air Conditioner",
+          price: "",
+          discount: 0,
+          rating: 0,
+          reviews: 0,
+          features: [],
+          specifications: {
+            capacity: "",
+            starRating: "",
+            powerConsumption: "",
+            cooling: "",
+            ambientOperation: "",
+            waterproofRating: "",
+          },
+          availability: true,
+          imageUrls: [],
+        });
       }
-
     } catch (error) {
-      console.log(error);
-      toast.error(error.message)
+      setMessage("Failed to add product. Please try again.");
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
-   }
+  };
 
   return (
-    <form onSubmit={onSubmitHandler} className='flex flex-col w-full items-start gap-3'>
-        <div>
-          <p className='mb-2'>Upload Image</p>
+    <div className="p-8 bg-gray-100 min-h-screen">
+      {/* Form Section */}
+      <div className="bg-white p-6 rounded shadow-md">
+        <h2 className="text-2xl font-semibold mb-4">Add Product</h2>
 
-          <div className='flex gap-2'>
-            <label htmlFor="image1">
-              <img className='w-20' src={!image1 ? assets.upload_area : URL.createObjectURL(image1)} alt="" />
-              <input onChange={(e)=>setImage1(e.target.files[0])} type="file" id="image1" hidden/>
-            </label>
-            <label htmlFor="image2">
-              <img className='w-20' src={!image2 ? assets.upload_area : URL.createObjectURL(image2)} alt="" />
-              <input onChange={(e)=>setImage2(e.target.files[0])} type="file" id="image2" hidden/>
-            </label>
-            <label htmlFor="image3">
-              <img className='w-20' src={!image3 ? assets.upload_area : URL.createObjectURL(image3)} alt="" />
-              <input onChange={(e)=>setImage3(e.target.files[0])} type="file" id="image3" hidden/>
-            </label>
-            <label htmlFor="image4">
-              <img className='w-20' src={!image4 ? assets.upload_area : URL.createObjectURL(image4)} alt="" />
-              <input onChange={(e)=>setImage4(e.target.files[0])} type="file" id="image4" hidden/>
-            </label>
+        {/* Product Name */}
+        <input
+          type="text"
+          placeholder="Product Name"
+          name="name"
+          value={product.name}
+          onChange={handleChange}
+          className="w-full border p-2 rounded mb-4"
+        />
+
+        {/* Brand */}
+        <input
+          type="text"
+          placeholder="Brand"
+          name="brand"
+          value={product.brand}
+          onChange={handleChange}
+          className="w-full border p-2 rounded mb-4"
+        />
+
+        {/* Model */}
+        <input
+          type="text"
+          placeholder="Model"
+          name="model"
+          value={product.model}
+          onChange={handleChange}
+          className="w-full border p-2 rounded mb-4"
+        />
+
+        {/* Category */}
+        <select
+          name="category"
+          value={product.category}
+          onChange={handleChange}
+          className="w-full border p-2 rounded mb-4"
+        >
+          <option value="Air Conditioner">Air Conditioner</option>
+          <option value="Microwave">Microwave</option>
+          <option value="Refrigerator">Refrigerator</option>
+          <option value="Water Heater">Water Heater</option>
+          <option value="Geyser">Geyser</option>
+        </select>
+
+        {/* Price */}
+        <input
+          type="number"
+          placeholder="Price"
+          name="price"
+          value={product.price}
+          onChange={handleChange}
+          className="w-full border p-2 rounded mb-4"
+        />
+
+        {/* Features */}
+        <div className="mb-4">
+          <div className="flex items-center">
+            <input
+              type="text"
+              placeholder="Add Feature"
+              value={featureInput}
+              onChange={(e) => setFeatureInput(e.target.value)}
+              className="w-full border p-2 rounded"
+            />
+            <button
+              onClick={addFeature}
+              className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Add
+            </button>
           </div>
+          <ul className="mt-2">
+            {product.features.map((feature, index) => (
+              <li key={index} className="text-sm text-gray-700">
+                - {feature}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div className='w-full'>
-          <p className='mb-2'>Product name</p>
-          <input onChange={(e)=>setName(e.target.value)} value={name} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Type here' required/>
+        {/* Specifications */}
+        <h3 className="font-semibold mb-2">Specifications</h3>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <input
+            type="text"
+            placeholder="Capacity"
+            name="capacity"
+            value={product.specifications.capacity}
+            onChange={handleSpecChange}
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            placeholder="Star Rating"
+            name="starRating"
+            value={product.specifications.starRating}
+            onChange={handleSpecChange}
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            placeholder="Power Consumption"
+            name="powerConsumption"
+            value={product.specifications.powerConsumption}
+            onChange={handleSpecChange}
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            placeholder="Cooling"
+            name="cooling"
+            value={product.specifications.cooling}
+            onChange={handleSpecChange}
+            className="border p-2 rounded"
+          />
         </div>
 
-        <div className='w-full'>
-          <p className='mb-2'>Product description</p>
-          <textarea onChange={(e)=>setDescription(e.target.value)} value={description} className='w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write content here' required/>
+        {/* Availability */}
+        <div className="flex items-center mb-4">
+          <input
+            type="checkbox"
+            name="availability"
+            checked={product.availability}
+            onChange={handleChange}
+            className="mr-2"
+          />
+          <label className="text-gray-700">Available</label>
         </div>
 
-        <div className='flex flex-col sm:flex-row gap-2 w-full sm:gap-8'>
+        {/* Add Button */}
+        <button
+          onClick={handleAddProduct}
+          className="bg-green-500 text-white px-4 py-2 rounded w-full"
+        >
+          Add Product
+        </button>
+      </div>
+    </div>
+  );
+};
 
-            <div>
-              <p className='mb-2'>Product category</p>
-              <select onChange={(e) => setCategory(e.target.value)} className='w-full px-3 py-2'>
-                  <option value="Men">Men</option>
-                  <option value="Women">Women</option>
-                  <option value="Kids">Kids</option>
-              </select>
-            </div>
-
-            <div>
-              <p className='mb-2'>Sub category</p>
-              <select onChange={(e) => setSubCategory(e.target.value)} className='w-full px-3 py-2'>
-                  <option value="Topwear">Topwear</option>
-                  <option value="Bottomwear">Bottomwear</option>
-                  <option value="Winterwear">Winterwear</option>
-              </select>
-            </div>
-
-            <div>
-              <p className='mb-2'>Product Price</p>
-              <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2 sm:w-[120px]' type="Number" placeholder='25' />
-            </div>
-
-        </div>
-
-        <div>
-          <p className='mb-2'>Product Sizes</p>
-          <div className='flex gap-3'>
-            <div onClick={()=>setSizes(prev => prev.includes("S") ? prev.filter( item => item !== "S") : [...prev,"S"])}>
-              <p className={`${sizes.includes("S") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>S</p>
-            </div>
-            
-            <div onClick={()=>setSizes(prev => prev.includes("M") ? prev.filter( item => item !== "M") : [...prev,"M"])}>
-              <p className={`${sizes.includes("M") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>M</p>
-            </div>
-
-            <div onClick={()=>setSizes(prev => prev.includes("L") ? prev.filter( item => item !== "L") : [...prev,"L"])}>
-              <p className={`${sizes.includes("L") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>L</p>
-            </div>
-
-            <div onClick={()=>setSizes(prev => prev.includes("XL") ? prev.filter( item => item !== "XL") : [...prev,"XL"])}>
-              <p className={`${sizes.includes("XL") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>XL</p>
-            </div>
-
-            <div onClick={()=>setSizes(prev => prev.includes("XXL") ? prev.filter( item => item !== "XXL") : [...prev,"XXL"])}>
-              <p className={`${sizes.includes("XXL") ? "bg-pink-100" : "bg-slate-200" } px-3 py-1 cursor-pointer`}>XXL</p>
-            </div>
-          </div>
-        </div>
-
-        <div className='flex gap-2 mt-2'>
-          <input onChange={() => setBestseller(prev => !prev)} checked={bestseller} type="checkbox" id='bestseller' />
-          <label className='cursor-pointer' htmlFor="bestseller">Add to bestseller</label>
-        </div>
-
-        <button type="submit" className='w-28 py-3 mt-4 bg-black text-white'>ADD</button>
-
-    </form>
-  )
-}
-
-export default Add
+export default AddProduct;
