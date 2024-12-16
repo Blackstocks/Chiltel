@@ -1,5 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddProduct = ({token}) => {
   // State for managing form inputs
@@ -26,7 +28,6 @@ const AddProduct = ({token}) => {
   });
 
   const [featureInput, setFeatureInput] = useState(""); // Temporary state for adding features
-  const [productList, setProductList] = useState([]); // State to hold added products
   const [loading, setLoading] = useState(false); // Loading State
   const [message, setMessage] = useState(""); // Success/Error Message
 
@@ -62,21 +63,26 @@ const AddProduct = ({token}) => {
     setLoading(true);
     setMessage("");
 
+    console.log(product);
+
     try {
-      const response = await axios.post("http://localhost:5000/api/products", product, {
+      const response = await axios.post("http://localhost:4000/api/product/add", product, {
         headers: { 
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "token": token
         },
       });
 
+      console.log(response.data);
+
       if (response.status === 201 || response.status === 200) {
         setMessage("Product added successfully!");
+        toast.success(response.data.message);
         setProduct({
           name: "",
           brand: "",
           model: "",
-          category: "Air Conditioner",
+          category: "",
           price: "",
           discount: 0,
           rating: 0,
@@ -96,6 +102,7 @@ const AddProduct = ({token}) => {
       }
     } catch (error) {
       setMessage("Failed to add product. Please try again.");
+      toast.error(message);
       console.error("Error:", error);
     } finally {
       setLoading(false);
@@ -220,6 +227,22 @@ const AddProduct = ({token}) => {
             placeholder="Cooling"
             name="cooling"
             value={product.specifications.cooling}
+            onChange={handleSpecChange}
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            placeholder="AmbientOperation"
+            name="ambientOperation"
+            value={product.specifications.ambientOperation}
+            onChange={handleSpecChange}
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            placeholder="WaterproofRating"
+            name="waterproofRating"
+            value={product.specifications.waterproofRating}
             onChange={handleSpecChange}
             className="border p-2 rounded"
           />
