@@ -1,16 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import axios from 'axios';
 import { useParams, useSearchParams } from "react-router-dom";
 import { Star, StarHalf, Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loading from "../components/Loading";
 
 const ProductList = () => {
   const { category } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const type = searchParams.get("type");
+  const [productsData, setProductsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  console.log('yo');
+
+  useEffect(()=>{
+    const fetchProducts = async ()=>{
+      try{
+        const response = await axios.get('http://localhost:4000/api/product/list');
+        console.log('data: ',response.data);
+        setProductsData(response.data.data);
+      }catch(err){
+        console.error('Error while fetching products: ', err);
+      }finally{
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  },[])
 
   // Product Data
-  const productsData = {
+  const productsData1 = {
     "air-conditioner": [
       {
         id: 1,
@@ -1546,7 +1568,11 @@ const ProductList = () => {
   ];
 
   const data = type === "purchase" ? productsData : {};
-  const items = data[category] || [];
+  console.log(category);
+  const items = data.filter(prod=>prod.category==category) || [];
+
+  console.log(data);
+  console.log('items: ', items);
 
   const [filteredItems, setFilteredItems] = useState(items);
   const [filters, setFilters] = useState({
@@ -1612,7 +1638,9 @@ const ProductList = () => {
     }
 
     setFilteredItems(result);
-  }, [filters, items]);
+  }, [filters, loading]);
+
+  if(loading) return (<Loading />);
 
   return (
     <div className="w-full max-w-screen-xl px-2 py-8 mx-auto sm:px-4 md:px-4 lg:px-2 xl:px-2">
