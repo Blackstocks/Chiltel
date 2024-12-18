@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import {
   Table,
   TableBody,
@@ -22,34 +24,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Search, Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 
-const EmployeeManagement = () => {
-  // Sample initial employee data
-  const [employees, setEmployees] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      role: "Senior Technician",
-      specialization: "HVAC",
-      phone: "+1 234-567-8901",
-      email: "john.doe@example.com",
-      status: "Active",
-      joinDate: "2023-01-15"
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      role: "Electrician",
-      specialization: "Home Appliances",
-      phone: "+1 234-567-8902",
-      email: "jane.smith@example.com",
-      status: "Active",
-      joinDate: "2023-03-20"
-    }
-  ]);
-
+const EmployeeManagement = ({ token }) => {
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   const emptyEmployee = {
     name: "",
     role: "",
@@ -57,35 +41,96 @@ const EmployeeManagement = () => {
     phone: "",
     email: "",
     status: "Active",
-    joinDate: ""
+    joiningDate: ""
   };
-  
+
   const [editingEmployee, setEditingEmployee] = useState(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newEmployee, setNewEmployee] = useState(emptyEmployee);
 
-  const handleAddEmployee = () => {
-    setEmployees([...employees, { ...newEmployee, id: employees.length + 1 }]);
-    setNewEmployee(emptyEmployee);
-    setIsAddDialogOpen(false);
+  // Fetch employees
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/api/employees/list', {
+        headers: { token }
+      });
+      setEmployees(response.data.data);
+    } catch (error) {
+      toast.error('Failed to fetch employees');
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchEmployees();
+  }, [token]);
+
+  // Add employee
+  const handleAddEmployee = async () => {
+    try {
+      setSubmitting(true);
+      const response = await axios.post('http://localhost:4000/api/employees/add', 
+        newEmployee,
+        { headers: { token } }
+      );
+      
+      setEmployees([...employees, response.data.data]);
+      setNewEmployee(emptyEmployee);
+      setIsAddDialogOpen(false);
+      toast.success('Employee added successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add employee');
+      console.error('Error:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Edit employee
   const handleEditClick = (employee) => {
     setEditingEmployee({ ...employee });
     setIsEditDialogOpen(true);
   };
 
-  const handleEditSave = () => {
-    setEmployees(employees.map(emp => 
-      emp.id === editingEmployee.id ? editingEmployee : emp
-    ));
-    setIsEditDialogOpen(false);
-    setEditingEmployee(null);
+  const handleEditSave = async () => {
+    try {
+      setSubmitting(true);
+      const response = await axios.put(
+        `http://localhost:4000/api/employees/${editingEmployee._id}`,
+        editingEmployee,
+        { headers: { token } }
+      );
+      
+      setEmployees(employees.map(emp => 
+        emp._id === editingEmployee._id ? response.data.data : emp
+      ));
+      setIsEditDialogOpen(false);
+      setEditingEmployee(null);
+      toast.success('Employee updated successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update employee');
+      console.error('Error:', error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleDeleteEmployee = (id) => {
-    setEmployees(employees.filter(emp => emp.id !== id));
+  // Delete employee
+  const handleDeleteEmployee = async (id) => {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
+      try {
+        await axios.delete(`http://localhost:4000/api/employees/${id}`, {
+          headers: { token }
+        });
+        
+        setEmployees(employees.filter(emp => emp._id !== id));
+        toast.success('Employee deleted successfully');
+      } catch (error) {
+        toast.error('Failed to delete employee');
+        console.error('Error:', error);
+      }
+    }
   };
 
   const filteredEmployees = employees.filter(employee =>
@@ -93,6 +138,24 @@ const EmployeeManagement = () => {
     employee.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.specialization.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Form validation
+  const validateForm = (employee) => {
+    const errors = {};
+    if (!employee.name) errors.name = 'Name is required';
+    if (!employee.email) errors.email = 'Email is required';
+    if (!employee.phone) errors.phone = 'Phone is required';
+    if (!employee.role) errors.role = 'Role is required';
+    if (!employee.specialization) errors.specialization = 'Specialization is required';
+    if (!employee.joiningDate) errors.joiningDate = 'Joining date is required';
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (employee.email && !emailRegex.test(employee.email)) {
+      errors.email = 'Invalid email format';
+    }
+
+    return errors;
+  };
 
   return (
     <div className="p-6">
@@ -150,11 +213,22 @@ const EmployeeManagement = () => {
                   <Input
                     placeholder="Join Date"
                     type="date"
-                    value={newEmployee.joinDate}
-                    onChange={(e) => setNewEmployee({...newEmployee, joinDate: e.target.value})}
+                    value={newEmployee.joiningDate}
+                    onChange={(e) => setNewEmployee({...newEmployee, joiningDate: e.target.value})}
                   />
-                  <Button className="w-full" onClick={handleAddEmployee}>
-                    Add Employee
+                  <Button 
+                    className="w-full" 
+                    onClick={handleAddEmployee}
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      'Add Employee'
+                    )}
                   </Button>
                 </div>
               </DialogContent>
@@ -162,60 +236,66 @@ const EmployeeManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Specialization</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Join Date</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEmployees.map((employee) => (
-                <TableRow key={employee.id}>
-                  <TableCell className="font-medium">{employee.name}</TableCell>
-                  <TableCell>{employee.role}</TableCell>
-                  <TableCell>{employee.specialization}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div>{employee.phone}</div>
-                      <div className="text-sm text-gray-500">{employee.email}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      employee.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {employee.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>{employee.joinDate}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleEditClick(employee)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleDeleteEmployee(employee.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {loading ? (
+            <div className="flex justify-center items-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Specialization</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Join Date</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredEmployees.map((employee) => (
+                  <TableRow key={employee._id}>
+                    <TableCell className="font-medium">{employee.name}</TableCell>
+                    <TableCell>{employee.role}</TableCell>
+                    <TableCell>{employee.specialization}</TableCell>
+                    <TableCell>
+                      <div>
+                        <div>{employee.phone}</div>
+                        <div className="text-sm text-gray-500">{employee.email}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        employee.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {employee.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>{new Date(employee.joiningDate).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditClick(employee)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteEmployee(employee._id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -255,11 +335,22 @@ const EmployeeManagement = () => {
             <Input
               placeholder="Join Date"
               type="date"
-              value={editingEmployee?.joinDate || ''}
-              onChange={(e) => setEditingEmployee({...editingEmployee, joinDate: e.target.value})}
+              value={editingEmployee?.joiningDate?.split('T')[0] || ''}
+              onChange={(e) => setEditingEmployee({...editingEmployee, joiningDate: e.target.value})}
             />
-            <Button className="w-full" onClick={handleEditSave}>
-              Save Changes
+            <Button 
+              className="w-full" 
+              onClick={handleEditSave}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </DialogContent>

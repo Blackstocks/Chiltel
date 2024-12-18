@@ -38,7 +38,8 @@ const ProductsPage = ({ token }) => {
   const pageSizeOptions = [5, 10, 15, 20];
 
   const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
+   
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);

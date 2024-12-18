@@ -45,7 +45,6 @@ const App = () => {
                   <Route path="/products" element={<ProductsPage token={token} />} />
                   <Route path="/services" element={<ServicesManagement token={token} />} />
                   <Route path="/employees" element={<EmployeeManagement token={token} />} />
-                  <Route path="/list" element={<ListProducts token={token} />} />
                   <Route path="/orders" element={<OrderManagement token={token} />} />
                 </Routes>
               </div>

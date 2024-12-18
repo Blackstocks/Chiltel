@@ -8,7 +8,7 @@ import productRouter from './routes/productRoute.js'
 import cartRouter from './routes/cartRoute.js'
 import orderRouter from './routes/orderRoute.js'
 import employeeRouter from './routes/employeeRoute.js'
-import adminAuth from '../middleware/adminAuth.js';
+import adminAuth from './middleware/adminAuth.js';
 
 // App Config
 const app = express()

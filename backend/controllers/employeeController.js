@@ -1,5 +1,5 @@
 // controllers/employeeController.js
-import Employee from '../models/employeeModel';
+import Employee from '../models/employeeModel.js';
 
 // Add new employee
 const addEmployee = async (req, res) => {
