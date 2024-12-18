@@ -159,4 +159,18 @@ const listProducts = async (req, res) => {
   }
 };
 
+// const getAllProducts = async (req, res) => {
+//   try{
+//       const products = await Product.find();
+      
+//   }catch(error){
+//     console.error('Error fetching all products: ', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Internal Server Error. Could not fetch all products.',
+//       error: error.message
+//     });
+//   }
+// }
+
 export { addProduct, removeProduct, getProduct, listProducts };

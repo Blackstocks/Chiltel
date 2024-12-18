@@ -25,7 +25,13 @@ const loginUser = async (req, res) => {
         if (isMatch) {
 
             const token = createToken(user._id)
-            res.json({ success: true, token })
+            res.json({ success: true, token,
+                user: {
+                    id: user._id,
+                    email: user.email,
+                    name: user.name,  // Assuming you store the user's name
+                  },
+             })
 
         }
         else {
@@ -80,6 +86,34 @@ const registerUser = async (req, res) => {
     }
 }
 
+// User Authentication
+const verifyToken = async (req, res) => {
+    try {
+        // Get the token from the Authorization header
+        const token = req.header('Authorization')?.replace('Bearer ', ''); // Remove 'Bearer ' part
+    
+        if (!token) {
+          return res.status(401).json({ success: false, message: 'No token provided.' });
+        }
+    
+        // Verify the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+        // Find user by decoded token id
+        const user = await userModel.findById(decoded.id).select('-password'); // Exclude password field
+    
+        if (!user) {
+          return res.status(401).json({ success: false, message: 'User not found.' });
+        }
+    
+        // If token is valid and user is found, send the user data
+        res.status(200).json(user); // Send back user data
+      } catch (error) {
+        console.log(error);
+        return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
+      }
+}
+
 // Route for admin login
 const adminLogin = async (req, res) => {
     try {
@@ -100,4 +134,4 @@ const adminLogin = async (req, res) => {
 }
 
 
-export { loginUser, registerUser, adminLogin }
+export { loginUser, registerUser, adminLogin, verifyToken }

@@ -21,6 +21,7 @@ const Login = () => {
           if (response.data.success) {
             setToken(response.data.token)
             localStorage.setItem('token',response.data.token)
+            token.success('Account created successfully')
           } else {
             toast.error(response.data.message)
           }
@@ -31,6 +32,7 @@ const Login = () => {
           if (response.data.success) {
             setToken(response.data.token)
             localStorage.setItem('token',response.data.token)
+            toast.success('Login successful');
           } else {
             toast.error(response.data.message)
           }
