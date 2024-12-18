@@ -1,18 +1,31 @@
-import { 
-  Plus,
-  Search,
-  Edit,
-  Trash
-} from 'lucide-react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import { Plus, Search } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
-
-import { useState } from 'react';
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Pencil, Trash2 } from "lucide-react";
 
 // Product Form Component
 const AddProductForm = ({ onSubmit, onClose, token }) => {
@@ -76,12 +89,12 @@ const AddProductForm = ({ onSubmit, onClose, token }) => {
 
     try {
       const response = await fetch("http://localhost:4000/api/product/add", {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'token': token
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          token: token,
         },
-        body: JSON.stringify(product)
+        body: JSON.stringify(product),
       });
 
       const data = await response.json();
@@ -111,7 +124,7 @@ const AddProductForm = ({ onSubmit, onClose, token }) => {
           imageUrls: [],
         });
       } else {
-        throw new Error(data.message || 'Failed to add product');
+        throw new Error(data.message || "Failed to add product");
       }
     } catch (error) {
       setMessage("Failed to add product. Please try again.");
@@ -273,9 +286,13 @@ const AddProductForm = ({ onSubmit, onClose, token }) => {
 
       {/* Message Display */}
       {message && (
-        <div className={`mb-4 p-2 rounded ${
-          message.includes('success') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }`}>
+        <div
+          className={`mb-4 p-2 rounded ${
+            message.includes("success")
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}
+        >
           {message}
         </div>
       )}
@@ -304,7 +321,7 @@ const AddProductForm = ({ onSubmit, onClose, token }) => {
 // ... rest of the ProductsPage component remains the same ...
 
 // Product List Component
-const ProductList = () => {
+/*const ProductList = () => {
   const products = [
     { id: 1, name: 'Deep Freezer XL', category: 'Deep Freezer', price: 24999, stock: 10 },
     { id: 2, name: 'Visi-Cooler Pro', category: 'Visi-Cooler', price: 18999, stock: 15 },
@@ -344,10 +361,10 @@ const ProductList = () => {
       </table>
     </div>
   );
-};
+};*/
 
 // Main Products Page Component
-const ProductsPage = () => {
+/*const ProductsPage = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -378,6 +395,290 @@ const ProductsPage = () => {
         </div>
       </div>
       <ProductList />
+    </div>
+  );
+};
+
+export default ProductsPage;*/
+
+const ProductsPage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [filters, setFilters] = useState({
+    category: "all",
+    availability: "all",
+    priceRange: "all",
+  });
+
+  const [products, setProducts] = useState([
+    {
+      id: 1,
+      name: "Deep Freezer XL",
+      brand: "CoolTech",
+      category: "Deep Freezer",
+      price: 24999,
+      availability: true,
+      specifications: {
+        capacity: "500L",
+        starRating: "4",
+      },
+      features: ["Frost Free", "Digital Display"],
+    },
+    {
+      id: 2,
+      name: "Visi-Cooler Pro",
+      brand: "FrostKing",
+      category: "Visi-Cooler",
+      price: 18999,
+      availability: true,
+      specifications: {
+        capacity: "300L",
+        starRating: "3",
+      },
+      features: ["LED Lighting", "Adjustable Shelves"],
+    },
+    {
+      id: 3,
+      name: "AC Supreme",
+      brand: "ChillMaster",
+      category: "AC",
+      price: 32999,
+      availability: false,
+      specifications: {
+        capacity: "1.5T",
+        starRating: "5",
+      },
+      features: ["Inverter Technology", "Wi-Fi Enabled"],
+    },
+  ]);
+
+  // Get unique categories from products
+  const categories = ["all", ...new Set(products.map((p) => p.category))];
+
+  const priceRanges = [
+    { label: "All Prices", value: "all" },
+    { label: "Under ₹20,000", value: "0-20000" },
+    { label: "₹20,000 - ₹30,000", value: "20000-30000" },
+    { label: "Above ₹30,000", value: "30000+" },
+  ];
+
+  const handleAddProduct = (newProduct) => {
+    setProducts([...products, { ...newProduct, id: products.length + 1 }]);
+    setIsAddDialogOpen(false);
+  };
+
+  const handleEditClick = (product) => {
+    setEditingProduct(product);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSave = (updatedProduct) => {
+    setProducts(
+      products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+    );
+    setIsEditDialogOpen(false);
+    setEditingProduct(null);
+  };
+
+  const handleDeleteProduct = (id) => {
+    setProducts(products.filter((product) => product.id !== id));
+  };
+
+  // Filter products based on all criteria
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      filters.category === "all" || product.category === filters.category;
+
+    const matchesAvailability =
+      filters.availability === "all" ||
+      (filters.availability === "inStock" && product.availability) ||
+      (filters.availability === "outOfStock" && !product.availability);
+
+    const matchesPriceRange = (() => {
+      if (filters.priceRange === "all") return true;
+      const [min, max] = filters.priceRange.split("-").map(Number);
+      if (filters.priceRange === "30000+") return product.price >= 30000;
+      return product.price >= min && product.price <= max;
+    })();
+
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesAvailability &&
+      matchesPriceRange
+    );
+  });
+
+  return (
+    <div className="p-6">
+      <Card className="w-full">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle className="text-2xl font-bold">
+            Products Management
+          </CardTitle>
+          <div className="flex space-x-4">
+            <div className="flex items-center border rounded-md px-2">
+              <Search className="h-4 w-4 text-gray-500" />
+              <Input
+                placeholder="Search products..."
+                className="border-0 focus:ring-0"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Product
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <AddProductForm
+                  onSubmit={handleAddProduct}
+                  onClose={() => setIsAddDialogOpen(false)}
+                  token="your-token-here"
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+
+        {/* Filters Section */}
+        <div className="px-6 py-4 border-b flex space-x-4">
+          <Select
+            value={filters.category}
+            onValueChange={(value) =>
+              setFilters({ ...filters, category: value })
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category === "all" ? "All Categories" : category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filters.availability}
+            onValueChange={(value) =>
+              setFilters({ ...filters, availability: value })
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Availability" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="inStock">In Stock</SelectItem>
+              <SelectItem value="outOfStock">Out of Stock</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filters.priceRange}
+            onValueChange={(value) =>
+              setFilters({ ...filters, priceRange: value })
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Price Range" />
+            </SelectTrigger>
+            <SelectContent>
+              {priceRanges.map((range) => (
+                <SelectItem key={range.value} value={range.value}>
+                  {range.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Brand</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Capacity</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredProducts.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.brand}</TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell>₹{product.price.toLocaleString()}</TableCell>
+                  <TableCell>{product.specifications.capacity}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        product.availability
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {product.availability ? "In Stock" : "Out of Stock"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditClick(product)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+          </DialogHeader>
+          {editingProduct && (
+            <AddProductForm
+              onSubmit={handleEditSave}
+              onClose={() => setIsEditDialogOpen(false)}
+              token="your-token-here"
+              initialData={editingProduct}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

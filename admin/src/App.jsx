@@ -10,6 +10,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Dashboard from './pages/Dashboard'
 import ProductsPage from './pages/Products'
+import EmployeeManagement from './pages/Employee'
+import ServicesManagement from './pages/Services'
+import OrderManagement from './pages/Orders'
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL
 export const currency = '$'
@@ -38,10 +41,10 @@ const App = () => {
               <Routes>
                 <Route path='/dashboard' element={<Dashboard token={token} />} />
                 <Route path='/products' element={<ProductsPage token={token} />} />
-                <Route path='/services' element={<AddProduct token={token} />} />
-                <Route path='/employees' element={<AddProduct token={token} />} />
+                <Route path='/services' element={<ServicesManagement token={token} />} />
+                <Route path='/employees' element={<EmployeeManagement token={token} />} />
                 <Route path='/list' element={<ListProducts token={token} />} />
-                <Route path='/orders' element={<Orders token={token} />} />
+                <Route path='/orders' element={<OrderManagement token={token} />} />
               </Routes>
             </div>
           </div>
