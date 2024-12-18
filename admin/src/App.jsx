@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import { Routes, Route } from 'react-router-dom'
-import AddProduct from './pages/Add'
+import AddProduct from './components/Add'
 import ListProducts from './pages/List'
 import Orders from './pages/Orders'
 import Login from './components/Login'
@@ -28,28 +28,31 @@ const App = () => {
   },[token])
 
   return (
-    <div className='bg-gray-50 min-h-screen'>
+    <div className="min-h-screen bg-gray-50">
       <ToastContainer />
-      {token === ""
-        ? <Login setToken={setToken} />
-        : <>
+      {token === "" ? (
+        <Login setToken={setToken} />
+      ) : (
+        <div className="flex flex-col h-screen">
           <Navbar setToken={setToken} />
-          <hr />
-          <div className='flex w-full'>
+          <hr className="border-gray-200" />
+          <div className="flex flex-1 overflow-hidden">
             <Sidebar />
-            <div className='w-[70%] mx-auto ml-[max(5vw,25px)] my-8 text-gray-600 text-base'>
-              <Routes>
-                <Route path='/dashboard' element={<Dashboard token={token} />} />
-                <Route path='/products' element={<ProductsPage token={token} />} />
-                <Route path='/services' element={<ServicesManagement token={token} />} />
-                <Route path='/employees' element={<EmployeeManagement token={token} />} />
-                <Route path='/list' element={<ListProducts token={token} />} />
-                <Route path='/orders' element={<OrderManagement token={token} />} />
-              </Routes>
-            </div>
+            <main className="flex-1 overflow-y-auto p-2">
+              <div className="max-w-6xl mx-auto">
+                <Routes>
+                  <Route path="/dashboard" element={<Dashboard token={token} />} />
+                  <Route path="/products" element={<ProductsPage token={token} />} />
+                  <Route path="/services" element={<ServicesManagement token={token} />} />
+                  <Route path="/employees" element={<EmployeeManagement token={token} />} />
+                  <Route path="/list" element={<ListProducts token={token} />} />
+                  <Route path="/orders" element={<OrderManagement token={token} />} />
+                </Routes>
+              </div>
+            </main>
           </div>
-        </>
-      }
+        </div>
+      )}
     </div>
   )
 }

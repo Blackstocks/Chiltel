@@ -7,6 +7,8 @@ import userRouter from './routes/userRoute.js'
 import productRouter from './routes/productRoute.js'
 import cartRouter from './routes/cartRoute.js'
 import orderRouter from './routes/orderRoute.js'
+import employeeRouter from './routes/employeeRoute.js'
+import adminAuth from '../middleware/adminAuth.js';
 
 // App Config
 const app = express()
@@ -20,6 +22,7 @@ app.use(cors())
 
 // api endpoints
 app.use('/api/user',userRouter)
+app.use('/api/employees', adminAuth, employeeRouter);
 app.use('/api/product',productRouter)
 app.use('/api/cart',cartRouter)
 app.use('/api/order',orderRouter)

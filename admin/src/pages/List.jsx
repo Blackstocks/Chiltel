@@ -127,7 +127,7 @@ const ListProducts = ({ token }) => {
                 <th className="p-2 border">Name</th>
                 <th className="p-2 border">Brand</th>
                 <th className="p-2 border">Category</th>
-                <th className="p-2 border">Price</th>
+                <th className="p-2 border">price</th>
                 <th className="p-2 border">Rating</th>
                 <th className="p-2 border">Availability</th>
                 <th className="p-2 border">Actions</th>
