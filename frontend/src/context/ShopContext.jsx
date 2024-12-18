@@ -15,8 +15,8 @@ const ShopContextProvider = (props) => {
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
-    // const [token, setToken] = useState('')
-    let token = localStorage.getItem('token');
+    const [token, setToken] = useState('')
+    // let token = localStorage.getItem('token');
     const navigate = useNavigate();
 
     const addToCart = async (itemId, size) => {
@@ -57,6 +57,7 @@ const ShopContextProvider = (props) => {
 
     const getCartCount = async (userId) => {
         let totalCount = 0;
+        setToken(localStorage.getItem('token'));
         const response = await axios.post(backendUrl + '/api/cart/get', {
             userId,
           },{
@@ -160,7 +161,7 @@ const ShopContextProvider = (props) => {
         cartItems, addToCart,setCartItems,
         getCartCount, updateQuantity,
         getCartAmount, navigate, backendUrl,
-        // setToken, token
+        setToken, token
     }
 
     return (
