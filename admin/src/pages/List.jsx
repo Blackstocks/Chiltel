@@ -30,7 +30,10 @@ const ListProducts = ({ token }) => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:4000/api/product/remove/${id}`, {
-        headers: { token },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
       });
       const updatedProducts = products.filter((product) => product._id !== id);
       setProducts(updatedProducts);

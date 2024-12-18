@@ -6,7 +6,7 @@ import adminAuth from '../middleware/adminAuth.js';
 const productRouter = express.Router();
 
 productRouter.post('/add',adminAuth, addProduct);
-productRouter.post('/remove',adminAuth, removeProduct);
+productRouter.delete('/remove',adminAuth, removeProduct);
 productRouter.get('/single', getProduct);
 productRouter.get('/list', listProducts);
 
