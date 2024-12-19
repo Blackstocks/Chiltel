@@ -62,8 +62,8 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="flex-1 overflow-auto">
+    <div className="flex h-screen">
+      <div className="flex-1">
         <main className="p-6">
           <div className="space-y-6">
             {/* Stats Cards */}

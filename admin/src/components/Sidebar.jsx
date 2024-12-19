@@ -1,40 +1,75 @@
-import { NavLink } from 'react-router-dom'
-import { assets } from '../assets/assets'
+import { NavLink } from 'react-router-dom';
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  LayoutDashboard, 
+  Package, 
+  Wrench, 
+  ShoppingCart, 
+  Users,
+  ChevronRight
+} from "lucide-react";
 
 const Sidebar = () => {
+  const navItems = [
+    {
+      title: "Dashboard",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      href: "/dashboard"
+    },
+    {
+      title: "Products",
+      icon: <Package className="h-5 w-5" />,
+      href: "/products"
+    },
+    {
+      title: "Services",
+      icon: <Wrench className="h-5 w-5" />,
+      href: "/services"
+    },
+    {
+      title: "Orders",
+      icon: <ShoppingCart className="h-5 w-5" />,
+      href: "/orders"
+    },
+    {
+      title: "Employees",
+      icon: <Users className="h-5 w-5" />,
+      href: "/employees"
+    }
+  ];
+
   return (
-    <div className='w-[18%] min-h-screen border-r-2'>
-        <div className='flex flex-col gap-4 pt-6 pl-[20%] text-[15px]'>
-
-        <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/dashboard">
-                <img className='w-5 h-5' src={assets.add_icon} alt="" />
-                <p className='hidden md:block'>Dashboard</p>
-            </NavLink>
-
-            <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/products">
-                <img className='w-5 h-5' src={assets.add_icon} alt="" />
-                <p className='hidden md:block'>Products</p>
-            </NavLink>
-
-            <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/services">
-                <img className='w-5 h-5' src={assets.add_icon} alt="" />
-                <p className='hidden md:block'>Services</p>
-            </NavLink>
-
-            <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/orders">
-                <img className='w-5 h-5' src={assets.order_icon} alt="" />
-                <p className='hidden md:block'>Orders</p>
-            </NavLink>
-
-            <NavLink className='flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l' to="/employees">
-                <img className='w-5 h-5' src={assets.order_icon} alt="" />
-                <p className='hidden md:block'>Employees</p>
-            </NavLink>
-
+    <div className="relative min-h-screen w-64 border-r bg-background">
+      <ScrollArea className="h-full w-full">
+        <div className="space-y-4 py-4">
+          <div className="px-3 py-2">
+            <h2 className="mb-2 px-4 text-lg font-semibold">
+              Admin Portal
+            </h2>
+            <div className="space-y-1">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.href}
+                  to={item.href}
+                  className={({ isActive }) => cn(
+                    "flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
+                    isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    {item.icon}
+                    <span>{item.title}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                </NavLink>
+              ))}
+            </div>
+          </div>
         </div>
-
+      </ScrollArea>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;
