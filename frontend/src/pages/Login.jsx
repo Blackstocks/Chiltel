@@ -2,11 +2,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
 
   const [currentState, setCurrentState] = useState('Login');
   const { token, setToken, navigate, backendUrl } = useContext(ShopContext)
+  const { login } = useContext(AuthContext)
 
   const [name,setName] = useState('')
   const [password,setPasword] = useState('')
@@ -18,6 +20,7 @@ const Login = () => {
         if (currentState === 'Sign Up') {
           
           const response = await axios.post(backendUrl + '/api/user/register',{name,email,password})
+          console.log("response:", response)
           if (response.data.success) {
             setToken(response.data.token)
             localStorage.setItem('token',response.data.token)
@@ -28,14 +31,16 @@ const Login = () => {
 
         } else {
 
-          const response = await axios.post(backendUrl + '/api/user/login', {email,password})
+          /*const response = await axios.post(backendUrl + '/api/user/login', {email,password})
           if (response.data.success) {
             setToken(response.data.token)
             localStorage.setItem('token',response.data.token)
             toast.success('Login successful');
           } else {
             toast.error(response.data.message)
-          }
+          }*/
+
+          login(email, password);
 
         }
 

@@ -26,7 +26,9 @@ const Navbar = () => {
                 console.error(err);
             }
         }
-        getCount();
+        if(isAuthenticated){
+            getCount();
+        }
     }, [user])
 
     const logout = () => {

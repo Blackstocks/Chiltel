@@ -78,10 +78,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/user/login', {
-        email,
-        password,
-      });
+      const response = await axios.post(backendUrl + '/api/user/login', {email,password});
 
       if (response.status === 200) {
         // Store the token and user data in local storage and state
