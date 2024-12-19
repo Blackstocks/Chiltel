@@ -36,10 +36,29 @@ const cartSchema = new mongoose.Schema(
 			ref: "User",
 			required: true,
 		},
-		items: {
-			type: [cartItemSchema],
-			default: [],
-		},
+		items: [
+			{
+				item: {
+					type: mongoose.Schema.Types.ObjectId,
+					refPath: 'items.itemType',
+					required: true,
+				},
+				itemType: {
+					type: String,
+					required: true,
+					enum: ['Product', 'Service'],
+				},
+				quantity: {
+					type: Number,
+					required: true,
+					min: 1,
+				},
+				price: {
+					type: Number,
+					required: true,
+				},
+			}
+		],
 		totalAmount: {
 			type: Number,
 			default: 0,

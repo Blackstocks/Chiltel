@@ -6,7 +6,26 @@ const userSchema = new mongoose.Schema(
 		name: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
 		password: { type: String, required: true },
-		cartId: { type: mongoose.Schema.Types.ObjectId, ref: "Cart" },
+		phoneNumber: String,
+		address: {
+			street: String,
+			city: String,
+			state: String,
+			zipCode: String,
+		},
+		registeredAt: { type: Date, default: Date.now },
+		orders: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "Order",
+			},
+		],
+		serviceRequests: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "ServiceRequest",
+			},
+		],
 	},
 	{ minimize: false }
 );

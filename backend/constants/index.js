@@ -1,0 +1,17 @@
+export const productEnums = [
+	"Air Conditioner",
+	"Water Heater",
+	"Microwave",
+	"Geyser",
+	"Refrigerator",
+	"Washing Machine",
+	"Air Cooler",
+	"Air Purifier",
+	"Water Purifier",
+	"Deep Freezer",
+	"Visi Cooler",
+	"Cassette AC",
+	"Water Cooler cum Purifier",
+	"Water Dispenser",
+	"Display Counter",
+];
