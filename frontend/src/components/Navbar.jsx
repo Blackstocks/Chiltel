@@ -3,6 +3,7 @@ import { assets } from "../assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import AuthContext from "../context/AuthContext";
+import CartContext from "../context/CartContext";
 
 const Navbar = () => {
 	const [visible, setVisible] = useState(false);
@@ -15,27 +16,35 @@ const Navbar = () => {
 		setToken,
 		setCartItems,
 	} = useContext(ShopContext);
-	const { user, isAuthenticated, logout } = useContext(AuthContext);
+	const { user, isAuthenticated, loading } = useContext(AuthContext);
+	const { cartCount } = useContext(CartContext);
 	const [userId, setUserId] = useState("");
-	const [cartCount, setCartCount] = useState(0);
+	// const [cartCount, setCartCount] = useState(0);
 
 	useEffect(() => {
 		setUserId(user?._id);
-	}, [isAuthenticated]);
+	}, [loading]);
 
-	useEffect(() => {
-		const getCount = async () => {
-			try {
-				const data = await getCartCount(userId);
-				setCartCount(data);
-			} catch (err) {
-				console.error(err);
-			}
-		};
-		if (isAuthenticated) {
-			getCount();
-		}
-	}, [user]);
+	// useEffect(()=>{
+	//     const getCount = async ()=> {
+	//         try{
+	//             const data = await getCartCount(userId);
+	//             setCartCount(data);
+	//         }catch(err){
+	//             console.error(err);
+	//         }
+	//     }
+	//     if(!loading){
+	//         getCount();
+	//     }
+	// }, [user, loading])
+
+	const logout = () => {
+		navigate("/login");
+		localStorage.removeItem("token");
+		setToken("");
+		setCartItems({});
+	};
 
 	return (
 		<div className="flex items-center justify-between py-5 font-medium">
