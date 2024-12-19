@@ -6,13 +6,17 @@ import { assets } from '../assets/assets';
 import CartTotal from '../components/CartTotal';
 import AuthContext from '../context/AuthContext';
 import { use } from 'react';
+import Loading from '../components/Loading';
+import CartContext from '../context/CartContext';
 
 const Cart = () => {
 
   const {backendUrl} = useContext(ShopContext);
-  const {user} = useContext(AuthContext);
-  const { products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
+  const {user, loading} = useContext(AuthContext);
+  const { products, currency, cartItems, navigate } = useContext(ShopContext);
+  const { addToCart, updateQuantity, removeFromCart } = useContext(CartContext);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [cartLoading, setCartLoading] = useState(true);
 
   const [cartData, setCartData] = useState([]);
 
@@ -32,11 +36,15 @@ const Cart = () => {
         setTotalAmount(response.data.cartData.totalAmount);
       }catch(err){
         console.error('Error while fetching cart items: ', err);
+      }finally{
+        setCartLoading(false);
       }
     }
 
-    fetchCartDetails();
-  },[])
+    if(!loading){
+      fetchCartDetails();
+    }
+  },[loading])
 
   // useEffect(() => {
 
@@ -56,6 +64,8 @@ const Cart = () => {
   //     setCartData(tempData);
   //   }
   // }, [cartItems, products])
+
+  if(cartLoading) return (<Loading />);
 
   return (
     <div className='border-t pt-14'>
@@ -82,8 +92,41 @@ const Cart = () => {
                     </div>
                   </div>
                 </div>
-                <input onChange={(e) => e.target.value === '' || e.target.value === '0' ? null : updateQuantity(item._id, item.size, Number(e.target.value))} className='border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1' type="number" min={1} defaultValue={item.quantity} />
-                <img onClick={() => updateQuantity(item._id, item.size, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer' src={assets.bin_icon} alt="" />
+                {/* <input onChange={(e) => e.target.value === '' || e.target.value === '0' ? null : updateQuantity(user._id, item.productId, Number(e.target.value))} className='border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1' type="number" min={1} defaultValue={item.quantity} /> */}
+                <input 
+                  onChange={(e) => {
+                    const newQuantity = Number(e.target.value); // Convert input value to a number
+                    if (newQuantity === 0 || isNaN(newQuantity)) return; // Do nothing for invalid values
+
+                    const quantityDifference = newQuantity - item.quantity; // Calculate difference
+
+                    if (quantityDifference !== 0) {
+                      updateQuantity(user._id, item.productId, newQuantity); // Call updateQuantity with the new quantity
+                    }
+                  }} 
+                  className="border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1" 
+                  type="number" 
+                  min={1} 
+                  defaultValue={item.quantity} 
+                />
+                {/* <input onChange={(e) => e.target.value === '' || e.target.value === '0' ? null : updateQuantity(item._id, item.size, Number(e.target.value))} className='border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1' type="number" min={1} defaultValue={item.quantity} /> */}
+                <img
+                  onClick={async () => {
+                    const result = await removeFromCart(user._id, item.productId);
+                    if (result.success) {
+                      // Update the cartData state with the new cart data
+                      setCartData(result.updatedCart.items);
+                      setTotalAmount(result.updatedCart.totalAmount);
+                    } else {
+                      console.error('Failed to remove item from cart:', result.error);
+                    }
+                  }}
+                  className='w-4 mr-4 sm:w-5 cursor-pointer'
+                  src={assets.bin_icon}
+                  alt=""
+                />
+                {/* <img onClick={() => removeFromCart(user._id, item.productId)} className='w-4 mr-4 sm:w-5 cursor-pointer' src={assets.bin_icon} alt="" /> */}
+                {/* <img onClick={() => updateQuantity(item._id, item.size, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer' src={assets.bin_icon} alt="" /> */}
               </div>
             )
 

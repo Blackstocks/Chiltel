@@ -8,10 +8,12 @@ import { use } from "react";
 import AuthContext from "../context/AuthContext";
 import { toast } from 'react-toastify'
 import { ShopContext } from "../context/ShopContext";
+import CartContext from "../context/CartContext";
 
 const ProductList = () => {
   const {user, isAuthenticated} = useContext(AuthContext);
-  const {backendUrl} = useContext(ShopContext);
+  const { backendUrl } = useContext(ShopContext);
+  const { addToCart } = useContext(CartContext);
   const { category } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -71,32 +73,33 @@ const ProductList = () => {
     };
 
     const handleAddToCart = async (item) => {
-      const token = localStorage.getItem('token');
+      addToCart(user, item);
+      // const token = localStorage.getItem('token');
 
-      if(!isAuthenticated){
-        toast.info('Please log in to add this item into your cart.');
-      }else{
-        console.log('Item: ',item);
-        toast.info('yo');
-        try{
-          const response = await axios.post(backendUrl + '/api/cart/add', {
-            userId: user._id,
-            itemId: item._id,
-            price: item.discountedPrice,
-            name: item.name,
-            image: item.image,
-            category: item.category
-          }, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          console.log('Add to cart: ', response.data);
-        }catch(err){
-          console.error('Error while adding item to card: ', err);
-        }
-        console.log('user: ', user);
-      }
+      // if(!isAuthenticated){
+      //   toast.info('Please log in to add this item into your cart.');
+      // }else{
+      //   console.log('Item: ',item);
+      //   toast.info('Item added to cart');
+      //   try{
+      //     const response = await axios.post(backendUrl + '/api/cart/add', {
+      //       userId: user._id,
+      //       itemId: item._id,
+      //       price: item.discountedPrice,
+      //       name: item.name,
+      //       image: item.image,
+      //       category: item.category
+      //     }, {
+      //       headers: {
+      //         Authorization: `Bearer ${token}`,
+      //       },
+      //     });
+      //     console.log('Add to cart: ', response.data);
+      //   }catch(err){
+      //     console.error('Error while adding item to card: ', err);
+      //   }
+      //   console.log('user: ', user);
+      // }
     }
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
