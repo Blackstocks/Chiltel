@@ -50,7 +50,7 @@ const EmployeeManagement = ({ token }) => {
   // Fetch employees
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/employees/list', {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/employees/list`, {
         headers: { token }
       });
       setEmployees(response.data.data);
@@ -70,7 +70,7 @@ const EmployeeManagement = ({ token }) => {
   const handleAddEmployee = async () => {
     try {
       setSubmitting(true);
-      const response = await axios.post('http://localhost:4000/api/employees/add', 
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/employees/add`, 
         newEmployee,
         { headers: { token } }
       );
@@ -97,7 +97,7 @@ const EmployeeManagement = ({ token }) => {
     try {
       setSubmitting(true);
       const response = await axios.put(
-        `http://localhost:4000/api/employees/${editingEmployee._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/employees/${editingEmployee._id}`,
         editingEmployee,
         { headers: { token } }
       );
@@ -120,7 +120,7 @@ const EmployeeManagement = ({ token }) => {
   const handleDeleteEmployee = async (id) => {
     if (window.confirm('Are you sure you want to delete this employee?')) {
       try {
-        await axios.delete(`http://localhost:4000/api/employees/${id}`, {
+        await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/employees/${id}`, {
           headers: { token }
         });
         

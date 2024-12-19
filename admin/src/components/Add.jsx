@@ -60,7 +60,7 @@ const AddProductForm = ({ onSubmit, onClose, token }) => {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:4000/api/product/add", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
