@@ -7,8 +7,14 @@ import AuthContext from "../context/AuthContext";
 const Navbar = () => {
 	const [visible, setVisible] = useState(false);
 
-	const { setShowSearch, getCartCount, navigate, setCartItems } =
-		useContext(ShopContext);
+	const {
+		setShowSearch,
+		getCartCount,
+		navigate,
+		token,
+		setToken,
+		setCartItems,
+	} = useContext(ShopContext);
 	const { user, isAuthenticated, logout } = useContext(AuthContext);
 	const [userId, setUserId] = useState("");
 	const [cartCount, setCartCount] = useState(0);
