@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { ShopContext } from "./ShopContext";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AuthContext = createContext();
 
@@ -10,68 +12,18 @@ export const AuthProvider = ({ children }) => {
 	const [loading, setLoading] = useState(true);
 	const { backendUrl } = useContext(ShopContext);
 
+	const navigate = useNavigate();
+
 	const checkAuthStatus = async () => {
 		setLoading(true);
-
-		try {
-			const token = localStorage.getItem("chiltel-user-token");
-			if (token) {
-				const response = await axios.get(backendUrl + "/api/user/verify", {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-
-				if (response.status === 200) {
-					// If the token is valid, store user data
-					setUser(response.data); // assuming the user data is in response.data
-					setIsAuthenticated(true);
-				} else {
-					// If the token is invalid, remove it and reset auth state
-					localStorage.removeItem("chiltel-user-token");
-					setUser(null);
-					setIsAuthenticated(false);
-				}
-			} else {
-				// If no token exists, reset auth state
-				setUser(null);
-				setIsAuthenticated(false);
-			}
-		} catch (error) {
-			console.error("Error checking authentication status:", error);
-			// Optionally, you could show a toast here to notify the user about the error.
-			toast.error("Failed to check authentication. Please try again.");
-		} finally {
-			setLoading(false); // Set loading to false once the check is done
+		const token = localStorage.getItem("chiltel-user-token");
+		if (!token) {
+			setIsAuthenticated(false);
+			setUser(null);
+			setLoading(false);
+			return;
 		}
 	};
-
-	// const checkAuthStatus = async () => {
-	//   try {
-	//     const token = localStorage.getItem('token');
-	//     if (token) {
-	//       const response = await fetch('/api/auth/verify', {
-	//         headers: {
-	//           Authorization: `Bearer ${token}`
-	//         }
-	//       });
-	//       if (response.ok) {
-	//         const userData = await response.json();
-	//         setUser(userData);
-	//         setIsAuthenticated(true);
-	//       } else {
-	//         localStorage.removeItem('token');
-	//         setUser(null);
-	//         setIsAuthenticated(false);
-	//       }
-	//     }
-	//   } catch (error) {
-	//     console.error('Auth check failed:', error);
-	//   } finally {
-	//     setLoading(false);
-	//   }
-	// };
-
 	useEffect(() => {
 		checkAuthStatus();
 	}, []);
@@ -88,24 +40,45 @@ export const AuthProvider = ({ children }) => {
 				localStorage.setItem("chiltel-user-token", response.data.token);
 				setUser(response.data.user);
 				setIsAuthenticated(true);
-
-				return { success: true };
+				toast.success("Logged in successfully");
 			} else {
-				throw new Error("Login failed");
+				toast.error(response.data.message);
 			}
 		} catch (error) {
-			console.error("Login Error:", error);
-			return {
-				success: false,
-				error: error.response ? error.response.data.message : error.message,
-			};
+			console.error("Error logging in:", error);
+			toast.error("Failed to log in. Please try again.");
+		}
+	};
+
+	const signup = async (email, password, name) => {
+		try {
+			const response = await axios.post(backendUrl + "/api/user/register", {
+				email,
+				password,
+				name,
+			});
+
+			if (response.status === 200) {
+				// Store the token and user data in local storage and state
+				localStorage.setItem("chiltel-user-token", response.data.token);
+				setUser(response.data.user);
+				setIsAuthenticated(true);
+				toast.success("Signed up successfully");
+			} else {
+				toast.error(response.data.message);
+			}
+		} catch (error) {
+			console.error("Error signing up:", error);
+			toast.error("Failed to sign up. Please try again.");
 		}
 	};
 
 	const logout = () => {
 		localStorage.removeItem("chiltel-user-token");
+		toast.success("Logged out successfully");
 		setUser(null);
 		setIsAuthenticated(false);
+		navigate("/login");
 	};
 
 	const value = {
@@ -113,8 +86,8 @@ export const AuthProvider = ({ children }) => {
 		isAuthenticated,
 		loading,
 		login,
+		signup,
 		logout,
-		checkAuthStatus,
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

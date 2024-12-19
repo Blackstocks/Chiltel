@@ -66,9 +66,9 @@ const ShopContextProvider = (props) => {
 				},
 			}
 		);
+		console.log(response.data);
 
 		const products = response.data.cartData.items;
-		console.log(products[0].quantity);
 		for (let item of products) {
 			totalCount += item.quantity;
 		}
@@ -128,12 +128,11 @@ const ShopContextProvider = (props) => {
 
 	const getUserCart = async (token) => {
 		try {
-			const response = await axios.post(
-				backendUrl + "/api/cart/get",
-				{},
-				{ headers: { token } }
-			);
+			const response = await axios.get(backendUrl + "/api/cart/get", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			if (response.data.success) {
+				console.log(response.data.cartData);
 				setCartItems(response.data.cartData);
 			}
 		} catch (error) {
@@ -149,7 +148,6 @@ const ShopContextProvider = (props) => {
 	useEffect(() => {
 		if (!token && localStorage.getItem("chiltel-user-token")) {
 			setToken(localStorage.getItem("chiltel-user-token"));
-			getUserCart(localStorage.getItem("chiltel-user-token"));
 		}
 		if (token) {
 			getUserCart(token);
@@ -172,8 +170,6 @@ const ShopContextProvider = (props) => {
 		getCartAmount,
 		navigate,
 		backendUrl,
-		setToken,
-		token,
 	};
 
 	return (

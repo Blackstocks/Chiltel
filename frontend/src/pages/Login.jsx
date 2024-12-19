@@ -6,8 +6,8 @@ import AuthContext from "../context/AuthContext";
 
 const Login = () => {
 	const [currentState, setCurrentState] = useState("Login");
-	const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
-	const { login, isAuthenticated } = useContext(AuthContext);
+	const { navigate, backendUrl } = useContext(ShopContext);
+	const { login, isAuthenticated, signup } = useContext(AuthContext);
 
 	const [name, setName] = useState("");
 	const [password, setPasword] = useState("");
@@ -17,29 +17,8 @@ const Login = () => {
 		event.preventDefault();
 		try {
 			if (currentState === "Sign Up") {
-				const response = await axios.post(backendUrl + "/api/user/register", {
-					name,
-					email,
-					password,
-				});
-				console.log("response:", response);
-				if (response.data.success) {
-					setToken(response.data.token);
-					localStorage.setItem("token", response.data.token);
-					token.success("Account created successfully");
-				} else {
-					toast.error(response.data.message);
-				}
+				signup(email, password, name);
 			} else {
-				/*const response = await axios.post(backendUrl + '/api/user/login', {email,password})
-          if (response.data.success) {
-            setToken(response.data.token)
-            localStorage.setItem('token',response.data.token)
-            toast.success('Login successful');
-          } else {
-            toast.error(response.data.message)
-          }*/
-
 				login(email, password);
 			}
 		} catch (error) {
@@ -49,10 +28,10 @@ const Login = () => {
 	};
 
 	useEffect(() => {
-		if (token) {
+		if (isAuthenticated) {
 			navigate("/");
 		}
-	}, [token]);
+	}, [isAuthenticated]);
 
 	return (
 		<form
