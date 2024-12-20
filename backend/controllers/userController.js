@@ -3,8 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 
-const createToken = (email) => {
-	return jwt.sign({ email }, process.env.JWT_SECRET);
+const createToken = (email, id) => {
+	return jwt.sign({ email, id }, process.env.JWT_SECRET);
 };
 
 // Route for user login
@@ -21,7 +21,7 @@ const loginUser = async (req, res) => {
 		const isMatch = await bcrypt.compare(password, user.password);
 
 		if (isMatch) {
-			const token = createToken(user.email);
+			const token = createToken(user.email, user._id);
 			res.json({
 				success: true,
 				token,
@@ -77,7 +77,7 @@ const registerUser = async (req, res) => {
 
 		const user = await newUser.save();
 
-		const token = createToken(email);
+		const token = createToken(email, user._id);
 
 		res.json({ success: true, token });
 	} catch (error) {
@@ -85,6 +85,35 @@ const registerUser = async (req, res) => {
 		res.json({ success: false, message: error.message });
 	}
 };
+
+const verifyToken = async (req, res) => {
+    try {
+        // Get the token from the Authorization header
+        const token = req.header('Authorization')?.replace('Bearer ', ''); // Remove 'Bearer ' part
+    
+        if (!token) {
+          return res.status(401).json({ success: false, message: 'No token provided.' });
+        }
+    
+        // Verify the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		console.log('decoded: ', decoded);
+    
+        // Find user by decoded token id
+        const user = await userModel.findById(decoded.id).select('-password'); // Exclude password field
+    
+        if (!user) {
+          return res.status(401).json({ success: false, message: 'User not found.' });
+        }
+    
+        // If token is valid and user is found, send the user data
+        res.status(200).json(user); // Send back user data
+      } catch (error) {
+        console.error(error);
+        return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
+      }
+}
+
 
 // Route for admin login
 const adminLogin = async (req, res) => {
@@ -106,4 +135,4 @@ const adminLogin = async (req, res) => {
 	}
 };
 
-export { loginUser, registerUser, adminLogin };
+export { loginUser, registerUser, adminLogin, verifyToken };

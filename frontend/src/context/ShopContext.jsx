@@ -128,7 +128,7 @@ const ShopContextProvider = (props) => {
 
 	const getUserCart = async (token) => {
 		try {
-			const response = await axios.get(backendUrl + "/api/cart/get", {
+			const response = await axios.post(backendUrl + "/api/cart/get", {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (response.data.success) {
