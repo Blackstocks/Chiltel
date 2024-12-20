@@ -45,7 +45,14 @@ const ProductList = () => {
     ];
   
     const data = type === "purchase" ? productsData : {};
-    const items = data.filter(prod=>prod.category==category) || [];
+    console.log('data: ', data);
+    // const items = data.filter(prod=>prod.category==category) || [];
+    const items = data.filter(prod => 
+      prod.category.toLowerCase().replace(/[-\s]/g, '') === category.toLowerCase().replace(/[-\s]/g, '')
+    ) || [];
+    
+    console.log('category: ', category);
+    console.log('items: ', items);
   
     const [filteredItems, setFilteredItems] = useState(items);
     const [filters, setFilters] = useState({

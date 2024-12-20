@@ -82,14 +82,13 @@ export const CartProvider = ({ children }) => {
       toast.info('Please log in to add this item into your cart.');
     }else{
       console.log('Item: ',item);
-      toast.success('Cart updated');
       try{
         const response = await axios.post(backendUrl + '/api/cart/add', {
           userId: user._id,
           itemId: item._id,
-          price: item.discountedPrice,
+          price: item.price * (1 - item.discount),
           name: item.name,
-          image: item.image,
+          image: item.thumbnail,
           category: item.category
         }, {
           headers: {
@@ -99,7 +98,9 @@ export const CartProvider = ({ children }) => {
         console.log('Add to cart: ', response.data);
         setCart(response.data.cart);
         console.log('cart is: ', response.data.cart);
+        toast.success('Cart updated');
       }catch(err){
+        toast.error('Something went wrong')
         console.error('Error while adding item to card: ', err);
       }
       console.log('user: ', user);

@@ -14,17 +14,57 @@ export const AuthProvider = ({ children }) => {
 
 	const navigate = useNavigate();
 
+	// const checkAuthStatus = async () => {
+	// 	setLoading(true);
+	// 	const token = localStorage.getItem("chiltel-user-token");
+	// 	if (!token) {
+	// 		setIsAuthenticated(false);
+	// 		setUser(null);
+	// 		setLoading(false);
+	// 		return;
+	// 	}
+	// };
+
 	const checkAuthStatus = async () => {
+		console.log('checking');
 		setLoading(true);
-		const token = localStorage.getItem("chiltel-user-token");
-		if (!token) {
-			setIsAuthenticated(false);
+		
+		try {
+		  const token = localStorage.getItem('token');	
+		  if (token) {
+			const response = await axios.get(backendUrl + '/api/user/verify', {
+			  headers: {
+				Authorization: `Bearer ${token}`,
+			  },
+			});
+	  
+			console.log('response: ', response);
+			if (response.status === 200) {
+			  // If the token is valid, store user data
+			  setUser(response.data); // assuming the user data is in response.data
+			  setIsAuthenticated(true);
+			} else {
+			  // If the token is invalid, remove it and reset auth state
+			  localStorage.removeItem('token');
+			  setUser(null);
+			  setIsAuthenticated(false);
+			}
+		  } else {
+			// If no token exists, reset auth state
 			setUser(null);
-			setLoading(false);
-			return;
+			setIsAuthenticated(false);
+		  }
+		} catch (error) {
+		  console.error('Error checking authentication status:', error);
+		  // Optionally, you could show a toast here to notify the user about the error.
+		  toast.error('Failed to check authentication. Please try again.');
+		} finally {
+		  setLoading(false); // Set loading to false once the check is done
 		}
-	};
+	  };
+
 	useEffect(() => {
+		console.log('useEffect triggered');
 		checkAuthStatus();
 	}, []);
 
@@ -38,6 +78,8 @@ export const AuthProvider = ({ children }) => {
 			if (response.status === 200) {
 				// Store the token and user data in local storage and state
 				localStorage.setItem("chiltel-user-token", response.data.token);
+				localStorage.setItem("token", response.data.token);
+				console.log('user: ', response.data);
 				setUser(response.data.user);
 				setIsAuthenticated(true);
 				toast.success("Logged in successfully");
