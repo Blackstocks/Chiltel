@@ -1,7 +1,7 @@
 // routes/serviceRequestRoutes.js
 import express from 'express';
-import { serviceRequestController } from '../controllers/serviceRequestController';
-import adminAuth from '../middleware/adminAuth';
+import { serviceRequestController } from '../controllers/serviceRequestController.js';
+import adminAuth from '../middleware/adminAuth.js';
 
 const serviceRequestRoutes = express.Router();
 
