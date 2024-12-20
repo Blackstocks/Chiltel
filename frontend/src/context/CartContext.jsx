@@ -84,12 +84,13 @@ export const CartProvider = ({ children }) => {
       console.log('Item: ',item);
       toast.success('Cart updated');
       try{
+        console.log('item: ', item);
         const response = await axios.post(backendUrl + '/api/cart/add', {
           userId: user._id,
           itemId: item._id,
-          price: item.discountedPrice,
+          price: item.price * (1 - item.discount),
           name: item.name,
-          image: item.image,
+          image: item.thumbnail,
           category: item.category
         }, {
           headers: {

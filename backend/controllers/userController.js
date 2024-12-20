@@ -109,7 +109,7 @@ const verifyToken = async (req, res) => {
         // If token is valid and user is found, send the user data
         res.status(200).json(user); // Send back user data
       } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
       }
 }
