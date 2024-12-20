@@ -1,5 +1,5 @@
 // controllers/serviceRequestController.js
-import ServiceRequest from '../models/ServiceRequestModel.js';
+import ServiceRequest from '../models/serviceRequestModel.js';
 import { ApiError } from '../utils/ApiError';
 
 export const serviceRequestController = {
