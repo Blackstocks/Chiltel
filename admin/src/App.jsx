@@ -35,6 +35,7 @@ const App = () => {
             <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
               <div className="w-full h-full">
                 <Routes>
+                <Route path="/" element={<Dashboard token={token} />} />
                   <Route path="/dashboard" element={<Dashboard token={token} />} />
                   <Route path="/products" element={<ProductsPage token={token} />} />
                   <Route path="/services" element={<ServicesManagement token={token} />} />

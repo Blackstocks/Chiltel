@@ -50,75 +50,7 @@ const ProductsPage = ({ token }) => {
     priceRange: "all",
   });
 
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Deep Freezer XL",
-      brand: "CoolTech",
-      model: "DF-500X",
-      category: "Deep Freezer",
-      discountedprice: 24999,
-      discount: 10,
-      rating: 4.5,
-      reviews: 128,
-      availability: true,
-      specifications: {
-        capacity: "500L",
-        starRating: "4",
-        powerConsumption: "2.5 kW/day",
-        cooling: "Direct Cooling",
-        ambientOperation: "16°C to 43°C",
-        waterproofRating: "IPX4"
-      },
-      features: ["Frost Free", "Digital Display"],
-      imageUrls: ["/images/freezer-1.jpg", "/images/freezer-2.jpg"],
-    },
-    {
-      id: 2,
-      name: "Visi-Cooler Pro",
-      brand: "FrostKing",
-      model: "VC-300",
-      category: "Visi-Cooler",
-      discounteddiscountedPrice: 18999,
-      discount: 5,
-      rating: 4.2,
-      reviews: 95,
-      availability: true,
-      specifications: {
-        capacity: "300L",
-        starRating: "3",
-        powerConsumption: "1.8 kW/day",
-        cooling: "Fan Cooling",
-        ambientOperation: "18°C to 40°C",
-        waterproofRating: "IPX3"
-      },
-      features: ["LED Lighting", "Adjustable Shelves"],
-      imageUrls: ["/images/cooler-1.jpg"],
-    },
-    {
-      id: 3,
-      name: "AC Supreme",
-      brand: "ChillMaster",
-      model: "AC-15S",
-      category: "AC",
-      discountedprice: 32999,
-      discount: 15,
-      rating: 4.8,
-      reviews: 256,
-      availability: false,
-      specifications: {
-        capacity: "1.5T",
-        starRating: "5",
-        powerConsumption: "1.2 kW/h",
-        cooling: "Inverter Cooling",
-        ambientOperation: "16°C to 50°C",
-        waterproofRating: "IPX5"
-      },
-      features: ["Inverter Technology", "Wi-Fi Enabled"],
-      imageUrls: ["/images/ac-1.jpg", "/images/ac-2.jpg"],
-    },
-  ]);
-
+  const [products, setProducts] = useState([]);
 
 
   const categories = ["all", ...new Set(products.map((p) => p.category))];
@@ -208,13 +140,6 @@ const ProductsPage = ({ token }) => {
     );
   });
 
-  // Calculate total pages based on filtered results
-  useEffect(() => {
-    setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
-    // Reset to first page when filters change
-    setCurrentPage(1);
-  }, [filteredProducts.length, itemsPerPage]);
-
   // Get paginated data
   const paginatedProducts = paginateProducts(filteredProducts);
 
@@ -233,6 +158,13 @@ const ProductsPage = ({ token }) => {
   useEffect(() => {
     fetchProducts();
   }, [currentPage, itemsPerPage]); // Re-fetch when page or items per page changes
+
+  // Calculate total pages based on filtered results
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [filteredProducts.length, itemsPerPage]);
 
   return (
     <div className="p-6">
@@ -342,13 +274,19 @@ const ProductsPage = ({ token }) => {
               {paginatedProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.mainCategory}</TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">{product.brand}</div>
                       <div className="text-sm text-gray-500">{product.model}</div>
                     </div>
                   </TableCell>
-                  <TableCell>{product.category}</TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{product.category}</div>
+                      <div className="text-sm text-gray-500">{product.type}</div>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">₹{product.discountedPrice}</div>
@@ -364,6 +302,7 @@ const ProductsPage = ({ token }) => {
                       <span className="text-sm text-gray-500 ml-1">({product.reviews})</span>
                     </div>
                   </TableCell>
+                  <TableCell className="font-medium">{product.inStock}</TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${

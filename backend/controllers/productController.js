@@ -1,4 +1,4 @@
-import Product from '../models/productModel.js'; // Path to your Product model
+import Product from "../models/productModel.js"; // Path to your Product model
 
 // Add Product Controller
 const addProduct = async (req, res) => {
@@ -8,6 +8,8 @@ const addProduct = async (req, res) => {
       name,
       brand,
       model,
+      mainCategory,
+      type,
       category,
       price,
       discount,
@@ -15,15 +17,60 @@ const addProduct = async (req, res) => {
       reviews,
       features,
       specifications,
+      inStock,
+      thumbnail,
       imageUrls,
-      availability,
     } = req.body;
 
-    // Input Validation (basic)
-    if (!name || !brand || !model || !category || !price) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Please provide all required fields: name, brand, model, category, and price.' });
+    // Input Validation
+    if (!name || !brand || !model || !category || !price || !thumbnail) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide all required fields: name, brand, model, category, price, and thumbnail.",
+      });
+    }
+
+    // Validate enum fields
+    const validMainCategories = ["Retail", "Domestic Appliance", "Kitchen"];
+    const validTypes = [
+      "water",
+      "cooling",
+      "heating",
+      "cooking",
+      "cleaning",
+      "display",
+    ];
+
+    if (mainCategory && !validMainCategories.includes(mainCategory)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid main category. Must be one of: Retail, Domestic Appliance, Kitchen",
+      });
+    }
+
+    if (type && !validTypes.includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid type. Must be one of: water, cooling, heating, cooking, cleaning, display",
+      });
+    }
+
+    // Validate numeric fields
+    if (discount && (discount < 0 || discount > 1)) {
+      return res.status(400).json({
+        success: false,
+        message: "Discount must be between 0 and 1",
+      });
+    }
+
+    if (rating && (rating < 0 || rating > 5)) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 0 and 5",
+      });
     }
 
     // Create a new product instance
@@ -31,15 +78,19 @@ const addProduct = async (req, res) => {
       name,
       brand,
       model,
+      mainCategory,
+      type,
       category,
       price,
-      discount,
-      rating,
-      reviews,
-      features,
-      specifications,
-      imageUrls,
-      availability,
+      discount: discount || 0,
+      rating: rating || 0,
+      reviews: reviews || 0,
+      features: features || [],
+      specifications: specifications || {},
+      inStock: inStock || 0,
+      thumbnail,
+      imageUrls: imageUrls || [],
+      createdAt: new Date(),
     });
 
     // Save product to the database
@@ -48,16 +99,25 @@ const addProduct = async (req, res) => {
     // Send success response
     res.status(201).json({
       success: true,
-      message: 'Product added successfully!',
+      message: "Product added successfully!",
       data: newProduct,
     });
   } catch (error) {
-    console.error('Error adding product:', error.message);
+    console.error("Error adding product:", error);
+
+    // Handle Mongoose validation errors
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Validation Error",
+        errors: Object.values(error.errors).map((err) => err.message),
+      });
+    }
 
     // Send error response
     res.status(500).json({
       success: false,
-      message: 'Internal Server Error. Could not add product.',
+      message: "Internal Server Error. Could not add product.",
       error: error.message,
     });
   }
@@ -70,7 +130,9 @@ const removeProduct = async (req, res) => {
 
     // Check if product ID is provided
     if (!id) {
-      return res.status(400).json({ success: false, message: 'Product ID is required.' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required." });
     }
 
     // Find and delete the product by ID
@@ -78,22 +140,24 @@ const removeProduct = async (req, res) => {
 
     // Check if product was found and deleted
     if (!deletedProduct) {
-      return res.status(404).json({ success: false, message: 'Product not found.' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found." });
     }
 
     // Send success response
     res.status(200).json({
       success: true,
-      message: 'Product removed successfully!',
+      message: "Product removed successfully!",
       data: deletedProduct,
     });
   } catch (error) {
-    console.error('Error removing product:', error.message);
+    console.error("Error removing product:", error.message);
 
     // Send error response
     res.status(500).json({
       success: false,
-      message: 'Internal Server Error. Could not remove product.',
+      message: "Internal Server Error. Could not remove product.",
       error: error.message,
     });
   }
@@ -106,7 +170,9 @@ const getProduct = async (req, res) => {
 
     // Check if product ID is provided
     if (!id) {
-      return res.status(400).json({ success: false, message: 'Product ID is required.' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required." });
     }
 
     // Find the product by ID
@@ -114,22 +180,24 @@ const getProduct = async (req, res) => {
 
     // Check if product was found
     if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found.' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found." });
     }
 
     // Send success response
     res.status(200).json({
       success: true,
-      message: 'Product retrieved successfully!',
+      message: "Product retrieved successfully!",
       data: product,
     });
   } catch (error) {
-    console.error('Error retrieving product:', error.message);
+    console.error("Error retrieving product:", error.message);
 
     // Send error response
     res.status(500).json({
       success: false,
-      message: 'Internal Server Error. Could not retrieve product.',
+      message: "Internal Server Error. Could not retrieve product.",
       error: error.message,
     });
   }
@@ -144,33 +212,19 @@ const listProducts = async (req, res) => {
     // Send success response
     res.status(200).json({
       success: true,
-      message: 'Products retrieved successfully!',
+      message: "Products retrieved successfully!",
       data: products,
     });
   } catch (error) {
-    console.error('Error retrieving products:', error.message);
+    console.error("Error retrieving products:", error.message);
 
     // Send error response
     res.status(500).json({
       success: false,
-      message: 'Internal Server Error. Could not retrieve products.',
+      message: "Internal Server Error. Could not retrieve products.",
       error: error.message,
     });
   }
 };
-
-// const getAllProducts = async (req, res) => {
-//   try{
-//       const products = await Product.find();
-      
-//   }catch(error){
-//     console.error('Error fetching all products: ', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Internal Server Error. Could not fetch all products.',
-//       error: error.message
-//     });
-//   }
-// }
 
 export { addProduct, removeProduct, getProduct, listProducts };

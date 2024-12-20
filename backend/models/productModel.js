@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { productEnums } from "../constants";
+import { productEnums } from "../constants/index.js";
 
 const productSchema = new mongoose.Schema({
 	name: {
