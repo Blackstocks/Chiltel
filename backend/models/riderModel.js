@@ -2,7 +2,8 @@
 import mongoose from "mongoose";
 
 const riderSchema = {
-	name: String,
+	firstName: String,
+	lastName: String,
 	email: { type: String, unique: true },
 	password: String,
 	phoneNumber: String,
@@ -34,7 +35,6 @@ const riderSchema = {
 		},
 		coordinates: {
 			type: [Number], // [longitude, latitude]
-			required: true,
 		},
 	},
 };
