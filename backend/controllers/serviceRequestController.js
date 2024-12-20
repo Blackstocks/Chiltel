@@ -1,6 +1,5 @@
 // controllers/serviceRequestController.js
 import ServiceRequest from '../models/serviceRequestModel.js';
-import { ApiError } from '../utils/ApiError';
 
 export const serviceRequestController = {
   // Create a new service request
@@ -32,7 +31,11 @@ export const serviceRequestController = {
         data: serviceRequest
       });
     } catch (error) {
-      throw new ApiError(400, 'Failed to create service request', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create service request',
+        error: error.message
+      });
     }
   },
 
@@ -73,7 +76,11 @@ export const serviceRequestController = {
         data: serviceRequests
       });
     } catch (error) {
-      throw new ApiError(400, 'Failed to fetch service requests', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch service requests',
+        error: error.message
+      });
     }
   },
 
@@ -88,7 +95,10 @@ export const serviceRequestController = {
         .populate('rider', 'name phone');
 
       if (!serviceRequest) {
-        throw new ApiError(404, 'Service request not found');
+        return res.status(404).json({
+          success: false,
+          message: 'Service request not found'
+        });
       }
 
       res.status(200).json({
@@ -96,7 +106,11 @@ export const serviceRequestController = {
         data: serviceRequest
       });
     } catch (error) {
-      throw new ApiError(400, 'Failed to fetch service request', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch service request',
+        error: error.message
+      });
     }
   },
 
@@ -121,7 +135,10 @@ export const serviceRequestController = {
       );
 
       if (!serviceRequest) {
-        throw new ApiError(404, 'Service request not found');
+        return res.status(404).json({
+          success: false,
+          message: 'Service request not found'
+        });
       }
 
       res.status(200).json({
@@ -130,7 +147,11 @@ export const serviceRequestController = {
         data: serviceRequest
       });
     } catch (error) {
-      throw new ApiError(400, 'Failed to update service request', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update service request',
+        error: error.message
+      });
     }
   },
 
@@ -151,7 +172,10 @@ export const serviceRequestController = {
       );
 
       if (!serviceRequest) {
-        throw new ApiError(404, 'Service request not found');
+        return res.status(404).json({
+          success: false,
+          message: 'Service request not found'
+        });
       }
 
       res.status(200).json({
@@ -160,7 +184,11 @@ export const serviceRequestController = {
         data: serviceRequest
       });
     } catch (error) {
-      throw new ApiError(400, 'Failed to assign rider', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to assign rider',
+        error: error.message
+      });
     }
   },
 
@@ -184,7 +212,10 @@ export const serviceRequestController = {
       );
 
       if (!serviceRequest) {
-        throw new ApiError(404, 'Service request not found');
+        return res.status(404).json({
+          success: false,
+          message: 'Service request not found'
+        });
       }
 
       res.status(200).json({
@@ -193,7 +224,11 @@ export const serviceRequestController = {
         data: serviceRequest
       });
     } catch (error) {
-      throw new ApiError(400, 'Failed to update payment status', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update payment status',
+        error: error.message
+      });
     }
   },
 
@@ -214,7 +249,10 @@ export const serviceRequestController = {
       );
 
       if (!serviceRequest) {
-        throw new ApiError(404, 'Service request not found');
+        return res.status(404).json({
+          success: false,
+          message: 'Service request not found'
+        });
       }
 
       res.status(200).json({
@@ -223,7 +261,11 @@ export const serviceRequestController = {
         data: serviceRequest
       });
     } catch (error) {
-      throw new ApiError(400, 'Failed to cancel service request', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to cancel service request',
+        error: error.message
+      });
     }
   }
 };
