@@ -86,7 +86,7 @@ export const CartProvider = ({ children }) => {
         const response = await axios.post(backendUrl + '/api/cart/add', {
           userId: user._id,
           itemId: item._id,
-          price: item.price * (1 - item.discount),
+          price: parseFloat((item.price * (1 - item.discount)).toFixed(2)),
           name: item.name,
           image: item.thumbnail,
           category: item.category

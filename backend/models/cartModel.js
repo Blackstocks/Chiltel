@@ -48,12 +48,23 @@ const cartSchema = new mongoose.Schema(
 );
 
 // Calculate total amount before saving
+// cartSchema.pre("save", function (next) {
+// 	this.totalAmount = this.items.reduce((total, item) => {
+// 		return total + item.price * item.quantity;
+// 	}, 0);
+// 	next();
+// });
+
 cartSchema.pre("save", function (next) {
-	this.totalAmount = this.items.reduce((total, item) => {
-		return total + item.price * item.quantity;
-	}, 0);
+	// Calculate total amount and round to two decimal places
+	this.totalAmount = parseInt(
+		this.items.reduce((total, item) => {
+			return total + item.price * item.quantity;
+		}, 0)
+	);
 	next();
 });
+
 
 const Cart = mongoose.model("Cart", cartSchema);
 export default Cart;
