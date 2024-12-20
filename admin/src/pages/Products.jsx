@@ -262,10 +262,12 @@ const ProductsPage = ({ token }) => {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Main Category</TableHead>
                 <TableHead>Brand/Model</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead>Category/Type</TableHead>
                 <TableHead>price</TableHead>
                 <TableHead>Rating</TableHead>
+                <TableHead>InStock</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -289,9 +291,9 @@ const ProductsPage = ({ token }) => {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">₹{product.discountedPrice}</div>
+                      <div className="font-medium">₹{(product.price*(1-product.discount)).toFixed(2)}</div>
                       {product.discount > 0 && (
-                        <div className="text-sm text-green-600">-{product.discount}% off</div>
+                        <div className="text-sm text-green-600">-{(product.discount*100).toFixed(2)}% off</div>
                       )}
                     </div>
                   </TableCell>

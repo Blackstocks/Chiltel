@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import {
   Table,
   TableBody,
@@ -30,183 +32,279 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Pencil, Trash2, Settings } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
 
-const ServicesManagement = () => {
+// Product types and categories based on schema
+const PRODUCT_TYPES = [
+  "Air Conditioner",
+  "Refrigerator",
+  "Microwave",
+  "Water Heater",
+  "Washing Machine"
+];
+
+const CATEGORIES = ["Installation", "Service", "Repair"];
+
+const ServicesManagement = ({ token }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [services, setServices] = useState([]);
+
   const [newService, setNewService] = useState({
     name: "",
-    category: "",
-    price: "",
-    duration: "",
     description: "",
-    status: "active"
+    price: "",
+    discount: 0,
+    product: "",
+    category: "",
+    estimatedDuration: "",
+    isAvailable: true,
+    requirements: []
   });
-
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      name: "AC Installation",
-      category: "Air Conditioner",
-      price: 1500,
-      duration: "2-3 hours",
-      description: "Professional AC installation service including mounting, piping, and testing",
-      status: "active",
-      techniciansRequired: 2
-    },
-    {
-      id: 2,
-      name: "Refrigerator Repair",
-      category: "Refrigerator",
-      price: 800,
-      duration: "1-2 hours",
-      description: "Diagnostic and repair service for all types of refrigerator issues",
-      status: "active",
-      techniciansRequired: 1
-    },
-    {
-      id: 3,
-      name: "Microwave Service",
-      category: "Microwave",
-      price: 500,
-      duration: "1 hour",
-      description: "Complete microwave servicing and repair",
-      status: "inactive",
-      techniciansRequired: 1
-    }
-  ]);
 
   const [filters, setFilters] = useState({
+    product: "all",
     category: "all",
-    status: "all",
-    priceRange: "all"
+    availability: "all"
   });
 
-  const handleAddService = () => {
-    setServices([...services, { ...newService, id: services.length + 1 }]);
-    setNewService({
-      name: "",
-      category: "",
-      price: "",
-      duration: "",
-      description: "",
-      status: "active"
-    });
-    setIsAddDialogOpen(false);
-  };
-
-  const handleEditService = () => {
-    setServices(services.map(service => 
-      service.id === editingService.id ? editingService : service
-    ));
-    setIsEditDialogOpen(false);
-    setEditingService(null);
-  };
-
-  const handleDeleteService = (id) => {
-    setServices(services.filter(service => service.id !== id));
-  };
-
-  const ServiceForm = ({ isEdit, data, onSave, onCancel }) => (
-    <div className="space-y-4">
-      <Input
-        placeholder="Service Name"
-        value={isEdit ? editingService.name : newService.name}
-        onChange={(e) => isEdit 
-          ? setEditingService({...editingService, name: e.target.value})
-          : setNewService({...newService, name: e.target.value})
+  // Fetch services from backend
+  const fetchServices = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/services`,
+        {
+          headers: { token }
         }
-      />
+      );
+      console.log('Services fetched:', response.data);
+      setServices(Array.isArray(response.data.data) ? response.data.data : response.data.data.services || []);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      toast.error('Failed to fetch services');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, [token]);
+
+  const handleRequirementsChange = (value, isEdit) => {
+    const requirementsArray = value.split(',').map(item => item.trim()).filter(Boolean);
+    if (isEdit) {
+      setEditingService({...editingService, requirements: requirementsArray});
+    } else {
+      setNewService({...newService, requirements: requirementsArray});
+    }
+  };
+
+  const handleAddService = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/services`,
+        {
+          ...newService,
+          price: Number(newService.price),
+          discount: Number(newService.discount)
+        },
+        {
+          headers: { token }
+        }
+      );
+
+      setServices(prev => [...prev, response.data]);
+      setNewService({
+        name: "",
+        description: "",
+        price: "",
+        discount: 0,
+        product: "",
+        category: "",
+        estimatedDuration: "",
+        isAvailable: true,
+        requirements: []
+      });
+      setIsAddDialogOpen(false);
+      toast.success('Service added successfully');
+    } catch (error) {
+      console.error('Error adding service:', error);
+      toast.error('Failed to add service');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditService = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/services/${editingService._id}`,
+        {
+          ...editingService,
+          price: Number(editingService.price),
+          discount: Number(editingService.discount)
+        },
+        {
+          headers: { token }
+        }
+      );
+
+      setServices(prev => 
+        prev.map(service => 
+          service._id === editingService._id ? response.data : service
+        )
+      );
+      setIsEditDialogOpen(false);
+      setEditingService(null);
+      toast.success('Service updated successfully');
+    } catch (error) {
+      console.error('Error updating service:', error);
+      toast.error('Failed to update service');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteService = async (id) => {
+    try {
+      setIsLoading(true);
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/services/${id}`,
+        {
+          headers: { token }
+        }
+      );
       
-      <Select
-        value={isEdit ? editingService.category : newService.category}
-        onValueChange={(value) => isEdit
-          ? setEditingService({...editingService, category: value})
-          : setNewService({...newService, category: value})
-        }
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Category" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Air Conditioner">Air Conditioner</SelectItem>
-          <SelectItem value="Refrigerator">Refrigerator</SelectItem>
-          <SelectItem value="Microwave">Microwave</SelectItem>
-          <SelectItem value="Water Heater">Water Heater</SelectItem>
-          <SelectItem value="Washing Machine">Washing Machine</SelectItem>
-        </SelectContent>
-      </Select>
+      setServices(prev => prev.filter(service => service._id !== id));
+      toast.success('Service deleted successfully');
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error('Failed to delete service');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      <Input
-        type="number"
-        placeholder="Price"
-        value={isEdit ? editingService.price : newService.price}
-        onChange={(e) => isEdit
-          ? setEditingService({...editingService, price: e.target.value})
-          : setNewService({...newService, price: e.target.value})
-        }
-      />
+  const ServiceForm = ({ isEdit, onSave, onCancel }) => {
+    const currentService = isEdit ? editingService : newService;
+    const setCurrentService = isEdit ? setEditingService : setNewService;
 
-      <Input
-        placeholder="Duration (e.g., 2-3 hours)"
-        value={isEdit ? editingService.duration : newService.duration}
-        onChange={(e) => isEdit
-          ? setEditingService({...editingService, duration: e.target.value})
-          : setNewService({...newService, duration: e.target.value})
-        }
-      />
+    return (
+      <div className="space-y-4">
+        <Input
+          placeholder="Service Name"
+          value={currentService.name}
+          onChange={(e) => setCurrentService({...currentService, name: e.target.value})}
+        />
+        
+        <Textarea
+          placeholder="Service Description"
+          value={currentService.description}
+          onChange={(e) => setCurrentService({...currentService, description: e.target.value})}
+        />
 
-      <Textarea
-        placeholder="Service Description"
-        value={isEdit ? editingService.description : newService.description}
-        onChange={(e) => isEdit
-          ? setEditingService({...editingService, description: e.target.value})
-          : setNewService({...newService, description: e.target.value})
-        }
-      />
+        <div className="flex space-x-4">
+          <Input
+            type="number"
+            placeholder="Price"
+            value={currentService.price}
+            onChange={(e) => setCurrentService({...currentService, price: Number(e.target.value)})}
+            className="flex-1"
+          />
+          <Input
+            type="number"
+            placeholder="Discount"
+            value={currentService.discount}
+            onChange={(e) => setCurrentService({...currentService, discount: Number(e.target.value)})}
+            className="flex-1"
+          />
+        </div>
 
-      <Select
-        value={isEdit ? editingService.status : newService.status}
-        onValueChange={(value) => isEdit
-          ? setEditingService({...editingService, status: value})
-          : setNewService({...newService, status: value})
-        }
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="inactive">Inactive</SelectItem>
-        </SelectContent>
-      </Select>
+        <Select
+          value={currentService.product}
+          onValueChange={(value) => setCurrentService({...currentService, product: value})}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Product" />
+          </SelectTrigger>
+          <SelectContent>
+            {PRODUCT_TYPES.map((product) => (
+              <SelectItem key={product} value={product}>{product}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <div className="flex space-x-3 pt-4">
-        <Button onClick={onSave} className="flex-1">
-          {isEdit ? "Update Service" : "Add Service"}
-        </Button>
-        <Button onClick={onCancel} variant="outline" className="flex-1">
-          Cancel
-        </Button>
+        <Select
+          value={currentService.category}
+          onValueChange={(value) => setCurrentService({...currentService, category: value})}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Category" />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((category) => (
+              <SelectItem key={category} value={category}>{category}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Input
+          placeholder="Estimated Duration (e.g., 2-3 hours)"
+          value={currentService.estimatedDuration}
+          onChange={(e) => setCurrentService({...currentService, estimatedDuration: e.target.value})}
+        />
+
+        <Textarea
+          placeholder="Requirements (comma-separated)"
+          value={currentService.requirements.join(', ')}
+          onChange={(e) => handleRequirementsChange(e.target.value, isEdit)}
+        />
+
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={currentService.isAvailable}
+            onChange={(e) => setCurrentService({...currentService, isAvailable: e.target.checked})}
+            className="rounded border-gray-300"
+          />
+          <label>Available</label>
+        </div>
+
+        <div className="flex space-x-3 pt-4">
+          <Button onClick={onSave} className="flex-1" disabled={isLoading}>
+            {isEdit ? "Update Service" : "Add Service"}
+          </Button>
+          <Button onClick={onCancel} variant="outline" className="flex-1" disabled={isLoading}>
+            Cancel
+          </Button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const filteredServices = services.filter(service => {
     const matchesSearch = 
       service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.category.toLowerCase().includes(searchTerm.toLowerCase());
+      service.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesProduct = 
+      filters.product === "all" || service.product === filters.product;
 
     const matchesCategory = 
       filters.category === "all" || service.category === filters.category;
 
-    const matchesStatus = 
-      filters.status === "all" || service.status === filters.status;
+    const matchesAvailability = 
+      filters.availability === "all" || 
+      (filters.availability === "available" ? service.isAvailable : !service.isAvailable);
 
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesProduct && matchesCategory && matchesAvailability;
   });
 
   return (
@@ -245,8 +343,22 @@ const ServicesManagement = () => {
           </div>
         </CardHeader>
 
-        {/* Filters */}
         <div className="px-6 py-4 border-b flex space-x-4">
+          <Select
+            value={filters.product}
+            onValueChange={(value) => setFilters({...filters, product: value})}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Product" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Products</SelectItem>
+              {PRODUCT_TYPES.map((product) => (
+                <SelectItem key={product} value={product}>{product}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <Select
             value={filters.category}
             onValueChange={(value) => setFilters({...filters, category: value})}
@@ -256,25 +368,23 @@ const ServicesManagement = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Air Conditioner">Air Conditioner</SelectItem>
-              <SelectItem value="Refrigerator">Refrigerator</SelectItem>
-              <SelectItem value="Microwave">Microwave</SelectItem>
-              <SelectItem value="Water Heater">Water Heater</SelectItem>
-              <SelectItem value="Washing Machine">Washing Machine</SelectItem>
+              {CATEGORIES.map((category) => (
+                <SelectItem key={category} value={category}>{category}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
           <Select
-            value={filters.status}
-            onValueChange={(value) => setFilters({...filters, status: value})}
+            value={filters.availability}
+            onValueChange={(value) => setFilters({...filters, availability: value})}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Availability" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="unavailable">Unavailable</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -284,6 +394,7 @@ const ServicesManagement = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Service Name</TableHead>
+                <TableHead>Product</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Duration</TableHead>
@@ -292,48 +403,69 @@ const ServicesManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredServices.map((service) => (
-                <TableRow key={service.id}>
-                  <TableCell className="font-medium">{service.name}</TableCell>
-                  <TableCell>{service.category}</TableCell>
-                  <TableCell>₹{service.price.toLocaleString()}</TableCell>
-                  <TableCell>{service.duration}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      service.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {service.status === 'active' ? 'Active' : 'Inactive'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          setEditingService(service);
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleDeleteService(service.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4">
+                    Loading services...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredServices.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4">
+                    No services found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredServices.map((service) => (
+                  <TableRow key={service._id}>
+                    <TableCell className="font-medium">{service.name}</TableCell>
+                    <TableCell>{service.product}</TableCell>
+                    <TableCell>{service.category}</TableCell>
+                    <TableCell>
+                      ₹{service.price?.toLocaleString()}
+                      {service.discount > 0 && (
+                        <span className="text-green-600 text-sm ml-2">
+                          (-₹{service.discount})
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>{service.estimatedDuration}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        service.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {service.isAvailable ? 'Available' : 'Unavailable'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setEditingService(service);
+                            setIsEditDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteService(service._id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -342,7 +474,6 @@ const ServicesManagement = () => {
           {editingService && (
             <ServiceForm
               isEdit={true}
-              data={editingService}
               onSave={handleEditService}
               onCancel={() => setIsEditDialogOpen(false)}
             />

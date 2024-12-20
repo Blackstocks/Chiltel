@@ -1,10 +1,25 @@
-// controllers/employeeController.js
-import Employee from '../models/employeeModel.js';
+// controllers/ridersController.js
+import Rider from '../models/riderModel.js';
 
-// Add new employee
-const addEmployee = async (req, res) => {
+// Add new rider
+const addRider = async (req, res) => {
   try {
-    const { name, role, specialization, phone, email, joiningDate } = req.body;
+    const { 
+      name, 
+      email, 
+      password, 
+      phoneNumber, 
+      specialization,
+      location 
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !password || !phoneNumber || !specialization || !location) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required: name, email, password, phoneNumber, specialization, and location'
+      });
+    }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,62 +30,102 @@ const addEmployee = async (req, res) => {
       });
     }
 
-    // Check if employee with email already exists
-    const existingEmployee = await Employee.findOne({ email });
-    if (existingEmployee) {
+    // Validate specialization enum
+    const validSpecializations = ["AC", "Cooler", "Microwave"];
+    if (!validSpecializations.includes(specialization)) {
       return res.status(400).json({
         success: false,
-        message: 'Employee with this email already exists'
+        message: 'Invalid specialization. Must be one of: AC, Cooler, Microwave'
       });
     }
 
-    const employee = new Employee({
+    // Validate location format
+    if (!location.coordinates || 
+        !Array.isArray(location.coordinates) || 
+        location.coordinates.length !== 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'Location must include coordinates [longitude, latitude]'
+      });
+    }
+
+    // Check if rider with email already exists
+    const existingRider = await Rider.findOne({ email });
+    if (existingRider) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rider with this email already exists'
+      });
+    }
+
+    // Create new rider
+    const rider = new Rider({
       name,
-      role,
-      specialization,
-      phone,
       email,
-      joiningDate: new Date(joiningDate)
+      password, // Note: You should hash this password before saving
+      phoneNumber,
+      specialization,
+      status: "OFFLINE", // default status
+      assignedServices: [], // initialize empty
+      rating: {
+        average: 0,
+        count: 0
+      },
+      location: {
+        type: "Point",
+        coordinates: location.coordinates
+      }
     });
 
-    await employee.save();
+    await rider.save();
 
     res.status(201).json({
       success: true,
-      message: 'Employee added successfully',
-      data: employee
+      message: 'Rider added successfully',
+      data: rider
     });
   } catch (error) {
+    console.error('Error adding rider:', error);
+    
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation Error',
+        errors: Object.values(error.errors).map(err => err.message)
+      });
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Error adding employee',
+      message: 'Error adding rider',
       error: error.message
     });
   }
 };
 
 // Get all employees
-const getAllEmployees = async (req, res) => {
+const getAllRiders = async (req, res) => {
   try {
-    const employees = await Employee.find()
+    const riders = await Rider.find()
       .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      count: employees.length,
-      data: employees
+      count: riders.length,
+      data: riders
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching employees',
+      message: 'Error fetching riders',
       error: error.message
     });
   }
 };
 
 // Get single employee
-const getEmployeeById = async (req, res) => {
+const getRiderById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     
@@ -95,7 +150,7 @@ const getEmployeeById = async (req, res) => {
 };
 
 // Update employee
-const updateEmployee = async (req, res) => {
+const updateRider = async (req, res) => {
   try {
     const { name, role, specialization, phone, email, joiningDate } = req.body;
 
@@ -157,7 +212,7 @@ const updateEmployee = async (req, res) => {
 };
 
 // Delete employee
-const deleteEmployee = async (req, res) => {
+const deleteRider = async (req, res) => {
   try {
     const employee = await Employee.findByIdAndDelete(req.params.id);
 
@@ -181,4 +236,4 @@ const deleteEmployee = async (req, res) => {
   }
 };
 
-export { addEmployee, getAllEmployees, getEmployeeById, updateEmployee, deleteEmployee };
+export { addRider, getAllRiders, getRiderById, updateRider, deleteRider };

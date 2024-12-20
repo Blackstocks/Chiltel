@@ -7,7 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Dashboard from './pages/Dashboard';
 import ProductsPage from './pages/Products';
-import EmployeeManagement from './pages/Employee';
+import RiderManagement from './pages/Riders';
 import ServicesManagement from './pages/Services';
 import OrderManagement from './pages/Orders';
 
@@ -32,14 +32,14 @@ const App = () => {
           <hr className="border-gray-200" />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar />
-            <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
+            <main className="flex-1 overflow-y-auto p-4 pt-0 bg-gray-50">
               <div className="w-full h-full">
                 <Routes>
-                <Route path="/" element={<Dashboard token={token} />} />
+                  <Route path="/" element={<Dashboard token={token} />} />
                   <Route path="/dashboard" element={<Dashboard token={token} />} />
                   <Route path="/products" element={<ProductsPage token={token} />} />
                   <Route path="/services" element={<ServicesManagement token={token} />} />
-                  <Route path="/employees" element={<EmployeeManagement token={token} />} />
+                  <Route path="/riders" element={<RiderManagement token={token} />} />
                   <Route path="/orders" element={<OrderManagement token={token} />} />
                 </Routes>
               </div>
