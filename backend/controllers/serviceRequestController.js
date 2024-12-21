@@ -5,6 +5,7 @@ export const serviceRequestController = {
   // Create a new service request
   createServiceRequest: async (req, res) => {
     try {
+      console.log(req.body);
       const {
         user,
         service,
