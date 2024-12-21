@@ -6,16 +6,16 @@ import adminAuth from '../middleware/adminAuth.js';
 const serviceRequestRoutes = express.Router();
 
 // Public routes
-serviceRequestRoutes.get('/service-requests/:id', serviceRequestController.getServiceRequestById);
+serviceRequestRoutes.get('/:id', serviceRequestController.getServiceRequestById);
 
 // Protected routes (require authentication)
-serviceRequestRoutes.post('/service-requests', serviceRequestController.createServiceRequest);
-serviceRequestRoutes.put('/service-requests/:id', serviceRequestController.updateServiceRequest);
-serviceRequestRoutes.delete('/service-requests/:id', serviceRequestController.cancelServiceRequest);
+serviceRequestRoutes.post('/', serviceRequestController.createServiceRequest);
+serviceRequestRoutes.put('/:id', serviceRequestController.updateServiceRequest);
+serviceRequestRoutes.delete('/:id', serviceRequestController.cancelServiceRequest);
 
 // Admin only routes
-serviceRequestRoutes.get('/service-requests',adminAuth, serviceRequestController.getAllServiceRequests);
-serviceRequestRoutes.post('/service-requests/:id/assign-rider',adminAuth, serviceRequestController.assignRider);
-serviceRequestRoutes.put('/service-requests/:id/payment',adminAuth, serviceRequestController.updatePaymentStatus);
+serviceRequestRoutes.get('/',adminAuth, serviceRequestController.getAllServiceRequests);
+serviceRequestRoutes.post('/:id/assign-rider',adminAuth, serviceRequestController.assignRider);
+serviceRequestRoutes.put('/:id/payment',adminAuth, serviceRequestController.updatePaymentStatus);
 
 export default serviceRequestRoutes;

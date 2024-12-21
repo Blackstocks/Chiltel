@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const serviceRequestSchema = {
 	user: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: "User",
+		ref: "userModel",
 		required: true,
 	},
 	service: {

@@ -30,9 +30,10 @@ const userSchema = new mongoose.Schema(
 	{ minimize: false }
 );
 
-const userModel = mongoose.models.user || mongoose.model("user", userSchema);
+const userModel = mongoose.models.userModel || mongoose.model("userModel", userSchema);
 
 export default userModel;
+
 userSchema.pre("save", async function (next) {
 	if (this.isNew) {
 		const cart = new Cart({ userId: this._id });
