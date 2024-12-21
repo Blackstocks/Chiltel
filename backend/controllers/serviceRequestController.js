@@ -5,8 +5,15 @@ export const serviceRequestController = {
   // Create a new service request
   createServiceRequest: async (req, res) => {
     try {
-      const { user, service, userLocation, scheduledFor, price, remarks } =
-        req.body;
+      console.log(req.body);
+      const {
+        user,
+        service,
+        userLocation,
+        scheduledFor,
+        price,
+        remarks
+      } = req.body;
 
       const serviceRequest = new ServiceRequest({
         user,

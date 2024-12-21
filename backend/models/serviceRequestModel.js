@@ -7,9 +7,10 @@ const serviceRequestSchema = {
 		required: true,
 	},
 	service: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "Service",
-		required: true,
+		// type: mongoose.Schema.Types.ObjectId,
+		// ref: "Service",
+		// required: true,
+		type: Number
 	},
 	rider: {
 		type: mongoose.Schema.Types.ObjectId,
