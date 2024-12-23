@@ -26,7 +26,7 @@ const placeOrder = async (req,res) => {
             userId,
             products,
             totalAmount,
-            status: "PENDING",
+            status: "ORDERED",
             paymentDetails,
             address,
             createdAt: new Date(),
@@ -222,6 +222,10 @@ const userOrders = async (req,res) => {
         const { userId } = req.body
 
         const orders = await orderModel.find({ userId })
+        .populate({
+            path: 'products.product', // Path to populate
+            model: 'Product', // Model to populate from
+        });
         res.json({success:true,orders})
 
     } catch (error) {
