@@ -16,13 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +29,6 @@ const RiderManagement = ({ token }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
 
   const emptyRider = {
     name: "",
@@ -79,76 +71,31 @@ const RiderManagement = ({ token }) => {
 
   // Add rider
   const handleAddRider = async () => {
-    console.log("Submitting rider data:", newRider); // Add this
-
-    const validationErrors = validateForm(newRider);
-
-    if (Object.keys(validationErrors).length > 0) {
-      console.log("Validation errors:", validationErrors); // Add this
-      setErrors(validationErrors);
-      return;
-    }
     try {
       setSubmitting(true);
-
-      // Format the data before sending
-      const riderData = {
-        ...newRider,
-        location: {
-          type: "Point",
-          coordinates: [
-            parseFloat(newRider.location.coordinates[0]),
-            parseFloat(newRider.location.coordinates[1]),
-          ],
-        },
-      };
-
-      console.log("Sending data to server:", riderData); // Add this
-
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/riders/add`,
-        riderData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            token: token,
-          },
-        }
-      );
-
-      console.log("Server response:", response.data); // Add this
-
-      if (response.data.success) {
-        setRiders([...riders, response.data.data]);
-        setNewRider(emptyRider);
-        setIsAddDialogOpen(false);
-        toast.success("Rider added successfully");
-      } else {
-        toast.error(response.data.message || "Failed to add rider");
-      }
+      const signupLink = `${import.meta.env.VITE_BACKEND_URL}/rider/signup`;
+      
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/send-email`, {
+        to: newRider.email,
+        subject: "Invitation to Join as Rider",
+        html: `
+          <h2>Welcome to Our Platform!</h2>
+          <p>You've been invited to join as a rider. Click the link below to complete your registration:</p>
+          <a href="${signupLink}">Complete Registration</a>
+        `
+      }, {
+        headers: { token }
+      });
+   
+      toast.success('Invitation sent successfully');
+      setIsAddDialogOpen(false);
+      setNewRider({ email: '' });
     } catch (error) {
-      console.error("Detailed error:", error); // More detailed error logging
-
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error("Response data:", error.response.data);
-        console.error("Response status:", error.response.status);
-        toast.error(error.response.data.message || "Server error occurred");
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error("No response received:", error.request);
-        toast.error("No response from server");
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error("Error setting up request:", error.message);
-        toast.error("Error setting up request");
-      }
+      toast.error(error.response?.data?.message || 'Failed to send invitation');
     } finally {
       setSubmitting(false);
     }
-  };
-
+   };
   // Edit employee
   const handleEditClick = (rider) => {
     setEditingRider({ ...rider });
@@ -294,17 +241,9 @@ const RiderManagement = ({ token }) => {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add New Rider</DialogTitle>
+                  <DialogTitle>Send Rider Invitation</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <Input
-                    placeholder="Name"
-                    value={newRider.name}
-                    onChange={(e) =>
-                      setNewRider({ ...newRider, name: e.target.value })
-                    }
-                  />
-
                   <Input
                     placeholder="Email"
                     type="email"
@@ -314,76 +253,6 @@ const RiderManagement = ({ token }) => {
                     }
                   />
 
-                  <Input
-                    placeholder="Password"
-                    type="password"
-                    value={newRider.password}
-                    onChange={(e) =>
-                      setNewRider({ ...newRider, password: e.target.value })
-                    }
-                  />
-
-                  <Input
-                    placeholder="Phone Number"
-                    value={newRider.phoneNumber}
-                    onChange={(e) =>
-                      setNewRider({ ...newRider, phoneNumber: e.target.value })
-                    }
-                  />
-
-                  <Select
-                    value={newRider.specialization}
-                    onValueChange={(value) =>
-                      setNewRider({ ...newRider, specialization: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select specialization" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="AC">AC</SelectItem>
-                      <SelectItem value="Cooler">Cooler</SelectItem>
-                      <SelectItem value="Microwave">Microwave</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      placeholder="Longitude"
-                      type="number"
-                      value={newRider.location?.coordinates[0] || ""}
-                      onChange={(e) =>
-                        setNewRider({
-                          ...newRider,
-                          location: {
-                            type: "Point",
-                            coordinates: [
-                              parseFloat(e.target.value),
-                              newRider.location?.coordinates[1] || 0,
-                            ],
-                          },
-                        })
-                      }
-                    />
-                    <Input
-                      placeholder="Latitude"
-                      type="number"
-                      value={newRider.location?.coordinates[1] || ""}
-                      onChange={(e) =>
-                        setNewRider({
-                          ...newRider,
-                          location: {
-                            type: "Point",
-                            coordinates: [
-                              newRider.location?.coordinates[0] || 0,
-                              parseFloat(e.target.value),
-                            ],
-                          },
-                        })
-                      }
-                    />
-                  </div>
-
                   <Button
                     className="w-full"
                     onClick={handleAddRider}
@@ -392,10 +261,10 @@ const RiderManagement = ({ token }) => {
                     {submitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Adding...
+                        Sending Invitation...
                       </>
                     ) : (
-                      "Add Rider"
+                      "Send Invitation"
                     )}
                   </Button>
                 </div>
@@ -424,7 +293,7 @@ const RiderManagement = ({ token }) => {
               <TableBody>
                 {filteredRiders.map((rider) => (
                   <TableRow key={rider._id}>
-                    <TableCell className="font-medium">{rider.name}</TableCell>
+                    <TableCell className="font-medium">{rider.firstName+" "+rider.lastName}</TableCell>
                     <TableCell>{rider.specialization}</TableCell>
                     <TableCell>
                       <div>
@@ -491,7 +360,7 @@ const RiderManagement = ({ token }) => {
       </Card>
 
       {/* Edit Employee Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      {/*<Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Rider</DialogTitle>
@@ -613,7 +482,7 @@ const RiderManagement = ({ token }) => {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog>*/}
     </div>
   );
 };

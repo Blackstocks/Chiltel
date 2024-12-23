@@ -28,7 +28,7 @@ import OrderDetailsDialog from "@/components/OrderDetailsDialog";
 import ServiceDetailsDialog from "@/components/ServiceDetailsDialog";
 import { toast } from "react-toastify";
 
-const OrderManagement = ({token}) => {
+const OrderManagement = ({ token }) => {
   const [orders, setOrders] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [riders, setRiders] = useState([]);
@@ -58,22 +58,25 @@ const OrderManagement = ({token}) => {
 
   // Fetch service requests
   const fetchServiceRequests = async () => {
-  try {
-    setLoading((prev) => ({ ...prev, services: true }));
-    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/serviceRequests`, {
-      headers: { token },
-    });
-    const data = response.data.data;
-    
-    // Better logging options:
-    console.log('Service Requests:', data); // Option 1: Direct logging
-    setServiceRequests(data);
-  } catch (error) {
-    toast.error(error.message);
-  } finally {
-    setLoading((prev) => ({ ...prev, services: false }));
-  }
-};
+    try {
+      setLoading((prev) => ({ ...prev, services: true }));
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/serviceRequests`,
+        {
+          headers: { token },
+        }
+      );
+      const data = response.data.data;
+
+      // Better logging options:
+      console.log("Service Requests:", data); // Option 1: Direct logging
+      setServiceRequests(data);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading((prev) => ({ ...prev, services: false }));
+    }
+  };
 
   // Fetch riders
   const fetchRiders = async () => {
@@ -98,7 +101,7 @@ const OrderManagement = ({token}) => {
       const response = await fetch(
         `${
           import.meta.env.VITE_BACKEND_URL
-        }/api/service-requests/${requestId}/assign`,
+        }/api/serviceRequests/${requestId}/assign-rider`,
         {
           method: "POST",
           headers: {
@@ -240,7 +243,8 @@ const OrderManagement = ({token}) => {
                     <TableRow key={service._id}>
                       <TableCell>{service._id}</TableCell>
                       <TableCell>{service.service.name}</TableCell>
-                      {/*<TableCell>{service.user.name}</TableCell>*/}
+                      {/*<TableCell>{service.user.name || "null"}</TableCell>*/}
+                      <TableCell>{"null"}</TableCell>
                       <TableCell>
                         <Badge className={getStatusBadgeColor(service.status)}>
                           {service.status}
@@ -250,23 +254,49 @@ const OrderManagement = ({token}) => {
                         {new Date(service.scheduledFor).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Select
-                          value={service.assignedRider || ""}
-                          onValueChange={(value) =>
-                            handleRiderAssignment(service._id, value)
-                          }
-                        >
-                          {/*<SelectTrigger className="w-40">
-                            <SelectValue placeholder="Assign rider" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {riders.map((rider) => (
-                              <SelectItem key={rider._id} value={rider._id}>
-                                {rider.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>*/}
-                        </Select>
+                        <div className="space-y-2">
+                          <Select
+                            value={service.assignedRider || ""}
+                            onValueChange={(value) =>
+                              handleRiderAssignment(service._id, value)
+                            }
+                          >
+                            <SelectTrigger className="w-40">
+                              <SelectValue placeholder="Assign rider" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.isArray(riders) &&
+                                riders
+                                  .filter(
+                                    (rider) =>
+                                      rider?.specialization?.toLowerCase() ===
+                                        service?.service?.name?.toLowerCase() &&
+                                      rider?.status === "AVAILABLE"
+                                  )
+                                  .map((rider) => (
+                                    <SelectItem
+                                      key={rider._id}
+                                      value={rider._id}
+                                    >
+                                      {rider.name} (
+                                      {rider?.rating?.average?.toFixed(1) ||
+                                        "0.0"}
+                                      ★)
+                                    </SelectItem>
+                                  ))}
+                            </SelectContent>
+                          </Select>
+                          {service.assignedRider && (
+                            <Badge variant="outline">
+                              Currently Assigned:{" "}
+                              {
+                                riders.find(
+                                  (r) => r._id === service.assignedRider
+                                )?.name
+                              }
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <ServiceDetailsDialog service={service} />

@@ -37,9 +37,9 @@ export const serviceRequestController = {
   getAllServiceRequests: async (req, res) => {
     try {
       const serviceRequests = await ServiceRequest.find()
-        .populate("user", "name email phoneNumber")
-        .populate("service", "name description price")
-        .populate("rider", "name email phoneNumber")
+        .populate("user")
+        .populate("service")
+        .populate("rider")
         .sort({ createdAt: -1 });
 
       res.status(200).json({
