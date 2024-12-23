@@ -87,7 +87,8 @@ const ProductsPage = ({ token }) => {
   };
 
 
-  const handleAddProduct = (newProduct) => {
+  const handleAddProduct = async (newProduct) => {
+    await fetchProducts();
     setProducts([...products, { ...newProduct, id: products.length + 1 }]);
     setIsAddDialogOpen(false);
   };
@@ -110,7 +111,8 @@ const ProductsPage = ({ token }) => {
   };
 
   // Update filtered products with pagination
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = products?.filter((product) => {
+    if (!product?.name || !product?.category || !product?.brand || !product?.model) return false;
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||

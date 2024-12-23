@@ -200,13 +200,19 @@ const RiderManagement = ({ token }) => {
     }
   };
 
-  const filteredRiders = riders.filter(
-    (rider) =>
-      rider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      rider.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      rider.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      rider.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRiders = riders.filter((rider) => {
+    const name = rider?.name || "";
+    const specialization = rider?.specialization || "";
+    const email = rider?.email || "";
+    const phoneNumber = rider?.phoneNumber || "";
+
+    return (
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      phoneNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   // Form validation
   const validateForm = (rider) => {
@@ -444,14 +450,17 @@ const RiderManagement = ({ token }) => {
                     <TableCell>
                       <div className="flex items-center">
                         <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-                        {rider.rating.average.toFixed(1)} ({rider.rating.count})
+                        {rider?.rating?.average?.toFixed(1) || "0.0"} (
+                        {rider?.rating?.count || 0})
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {rider.location.coordinates[1].toFixed(4)},{" "}
-                        {/* Latitude */}
-                        {rider.location.coordinates[0].toFixed(4)}{" "}
+                        {rider?.location?.coordinates?.[1]?.toFixed(4) ||
+                          "0.0000"}
+                        , {/* Latitude */}
+                        {rider?.location?.coordinates?.[0]?.toFixed(4) ||
+                          "0.0000"}{" "}
                         {/* Longitude */}
                       </div>
                     </TableCell>

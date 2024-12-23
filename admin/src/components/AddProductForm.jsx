@@ -10,8 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from 'react-toastify';
 
 const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
+  const token = localStorage.getItem('token');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     brand: "",
@@ -87,19 +90,46 @@ const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData);
     if (validateForm()) {
-      const formattedData = {
-        ...formData,
-        price: Number(formData.price),
-        discount: Number(formData.discount),
-        rating: Number(formData.rating),
-        reviews: Number(formData.reviews),
-        features: formData.features.filter((f) => f.trim() !== ""),
-        imageUrls: formData.imageUrls.filter((url) => url.trim() !== ""),
-      };
-      onSubmit(formattedData);
+      setIsSubmitting(true);
+      try {
+        const formattedData = {
+          ...formData,
+          price: Number(formData.price),
+          discount: Number(formData.discount)/100,
+          rating: Number(formData.rating),
+          reviews: Number(formData.reviews),
+          features: formData.features.filter((f) => f.trim() !== ""),
+          imageUrls: formData.imageUrls.filter((url) => url.trim() !== ""),
+        };
+        console.log("formatteddata", formattedData);
+
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product`, {
+          method: initialData ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'token': token,
+          },
+          body: JSON.stringify(formattedData),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save product');
+        }
+
+        const result = await response.json();
+        console.log('Response:', result);
+        
+        toast.success(`Successfully ${initialData ? 'updated' : 'added'} ${formData.name}`);
+        onSubmit(result);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -579,8 +609,15 @@ const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit">
-          {initialData ? "Update Product" : "Add Product"}
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              {initialData ? "Updating..." : "Adding..."}
+            </div>
+          ) : (
+            initialData ? "Update Product" : "Add Product"
+          )}
         </Button>
       </div>
     </form>
