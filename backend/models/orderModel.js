@@ -24,7 +24,10 @@ const orderSchema = new mongoose.Schema({
 	},
 	paymentDetails: {
 		method: String,
-		transactionId: String,
+		transactionId: {
+			type: String,
+			default: ''
+		},
 		paidAt: Date,
 	},
 	address: {

@@ -6,12 +6,18 @@ import { ShopContext } from '../context/ShopContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import AuthContext from '../context/AuthContext'
+import CartContext from '../context/CartContext'
 
 const PlaceOrder = () => {
 
     const [method, setMethod] = useState('cod');
     const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+    const { cart } = useContext(CartContext);
     const { user } = useContext(AuthContext);
+    const [street, setStreet] = useState('');
+    const [city, setCity] = useState('');
+    const [state, setState] = useState('');
+    const [zipCode, setZipCode] = useState('');
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -42,10 +48,11 @@ const PlaceOrder = () => {
             handler: async (response) => {
                 console.log('init pay: ', response)
                 try {
-                    
                     const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers: { Authorization: `Bearer ${token}` }})
                     // const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers:{token}})
+                    console.log('transaction data: ', data);
                     if (data.success) {
+                        console.log('order info: ', data.orderInfo);
                         navigate('/orders')
                         setCartItems({})
                     }
@@ -65,46 +72,38 @@ const PlaceOrder = () => {
 
             let orderItems = []
 
-            for (const items in cartItems) {
-                for (const item in cartItems[items]) {
-                    if (cartItems[items][item] > 0) {
-                        const itemInfo = structuredClone(products.find(product => product._id === items))
-                        if (itemInfo) {
-                            itemInfo.size = item
-                            itemInfo.quantity = cartItems[items][item]
-                            orderItems.push(itemInfo)
-                        }
-                    }
-                }
+            for (const item of cart.items) {
+                let itemInfo = {
+                    product: item.productId,
+                    quantity: item.quantity,
+                    price: item.price
+                };
+                orderItems.push(itemInfo);
             }
 
+            console.log('order items: ', orderItems);
+            
             console.log('user: ', user);
             let orderData = {
                 userId: user._id,
                 products: orderItems,
-                amount: getCartAmount() + delivery_fee,
+                totalAmount: cart.totalAmount + delivery_fee,
                 status: "PENDING",
                 paymentDetails: {
-                    method: "RAZORPAY",
-                    transactionId: "abcd",
+                    method: method,
+                    transactionId: "",
                     paidAt: new Date()
                 },
                 address: {
-                    street: "abcd",
-                    city: "abc",
-                    state: "ab",
-                    zipCode: 123456,
+                    street: formData.street,
+                    city: formData.city,
+                    state: formData.state,
+                    zipCode: formData.zipcode,
                 },
                 createdAt: new Date(),
                 updatedAt: new Date()
             }
-            // let orderData = {
-            //     address: formData,
-            //     items: orderItems,
-            //     amount: getCartAmount() + delivery_fee
-            // }
-            
-
+           
             switch (method) {
 
                 // API Calls for COD
@@ -152,6 +151,7 @@ const PlaceOrder = () => {
         }
     }
 
+    console.log('cart: ', cart);
 
     return (
         <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t'>

@@ -16,6 +16,7 @@ export const CartProvider = ({ children }) => {
   useEffect(()=>{
     if(isAuthenticated){
       getCartCount(user._id);
+      fetchCart();
     }
   },[loading]);
 
@@ -23,57 +24,28 @@ export const CartProvider = ({ children }) => {
     if (isAuthenticated) {
       getCartAmount(user._id);
       getCartCount(user._id);
-      fetchCart();
     }
   }, [isAuthenticated, cart]);
 
   const fetchCart = async () => {
     try {
       setCartLoading(true);
-      const response = await fetch('/api/cart', {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(backendUrl + '/api/cart/get', {
+        userId: user._id,
+      },{
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      if (response.ok) {
-        const cartData = await response.json();
-        setCart(cartData);
-      }
+      console.log(response.data.cartData);
+      setCart(response.data.cartData);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
     } finally {
       setCartLoading(false);
     }
   };
-
-  // const addToCart = async (product, quantity = 1) => {
-  //   try {
-  //     const response = await fetch('/api/cart/add', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${localStorage.getItem('token')}`
-  //       },
-  //       body: JSON.stringify({
-  //         productId: product.id,
-  //         quantity,
-  //         category: product.category,
-  //         price: product.discountedPrice,
-  //         name: product.name,
-  //         image: product.image
-  //       })
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to add to cart');
-  //     }
-
-  //     await fetchCart(); // Refresh cart data
-  //     return { success: true };
-  //   } catch (error) {
-  //     return { success: false, error: error.message };
-  //   }
-  // };
 
   const addToCart = async (user, item) => {
     const token = localStorage.getItem('token');
@@ -106,25 +78,6 @@ export const CartProvider = ({ children }) => {
       console.log('user: ', user);
     }
 }
-
-  // const removeFromCart = async (userId, itemId) => {
-  //   console.log(backendUrl);
-  //   try {
-  //     const response = await axios.post(backendUrl + '/api/cart/remove', {userId, itemId,}, {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem('token')}`,
-  //       }
-  //     });
-  //     console.log(localStorage.getItem('token'));
-  //     console.log(response);
-  //     console.log('deleted');
-  //     return {sucess: true};
-
-  //   } catch (error) {
-  //     console.error(error);
-  //     return { success: false, error: error.message };
-  //   }
-  // };
 
   const removeFromCart = async (userId, itemId) => {
     try {
@@ -202,15 +155,6 @@ export const CartProvider = ({ children }) => {
     }
     setCartCount(totalCount);
 }
-
-  // const getCartCount = async (userId) => {
-  //   try{
-  //     const data = await getCartCount(userId);
-  //     setCartCount(data);
-  //   }catch(err){    
-  //       console.error(err);
-  //   }
-  // }
 
   const value = {
     cart,
