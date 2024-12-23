@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const AnimatedCounter = ({ end, duration = 2000 }) => {
   const [count, setCount] = useState(0);
@@ -84,28 +85,24 @@ const Hero = () => {
   const categories = [
     {
       name: 'Air Conditioner',
-      icon: "/assets/acinfo2.jpg"
+      icon: "/assets/acinfo2.jpg",
+      link: "/products/air-conditioner?type=purchase"
     },
     {
       name: 'Water Purifier',
-      icon: "/assets/purifier.jpg" // Example for replacing other icons
+      icon: "/assets/purifier.jpg",
+      link: "/products/water-purifier?type=purchase"
     },
     {
       name: 'Geyser',
-      icon: "/assets/geyser.jpg" // Example for replacing other icons
+      icon: "/assets/geyser.jpg",
+      link: "/products/geyser?type=purchase"
     },
     {
       name: 'Microwave',
-      icon: "/assets/microwave.jpg" // Example for replacing other icons
-    },
-    // {
-    //   name: 'Installation',
-    //   icon: "/assets/install.jpg" // Example for replacing other icons
-    // },
-    // {
-    //   name: 'Repair & Service',
-    //   icon: "/assets/install2.jpg" // Example for replacing other icons
-    // }
+      icon: "/assets/microwave.jpg",
+      link: "/products/microwave?type=purchase"
+    }
   ];
 
   const stats = [
@@ -155,10 +152,11 @@ const Hero = () => {
 
           {/* Categories Grid */}
           <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
-            {categories.map(({ name, icon }) => (
-              <div 
+            {categories.map(({ name, icon, link }) => (
+              <Link 
                 key={name} 
-                className="p-2.5 transition-transform duration-200 transform bg-white border border-gray-100 rounded-lg shadow-sm cursor-pointer sm:p-3 md:p-4 hover:scale-105 hover:shadow-md"
+                to={link}
+                className="block p-2.5 transition-transform duration-200 transform bg-white border border-gray-100 rounded-lg shadow-sm cursor-pointer sm:p-3 md:p-4 hover:scale-105 hover:shadow-md"
               >
                 <div className="flex items-center gap-2 sm:gap-2 md:gap-3">
                   <div className="p-2 rounded-lg bg-blue-50">
@@ -172,7 +170,7 @@ const Hero = () => {
                     {name}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
