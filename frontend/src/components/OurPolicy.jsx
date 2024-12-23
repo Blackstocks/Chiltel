@@ -8,17 +8,18 @@ const OurPolicy = () => {
       <div>
         <img src={assets.exchange_icon} className='w-12 m-auto mb-5' alt="" />
         <p className='font-semibold '>Price Never Seen</p>
-        <p className='text-gray-400 '>Prices So Low, You Won't Believe Your Eyes</p>
+        <p className='text-gray-400 '>Affordable Pricing for Every Need - <br/>Products and Services You Can Trust!</p>
       </div>
       <div>
         <img src={assets.quality_icon} className='w-12 m-auto mb-5' alt="" />
         <p className='font-semibold '>No Service No Fee</p>
-        <p className='text-gray-400 '>Service You Can Trust, or It’s Free</p>
+        <p className='text-gray-400 '>30-Day Warranty with Genuine <br/>
+        Manufacturer Spares for All Services!</p>
       </div>
       <div>
         <img src={assets.support_img} className='w-12 m-auto mb-5' alt="" />
         <p className='font-semibold '>Best customer support</p>
-        <p className='text-gray-400 '>we provide 24/7 customer support</p>
+        <p className='text-gray-400 '>We provide customer support from <br/> 9 AM to 6 PM, Monday to Saturday</p>
       </div>
 
     </div>
