@@ -5,11 +5,13 @@ import { assets } from '../assets/assets'
 import { ShopContext } from '../context/ShopContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import AuthContext from '../context/AuthContext'
 
 const PlaceOrder = () => {
 
     const [method, setMethod] = useState('cod');
     const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+    const { user } = useContext(AuthContext);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -38,10 +40,11 @@ const PlaceOrder = () => {
             order_id: order.id,
             receipt: order.receipt,
             handler: async (response) => {
-                console.log(response)
+                console.log('init pay: ', response)
                 try {
                     
-                    const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers:{token}})
+                    const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers: { Authorization: `Bearer ${token}` }})
+                    // const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers:{token}})
                     if (data.success) {
                         navigate('/orders')
                         setCartItems({})
@@ -75,11 +78,31 @@ const PlaceOrder = () => {
                 }
             }
 
+            console.log('user: ', user);
             let orderData = {
-                address: formData,
-                items: orderItems,
-                amount: getCartAmount() + delivery_fee
+                userId: user._id,
+                products: orderItems,
+                amount: getCartAmount() + delivery_fee,
+                status: "PENDING",
+                paymentDetails: {
+                    method: "RAZORPAY",
+                    transactionId: "abcd",
+                    paidAt: new Date()
+                },
+                address: {
+                    street: "abcd",
+                    city: "abc",
+                    state: "ab",
+                    zipCode: 123456,
+                },
+                createdAt: new Date(),
+                updatedAt: new Date()
             }
+            // let orderData = {
+            //     address: formData,
+            //     items: orderItems,
+            //     amount: getCartAmount() + delivery_fee
+            // }
             
 
             switch (method) {
@@ -106,9 +129,13 @@ const PlaceOrder = () => {
                     break;
 
                 case 'razorpay':
-
-                    const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
+                    console.log('order data: ', orderData);
+                    const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers: { Authorization: `Bearer ${token}` }})
+                    // const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
+                    console.log(responseRazorpay);
                     if (responseRazorpay.data.success) {
+                        console.log('razorpay init success');
+                        console.log('razorpay response: ', responseRazorpay.data);
                         initPay(responseRazorpay.data.order)
                     }
 
