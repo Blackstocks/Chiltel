@@ -39,6 +39,7 @@ const addToCart = async (req, res) => {
 		const { userId, itemId, price, name, image, category } = req.body;
 
 		// Ensure the user exists
+		console.log('userId: ', userId);
 		const userData = await userModel.findById(userId);
 		if (!userData) {
 			return res
@@ -56,7 +57,7 @@ const addToCart = async (req, res) => {
 				items: [],
 			});
 		}
-
+		console.log('carrrrt: ', cart.items);
 		// Find the existing cart item if it exists
 		let cartItem = cart.items.find(
 			(item) =>
@@ -198,21 +199,21 @@ const removeFromCart = async (req, res) => {
 
 // Get user cart data
 const getUserCart = async (req, res) => {
-	try {
-		const { userId } = req.body;
-		const cartData = await userModel.findOne({ userId: userId });
+    try {
+        const { userId } = req.body;
+        const cartData = await Cart.findOne({userId: userId});
 
-		// const userData = await userModel.findById(userId);
-		// if (!userData) {
-		//     return res.status(404).json({ success: false, message: "User not found" });
-		// }
+        // const userData = await userModel.findById(userId);
+        // if (!userData) {
+        //     return res.status(404).json({ success: false, message: "User not found" });
+        // }
 
-		// const cartData = userData.cartData || {}; // Ensure cartData is an empty object if not found
-		res.json({ success: true, cartData });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ success: false, message: error.message });
-	}
+        // const cartData = userData.cartData || {}; // Ensure cartData is an empty object if not found
+        res.json({ success: true, cartData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 export { addToCart, updateCart, removeFromCart, getUserCart };
