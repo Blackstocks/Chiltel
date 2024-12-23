@@ -108,7 +108,8 @@ const PlaceOrder = () => {
 
                 // API Calls for COD
                 case 'cod':
-                    const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{token}})
+                    orderData.status = "ORDERED";
+                    const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{ Authorization: `Bearer ${token}` }})
                     if (response.data.success) {
                         setCartItems({})
                         navigate('/orders')
@@ -118,7 +119,8 @@ const PlaceOrder = () => {
                     break;
 
                 case 'stripe':
-                    const responseStripe = await axios.post(backendUrl + '/api/order/stripe',orderData,{headers:{token}})
+                    orderData.status = "PENDING";
+                    const responseStripe = await axios.post(backendUrl + '/api/order/stripe',orderData,{headers:{ Authorization: `Bearer ${token}` }})
                     if (responseStripe.data.success) {
                         const {session_url} = responseStripe.data
                         window.location.replace(session_url)
@@ -128,6 +130,7 @@ const PlaceOrder = () => {
                     break;
 
                 case 'razorpay':
+                    orderData.status = "PENDING";
                     console.log('order data: ', orderData);
                     const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers: { Authorization: `Bearer ${token}` }})
                     // const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
