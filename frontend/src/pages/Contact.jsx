@@ -20,7 +20,7 @@ const Contact = () => {
           <p className='flex items-start text-gray-500'>
             <FaHome className='inline-block mr-2' />
             <span>
-              Address: Shanti Apartment, Flat No - 1 D/2, Nowbhanga,
+              Address: Shristi Apartment, Flat No - 1 D/2, Nowbhanga,
               <span className='hidden lg:inline'> </span>
               <br className='block lg:hidden' />
               SEC-IV, North 24 Parganas, Kolkata - 700105
