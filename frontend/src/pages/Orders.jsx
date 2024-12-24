@@ -50,7 +50,7 @@ const Orders = () => {
     loadOrderData()
   },[])
 
-  if(loading | ordersLoading) return (<Loading/>);
+  if(loading || ordersLoading) return (<Loading/>);
 
   return (
     <div className="border-t pt-16 min-h-screen">
@@ -73,7 +73,7 @@ const Orders = () => {
               <div>Details</div>
               <div>Status</div>
               <div>Payment</div>
-              <div className=' text-center'>Actions</div>
+              <div className='text-center'>Actions</div>
             </div>
 
             {/* Order Rows */}
@@ -87,13 +87,13 @@ const Orders = () => {
                   <img
                     className="w-16 h-16 object-cover rounded-md"
                     src={item.thumbnail}
-                    alt={item.name || "Product Image"}
+                    alt={item.product.name || "Product Image"}
                   />
                 </div>
 
                 {/* Product Name */}
                 <div>
-                  <p className="font-medium text-gray-900">{item.name}</p>
+                  <p className="font-medium text-gray-900">{item.product.name}</p>
                 </div>
 
                 {/* Product Details */}
