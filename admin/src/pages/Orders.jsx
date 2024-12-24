@@ -94,8 +94,8 @@ const OrderManagement = ({ token }) => {
       );
       if (!response.ok) throw new Error("Failed to fetch riders");
       const data = await response.json();
-      console.log("Riders:", data);
-      setRiders(data);
+      console.log("Riders:", data.data);
+      setRiders(data.data);
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -251,7 +251,6 @@ const OrderManagement = ({ token }) => {
                     <TableRow key={service._id}>
                       <TableCell>{service._id}</TableCell>
                       <TableCell>{service.service.name}</TableCell>
-                      {/*<TableCell>{service.user.name || "null"}</TableCell>*/}
                       <TableCell>{"null"}</TableCell>
                       <TableCell>
                         <Badge className={getStatusBadgeColor(service.status)}>
@@ -283,7 +282,17 @@ const OrderManagement = ({ token }) => {
                               <ScrollArea className="max-h-[400px] pr-4">
                                 <div className="space-y-2">
                                   {Array.isArray(riders) &&
+                                  riders.filter(
+                                    (rider) =>
+                                      rider.specialization ===
+                                      service.service.product
+                                  ).length > 0 ? (
                                     riders
+                                      .filter(
+                                        (rider) =>
+                                          rider.specialization ===
+                                          service.service.product
+                                      )
                                       .map((rider) => (
                                         <Card
                                           key={rider._id}
@@ -318,7 +327,10 @@ const OrderManagement = ({ token }) => {
                                             </div>
                                           </CardContent>
                                         </Card>
-                                      ))}
+                                      ))
+                                  ) : (
+                                    <p>No rider with the specialization found</p>
+                                  )}
                                 </div>
                               </ScrollArea>
                             </DialogContent>
