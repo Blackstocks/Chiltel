@@ -6,7 +6,7 @@ import { use } from 'react';
 import AuthContext from '../context/AuthContext';
 import CartContext from '../context/CartContext';
 
-const CartTotal = () => {
+const CartTotal = ({amount=null}) => {
     const {currency,delivery_fee,getCartAmount, backendUrl} = useContext(ShopContext);
     const {user, loading} = useContext(AuthContext);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -43,7 +43,7 @@ const CartTotal = () => {
       <div className='flex flex-col gap-2 mt-2 text-sm'>
             <div className='flex justify-between'>
                 <p>Subtotal</p>
-                <p>{currency} {cartAmount}.00</p>
+                <p>{currency} {amount ? amount : cartAmount}.00</p>
                 {/* <p>{currency} {getCartAmount()}.00</p> */}
             </div>
             <hr />
@@ -54,7 +54,7 @@ const CartTotal = () => {
             <hr />
             <div className='flex justify-between'>
                 <b>Total</b>
-                <b>{currency} {cartAmount === 0 ? 0 : cartAmount + delivery_fee}.00</b>
+                <b>{currency} {cartAmount === 0 ? 0 : (amount ? amount : cartAmount) + delivery_fee}.00</b>
             </div>
       </div>
     </div>

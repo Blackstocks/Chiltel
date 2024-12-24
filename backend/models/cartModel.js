@@ -59,7 +59,7 @@ cartSchema.pre("save", function (next) {
 	// Calculate total amount and round to two decimal places
 	this.totalAmount = parseInt(
 		this.items.reduce((total, item) => {
-			return total + item.price * item.quantity;
+			return total + (item.price * (1 - item.discount)) * item.quantity;
 		}, 0)
 	);
 	next();

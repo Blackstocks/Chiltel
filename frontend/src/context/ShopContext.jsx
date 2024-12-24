@@ -15,6 +15,7 @@ const ShopContextProvider = (props) => {
 	const [cartItems, setCartItems] = useState({});
 	const [products, setProducts] = useState([]);
 	const [token, setToken] = useState("");
+	const [buyNowProduct, setBuyNowProduct] = useState(null);
 	// let token = localStorage.getItem('chiltel-user-token');
 	const navigate = useNavigate();
 
@@ -172,6 +173,8 @@ const ShopContextProvider = (props) => {
 		backendUrl,
 		setToken,
 		token,
+		buyNowProduct,
+		setBuyNowProduct,
 	};
 
 	return (

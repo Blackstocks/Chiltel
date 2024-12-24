@@ -12,7 +12,7 @@ import CartContext from "../context/CartContext";
 
 const ProductList = () => {
   const {user, isAuthenticated} = useContext(AuthContext);
-  const { backendUrl } = useContext(ShopContext);
+  const { backendUrl, setBuyNowProduct } = useContext(ShopContext);
   const { addToCart } = useContext(CartContext);
   const { category } = useParams();
   const [searchParams] = useSearchParams();
@@ -66,6 +66,7 @@ const ProductList = () => {
       if(!isAuthenticated){
         toast.info('Please log in to proceed with your purchase.');
       }else{
+        setBuyNowProduct(item);
         navigate("/checkout", {
           state: {
             product: {
@@ -354,7 +355,7 @@ const ProductList = () => {
                     {/* Price Section */}
                     <div className="mb-2">
                       <span className="text-xl font-bold">
-                        ₹{parseInt(item.discountedPrice).toLocaleString()}
+                        ₹{parseInt(item.price * (1 - item.discount)).toLocaleString()}
                       </span>
                       {parseInt(item.originalPrice) >
                         parseInt(item.discountedPrice) && (
