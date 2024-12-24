@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }) => {
 			console.log('response: ', response);
 			if (response.status === 200) {
 			  // If the token is valid, store user data
+			  console.log('user data: ', response.data);
 			  setUser(response.data); // assuming the user data is in response.data
 			  setIsAuthenticated(true);
 			} else {

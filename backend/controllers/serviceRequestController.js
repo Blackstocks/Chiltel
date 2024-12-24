@@ -1,5 +1,6 @@
 // controllers/serviceRequestController.js
 import ServiceRequest from "../models/serviceRequestModel.js";
+import mongoose from 'mongoose';
 
 export const serviceRequestController = {
   // Create a new service request
@@ -36,6 +37,54 @@ export const serviceRequestController = {
         success: false,
         message: "Failed to create service request",
         error: error.message,
+      });
+    }
+  },
+
+  getUserServiceRequests : async (req, res) => {
+    try{
+      const userId = req.params;
+      const serviceRequests = await ServiceRequest.find({user: new mongoose.Types.ObjectId(userId.userId)})
+        .populate('user', 'name email phone')
+        .populate('service', 'name description price estimatedDuration')
+        .populate('rider', 'name phone')
+        .sort({ createdAt: -1 });
+
+        res.status(200).json({
+          success: true,
+          count: serviceRequests.length,
+          data: serviceRequests
+        });
+
+    }catch(error){
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch user service requests',
+        error: error.message
+      });
+    }
+  },
+
+  getUserServiceRequests : async (req, res) => {
+    try{
+      const userId = req.params;
+      const serviceRequests = await ServiceRequest.find({user: new mongoose.Types.ObjectId(userId.userId)})
+        .populate('user', 'name email phone')
+        .populate('service', 'name description price estimatedDuration')
+        .populate('rider', 'name phone')
+        .sort({ createdAt: -1 });
+
+        res.status(200).json({
+          success: true,
+          count: serviceRequests.length,
+          data: serviceRequests
+        });
+
+    }catch(error){
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch user service requests',
+        error: error.message
       });
     }
   },

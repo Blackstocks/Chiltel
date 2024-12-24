@@ -21,32 +21,37 @@ import ServiceDetail from "./components/ServiceDetail";
 import ProductList from "./pages/ProductList"; // Let's use just this one
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { ServiceCartProvider } from "./context/ServiceCartContext";
+import BuyNow from "./pages/BuyNow";
 
 const App = () => {
   return (
     <AuthProvider>
           <ToastContainer />
       <CartProvider>
-        <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-          <Navbar />
-          <SearchBar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/collection" element={<Collection />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/product/:productId" element={<Product />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/place-order" element={<PlaceOrder />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/verify" element={<Verify />} />
-            <Route path="/services" element={<ServiceCollection />} />
-            <Route path="/services/:id" element={<ServiceDetail />} />
-            <Route path="/products/:category" element={<ProductList />} />
-          </Routes>
-          <Footer />
-        </div>
+        <ServiceCartProvider>
+          <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+            <Navbar />
+            <SearchBar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/collection" element={<Collection />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/product/:productId" element={<Product />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/place-order" element={<PlaceOrder />} />
+              <Route path='/checkout' element={<BuyNow />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/verify" element={<Verify />} />
+              <Route path="/services" element={<ServiceCollection />} />
+              <Route path="/services/:id" element={<ServiceDetail />} />
+              <Route path="/products/:category" element={<ProductList />} />
+            </Routes>
+            <Footer />
+          </div>
+        </ServiceCartProvider>
       </CartProvider>
     </AuthProvider>
   );
