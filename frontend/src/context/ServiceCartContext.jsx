@@ -20,31 +20,30 @@ export const ServiceCartProvider = ({ children }) => {
 //   }, [loading]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
     //   getServiceCartAmount(user._id);
     //   getServiceCartCount(user._id);
+    console.log('user: ', user);
       fetchServiceCart();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user, loading]);
 
   const fetchServiceCart = async () => {
-    try {
-      setServiceCartLoading(true);
-      const response = await axios.get(backendUrl + `/api/serviceRequests/user/${user._id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      console.log(response);
-      setServiceCart(response.data.data);
-    //   if (response.ok) {
-    //     const serviceCartData = await response.json();
-    //     setServiceCart(serviceCartData);
-    //   }
-    } catch (error) {
-      console.error('Failed to fetch service cart:', error);
-    } finally {
-      setServiceCartLoading(false);
+    if(user){
+      try {
+        setServiceCartLoading(true);
+        const response = await axios.get(backendUrl + `/api/serviceRequests/user/${user._id ? user._id : user.id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        console.log(response);
+        setServiceCart(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch service cart:', error);
+      } finally {
+        setServiceCartLoading(false);
+      }
     }
   };
 

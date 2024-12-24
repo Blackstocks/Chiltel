@@ -26,6 +26,7 @@ const loginUser = async (req, res) => {
 				success: true,
 				token,
 				user: {
+					_id: user._id,
 					id: user._id,
 					email: user.email,
 					name: user.name, // Assuming you store the user's name
