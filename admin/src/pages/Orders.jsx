@@ -27,6 +27,10 @@ import {
 import OrderDetailsDialog from "@/components/OrderDetailsDialog";
 import ServiceDetailsDialog from "@/components/ServiceDetailsDialog";
 import { toast } from "react-toastify";
+//import RiderAssignmentCell from "@/components/RiderAssignmentCell";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const OrderManagement = ({ token }) => {
   const [orders, setOrders] = useState([]);
@@ -83,10 +87,14 @@ const OrderManagement = ({ token }) => {
     try {
       setLoading((prev) => ({ ...prev, riders: true }));
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/riders`
+        `${import.meta.env.VITE_BACKEND_URL}/api/riders/list`,
+        {
+          headers: { token },
+        }
       );
       if (!response.ok) throw new Error("Failed to fetch riders");
       const data = await response.json();
+      console.log("Riders:", data);
       setRiders(data);
     } catch (error) {
       toast.error(error.message);
@@ -253,47 +261,85 @@ const OrderManagement = ({ token }) => {
                       <TableCell>
                         {new Date(service.scheduledFor).toLocaleDateString()}
                       </TableCell>
+
                       <TableCell>
                         <div className="space-y-2">
-                          <Select
-                            value={service.assignedRider || ""}
-                            onValueChange={(value) =>
-                              handleRiderAssignment(service._id, value)
-                            }
-                          >
-                            <SelectTrigger className="w-40">
-                              <SelectValue placeholder="Assign rider" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Array.isArray(riders) &&
-                                riders
-                                  .filter(
-                                    (rider) =>
-                                      rider?.specialization?.toLowerCase() ===
-                                        service?.service?.name?.toLowerCase() &&
-                                      rider?.status === "AVAILABLE"
-                                  )
-                                  .map((rider) => (
-                                    <SelectItem
-                                      key={rider._id}
-                                      value={rider._id}
-                                    >
-                                      {rider.name} (
-                                      {rider?.rating?.average?.toFixed(1) ||
-                                        "0.0"}
-                                      ★)
-                                    </SelectItem>
-                                  ))}
-                            </SelectContent>
-                          </Select>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                {service.assignedRider
+                                  ? "Reassign Rider"
+                                  : "Assign Rider"}
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>
+                                  {service.assignedRider
+                                    ? "Reassign Rider"
+                                    : "Assign Rider"}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <ScrollArea className="max-h-[400px] pr-4">
+                                <div className="space-y-2">
+                                  {Array.isArray(riders) &&
+                                    riders
+                                      .map((rider) => (
+                                        <Card
+                                          key={rider._id}
+                                          className={`cursor-pointer hover:bg-accent transition-colors ${
+                                            service.assignedRider === rider._id
+                                              ? "border-primary"
+                                              : ""
+                                          }`}
+                                          onClick={() => {
+                                            handleRiderAssignment(
+                                              service._id,
+                                              rider._id
+                                            );
+                                          }}
+                                        >
+                                          <CardContent className="p-4">
+                                            <div className="flex items-center justify-between">
+                                              <div>
+                                                <p className="font-medium">
+                                                  {`${rider.firstName} ${rider.lastName}`}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground">
+                                                  {rider.specialization}
+                                                </p>
+                                              </div>
+                                              <div className="text-sm">
+                                                {rider?.rating?.average?.toFixed(
+                                                  1
+                                                ) || "0.0"}
+                                                ★
+                                              </div>
+                                            </div>
+                                          </CardContent>
+                                        </Card>
+                                      ))}
+                                </div>
+                              </ScrollArea>
+                            </DialogContent>
+                          </Dialog>
+
                           {service.assignedRider && (
                             <Badge variant="outline">
                               Currently Assigned:{" "}
-                              {
-                                riders.find(
-                                  (r) => r._id === service.assignedRider
-                                )?.name
-                              }
+                              {riders.find(
+                                (r) => r._id === service.assignedRider
+                              )
+                                ? `${
+                                    riders.find(
+                                      (r) => r._id === service.assignedRider
+                                    ).firstName
+                                  } ${
+                                    riders.find(
+                                      (r) => r._id === service.assignedRider
+                                    ).lastName
+                                  }`
+                                : ""}
                             </Badge>
                           )}
                         </div>
