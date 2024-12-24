@@ -112,6 +112,7 @@ export const CartProvider = ({ children }) => {
       if (response.status === 200) {
         getCartAmount(userId);
         setCart(response.data.cart);
+        console.log('cart updated: ', cart);
         return { success: true, updatedCart: response.data.cart };
       } else {
         throw new Error('Failed to remove item from cart');

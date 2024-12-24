@@ -76,7 +76,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                 let itemInfo = {
                     product: item.productId,
                     quantity: item.quantity,
-                    price: parseInt(item.price * (1 - item.discount))
+                    price: parseInt(item.price)
                 };
                 orderItems.push(itemInfo);
             }
