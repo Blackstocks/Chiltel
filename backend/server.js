@@ -26,7 +26,7 @@ app.use(cors())
 // api endpoints
 app.use('/api/user',userRouter)
 app.use('/api/riders', adminAuth, ridersRouter);
-app.use('/api/services', adminAuth, serviceRoutes);
+app.use('/api/services', serviceRoutes);
 app.use('/api/serviceRequests', serviceRequestRoutes);
 app.use('/api/product',productRouter)
 app.use('/api/cart',cartRouter)

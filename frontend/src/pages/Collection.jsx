@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import ServiceModal from "./ServiceModal";
+import { ShopContext } from "../context/ShopContext";
 const categories = [
 	{
 		name: "Air Conditioner",
@@ -105,9 +107,12 @@ const categories = [
 	},
 ];
 
+
 const ServiceCollection = () => {
 	// eslint-disable-next-line react-hooks/exhaustive-dep
-
+	const { backendUrl, token } = useContext(ShopContext);
+	
+	// const [categories, setCategories] = useState([]);
 	const [mainCategoryFilter, setMainCategoryFilter] = useState(null);
 	const [typeFilter, setTypeFilter] = useState([]);
 	const [sortType, setSortType] = useState("name");
@@ -115,7 +120,38 @@ const ServiceCollection = () => {
 	const [filteredCategories, setFilteredCategories] = useState([]);
 	const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState(null);
+
 	const navigate = useNavigate();
+
+	const fetchServices = async () => {
+		try{
+			const response = await axios.get(backendUrl + '/api/services/', {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			// if (response.data.success) {
+			// 	const formattedCategories = response.data.data.map((service) => ({
+			// 	  name: service.name,
+			// 	  mainCategory: service.category, 
+			// 	  type: service.type || "General", 
+			// 	  image: `/assets/${service.name.toLowerCase().replace(/\s+/g, "_")}.jpeg`, // Dynamically generating image paths
+			// 	  description: service.description || "Service description not available",
+			// 	}));
+			// 	setCategories(formattedCategories);
+			// 	console.log('categories: ', formattedCategories);
+			//   } else {
+			// 	console.error("Error fetching services:", response.data.message);
+			//   }
+			console.log('services data: ', response.data);
+		}catch(err){
+			console.error(err);
+		}
+	}
+
+	useEffect(()=>{
+		fetchServices();
+	},[]);
 
 	const toggleMainCategory = (category) => {
 		setMainCategoryFilter((prev) => (prev === category ? null : category));
