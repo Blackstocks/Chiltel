@@ -70,7 +70,7 @@ const ProductList = () => {
           state: {
             product: {
               name: item.name,
-              price: item.discountedPrice,
+              price: item.price,
               image: item.image,
               specifications: item.specifications,
             },
@@ -141,8 +141,8 @@ const ProductList = () => {
       result = result.filter((item) => {
         return filters.priceRange.some(
           (range) =>
-            parseInt(item.discountedPrice) >= range.min &&
-            parseInt(item.discountedPrice) <= range.max
+            parseInt(item.price*item.discount) >= range.min &&
+            parseInt(item.price*item.discount) <= range.max
         );
       });
     }
@@ -330,7 +330,7 @@ const ProductList = () => {
                   {/* Image Section */}
                   <div className="flex items-center justify-center p-4">
                     <img
-                      src={item.image}
+                      src={item.thumbnail}
                       alt={item.name}
                       className="object-contain w-full h-48 rounded"
                     />
@@ -354,21 +354,15 @@ const ProductList = () => {
                     {/* Price Section */}
                     <div className="mb-2">
                       <span className="text-xl font-bold">
-                        ₹{parseInt(item.discountedPrice).toLocaleString()}
+                        ₹{parseInt(item.price*item.discount).toLocaleString()}
                       </span>
-                      {parseInt(item.originalPrice) >
-                        parseInt(item.discountedPrice) && (
+                      { item.discount>0 && (
                         <>
                           <span className="ml-2 text-sm text-gray-500 line-through">
-                            ₹{parseInt(item.originalPrice).toLocaleString()}
+                            ₹{parseInt(item.price).toLocaleString()}
                           </span>
                           <span className="ml-2 text-sm font-medium text-green-600">
-                            {Math.round(
-                              ((parseInt(item.originalPrice) -
-                                parseInt(item.discountedPrice)) /
-                                parseInt(item.originalPrice)) *
-                                100
-                            )}
+                            {item.discount*100}
                             % off
                           </span>
                         </>

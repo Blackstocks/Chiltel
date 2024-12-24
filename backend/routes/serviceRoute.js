@@ -16,7 +16,7 @@ router.get('/', getAllServices);
 router.get('/:id', getServiceById);
 
 // Protected routes (require authentication)
-router.post('/add', adminAuth, addService);
+router.post('/', adminAuth, addService);
 router.put('/update/:id', adminAuth, updateService);
 router.delete('/delete/:id', adminAuth, deleteService);
 

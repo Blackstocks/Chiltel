@@ -11,6 +11,7 @@ import ridersRouter from './routes/ridersRoute.js'
 import serviceRoutes from './routes/serviceRoute.js';
 import adminAuth from './middleware/adminAuth.js';
 import serviceRequestRoutes from './routes/serviceRequestRoute.js';
+import emailRoutes from './routes/emailRoute.js';
 
 // App Config
 const app = express()
@@ -30,6 +31,7 @@ app.use('/api/serviceRequests', serviceRequestRoutes);
 app.use('/api/product',productRouter)
 app.use('/api/cart',cartRouter)
 app.use('/api/order',orderRouter)
+app.use('/api', adminAuth, emailRoutes);
 
 app.get('/',(req,res)=>{
     res.send("API Working")

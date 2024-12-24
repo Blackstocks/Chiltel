@@ -104,38 +104,35 @@ const ServicesManagement = ({ token }) => {
     }
   };
 
-  const handleAddService = async () => {
+  const handleAddService = async (formData) => {
     try {
       setIsLoading(true);
+      
+      const serviceData = {
+        name: formData.name,
+        description: formData.description,
+        price: Number(formData.price),
+        discount: Number(formData.discount),
+        product: formData.product,
+        category: formData.category,
+        estimatedDuration: formData.estimatedDuration,
+        isAvailable: formData.isAvailable,
+        requirements: formData.requirements
+      };
+  
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/services`,
-        {
-          ...newService,
-          price: Number(newService.price),
-          discount: Number(newService.discount)
-        },
-        {
-          headers: { token }
-        }
+        serviceData,
+        { headers: { token } }
       );
-
-      setServices(prev => [...prev, response.data]);
-      setNewService({
-        name: "",
-        description: "",
-        price: "",
-        discount: 0,
-        product: "",
-        category: "",
-        estimatedDuration: "",
-        isAvailable: true,
-        requirements: []
-      });
+      console.log('Service added:', response.data);
+  
+      await fetchServices();
       setIsAddDialogOpen(false);
       toast.success('Service added successfully');
     } catch (error) {
       console.error('Error adding service:', error);
-      toast.error('Failed to add service');
+      toast.error(error.response?.data?.message || 'Failed to add service');
     } finally {
       setIsLoading(false);
     }
@@ -192,44 +189,58 @@ const ServicesManagement = ({ token }) => {
     }
   };
 
-  const ServiceForm = ({ isEdit, onSave, onCancel }) => {
-    const currentService = isEdit ? editingService : newService;
-    const setCurrentService = isEdit ? setEditingService : setNewService;
-
+  const ServiceForm = ({ isEdit, onSave, onCancel, initialData }) => {
+    const [formData, setFormData] = useState(initialData || {
+      name: '',
+      description: '',
+      price: '',
+      discount: '',
+      product: '',
+      category: '',
+      estimatedDuration: '',
+      requirements: [],
+      isAvailable: true
+    });
+  
+    const handleRequirementsChange = (value) => {
+      const requirements = value.split(',').map(req => req.trim()).filter(Boolean);
+      setFormData({ ...formData, requirements });
+    };
+  
     return (
       <div className="space-y-4">
         <Input
           placeholder="Service Name"
-          value={currentService.name}
-          onChange={(e) => setCurrentService({...currentService, name: e.target.value})}
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
         
         <Textarea
           placeholder="Service Description"
-          value={currentService.description}
-          onChange={(e) => setCurrentService({...currentService, description: e.target.value})}
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
-
+  
         <div className="flex space-x-4">
           <Input
             type="number"
             placeholder="Price"
-            value={currentService.price}
-            onChange={(e) => setCurrentService({...currentService, price: Number(e.target.value)})}
+            value={formData.price}
+            onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
             className="flex-1"
           />
           <Input
             type="number"
             placeholder="Discount"
-            value={currentService.discount}
-            onChange={(e) => setCurrentService({...currentService, discount: Number(e.target.value)})}
+            value={formData.discount}
+            onChange={(e) => setFormData({ ...formData, discount: Number(e.target.value) })}
             className="flex-1"
           />
         </div>
-
+  
         <Select
-          value={currentService.product}
-          onValueChange={(value) => setCurrentService({...currentService, product: value})}
+          value={formData.product}
+          onValueChange={(value) => setFormData({ ...formData, product: value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Product" />
@@ -240,10 +251,10 @@ const ServicesManagement = ({ token }) => {
             ))}
           </SelectContent>
         </Select>
-
+  
         <Select
-          value={currentService.category}
-          onValueChange={(value) => setCurrentService({...currentService, category: value})}
+          value={formData.category}
+          onValueChange={(value) => setFormData({ ...formData, category: value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Category" />
@@ -254,31 +265,31 @@ const ServicesManagement = ({ token }) => {
             ))}
           </SelectContent>
         </Select>
-
+  
         <Input
           placeholder="Estimated Duration (e.g., 2-3 hours)"
-          value={currentService.estimatedDuration}
-          onChange={(e) => setCurrentService({...currentService, estimatedDuration: e.target.value})}
+          value={formData.estimatedDuration}
+          onChange={(e) => setFormData({ ...formData, estimatedDuration: e.target.value })}
         />
-
+  
         <Textarea
           placeholder="Requirements (comma-separated)"
-          value={currentService.requirements.join(', ')}
-          onChange={(e) => handleRequirementsChange(e.target.value, isEdit)}
+          value={formData.requirements.join(', ')}
+          onChange={(e) => handleRequirementsChange(e.target.value)}
         />
-
+  
         <div className="flex items-center space-x-2">
           <input
             type="checkbox"
-            checked={currentService.isAvailable}
-            onChange={(e) => setCurrentService({...currentService, isAvailable: e.target.checked})}
+            checked={formData.isAvailable}
+            onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
             className="rounded border-gray-300"
           />
           <label>Available</label>
         </div>
 
         <div className="flex space-x-3 pt-4">
-          <Button onClick={onSave} className="flex-1" disabled={isLoading}>
+          <Button onClick={() => onSave(formData)}  className="flex-1" disabled={isLoading}>
             {isEdit ? "Update Service" : "Add Service"}
           </Button>
           <Button onClick={onCancel} variant="outline" className="flex-1" disabled={isLoading}>
