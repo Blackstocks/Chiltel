@@ -9,6 +9,7 @@ const serviceRequestRoutes = express.Router();
 serviceRequestRoutes.get('/:id', serviceRequestController.getServiceRequestById);
 
 // Protected routes (require authentication)
+serviceRequestRoutes.get('/user/:userId', serviceRequestController.getUserServiceRequests);
 serviceRequestRoutes.post('/', serviceRequestController.createServiceRequest);
 serviceRequestRoutes.put('/:id', serviceRequestController.updateServiceRequest);
 serviceRequestRoutes.delete('/:id', serviceRequestController.cancelServiceRequest);

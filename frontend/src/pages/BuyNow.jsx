@@ -8,10 +8,10 @@ import { toast } from 'react-toastify'
 import AuthContext from '../context/AuthContext'
 import CartContext from '../context/CartContext'
 
-const PlaceOrder = ({buyNowProduct=null}) => {
+const BuyNow = () => {
 
     const [method, setMethod] = useState('cod');
-    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, buyNowProduct } = useContext(ShopContext);
     const { cart } = useContext(CartContext);
     const { user } = useContext(AuthContext);
     const [street, setStreet] = useState('');
@@ -69,17 +69,13 @@ const PlaceOrder = ({buyNowProduct=null}) => {
     const onSubmitHandler = async (event) => {
         event.preventDefault()
         try {
-
-            let orderItems = []
-
-            for (const item of cart.items) {
-                let itemInfo = {
-                    product: item.productId,
-                    quantity: item.quantity,
-                    price: parseInt(item.price * (1 - item.discount))
-                };
-                orderItems.push(itemInfo);
-            }
+            const orderItems = [
+                    {
+                    product: buyNowProduct._id,
+                    quantity: 1,
+                    price: parseInt(buyNowProduct.price * (1 - buyNowProduct.discount))
+                    }
+                ];
 
             console.log('order items: ', orderItems);
             
@@ -87,7 +83,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
             let orderData = {
                 userId: user._id,
                 products: orderItems,
-                totalAmount: cart.totalAmount + delivery_fee,
+                totalAmount: parseInt(buyNowProduct.price * (1 - buyNowProduct.discount)) + delivery_fee,
                 status: "ORDERED",
                 paymentDetails: {
                     method: method,
@@ -182,7 +178,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
             <div className='mt-8'>
 
                 <div className='mt-8 min-w-80'>
-                    <CartTotal />
+                    <CartTotal amount = {parseInt(buyNowProduct.price * (1 - buyNowProduct.discount))}/>
                 </div>
 
                 <div className='mt-12'>
@@ -212,4 +208,4 @@ const PlaceOrder = ({buyNowProduct=null}) => {
     )
 }
 
-export default PlaceOrder
+export default BuyNow

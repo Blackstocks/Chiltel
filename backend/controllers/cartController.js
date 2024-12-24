@@ -57,7 +57,6 @@ const addToCart = async (req, res) => {
 				items: [],
 			});
 		}
-		console.log('carrrrt: ', cart.items);
 		// Find the existing cart item if it exists
 		let cartItem = cart.items.find(
 			(item) =>
