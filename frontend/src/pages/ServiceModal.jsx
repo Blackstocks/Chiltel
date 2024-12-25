@@ -3,6 +3,9 @@ import axios from "axios";
 import AuthContext from "../context/AuthContext";
 import { ShopContext } from "../context/ShopContext";
 import { ChevronDown, ChevronUp, Clock } from "lucide-react";
+import { toast } from "react-toastify";
+import Loading from "../components/Loading";
+import ModalLoader from "../components/ModalLoader";
 
 const ServiceModal = ({ isOpen, onClose, category }) => {
   if (!isOpen) return null;
@@ -12,6 +15,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 
   const [services, setServices] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [servicesLoading, setServicesLoading] = useState(true);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [scheduleService, setScheduleService] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
@@ -52,6 +56,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 
   // Fetch and organize services by product and category
   const fetchAndOrganizeServices = async () => {
+    setServicesLoading(true);
     try {
       const response = await axios.get(`${backendUrl}/api/services/`, {
         headers: {
@@ -86,6 +91,8 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
       }
     } catch (err) {
       console.error("Error fetching services:", err);
+    }finally{
+      setServicesLoading(false);
     }
   };
 
@@ -133,23 +140,13 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
       console.log('service request: ', response.data);
 
       if (response.data.success) {
-        alert("Service scheduled successfully.");
-        setScheduleService(null);
-        setSelectedDate("");
-        setSelectedTime("");
-        setRemarks("");
-        setAddress({
-          street: "",
-          city: "",
-          state: "",
-          zipCode: "",
-        });
+        toast.success("Service scheduled successfully.");
       } else {
-        alert("Failed to schedule the service.");
+        toast.error("Failed to schedule the service.");
       }
     } catch (err) {
       console.error("Error scheduling service:", err);
-      alert("An error occurred while scheduling the service.");
+      toast.error("An error occurred while scheduling the service.");
     }
   };
 
@@ -366,89 +363,6 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     </div>
   );
 
-
-  // const renderScheduleModal = () => (
-  //   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-  //     <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
-  //       <h2 className="text-lg font-bold">Schedule Service</h2>
-  //       <div className="mt-4 space-y-4">
-  //         <input
-  //           type="date"
-  //           className="w-full px-4 py-2 border rounded-md"
-  //           value={selectedDate}
-  //           min={new Date().toISOString().split("T")[0]} // Prevent past dates
-  //           onChange={(e) => setSelectedDate(e.target.value)}
-  //         />
-  //         <div className="grid grid-cols-4 gap-2">
-  //           {timeSlots.map((slot, idx) => (
-  //             <button
-  //               key={idx}
-  //               className={`px-4 py-2 border rounded-md ${
-  //                 selectedTime === slot
-  //                   ? "bg-black text-white"
-  //                   : "bg-gray-100 hover:bg-gray-200"
-  //               }`}
-  //               onClick={() => setSelectedTime(slot)}
-  //             >
-  //               {slot}
-  //             </button>
-  //           ))}
-  //         </div>
-  //         <textarea
-  //           className="w-full px-4 py-2 border rounded-md"
-  //           placeholder="Remarks (optional)"
-  //           value={remarks}
-  //           onChange={(e) => setRemarks(e.target.value)}
-  //         />
-  //         <input
-  //           type="text"
-  //           className="w-full px-4 py-2 border rounded-md"
-  //           placeholder="Street"
-  //           value={address.street}
-  //           onChange={(e) => setAddress((prev) => ({ ...prev, street: e.target.value }))}
-  //         />
-  //         <input
-  //           type="text"
-  //           className="w-full px-4 py-2 border rounded-md"
-  //           placeholder="City"
-  //           value={address.city}
-  //           onChange={(e) => setAddress((prev) => ({ ...prev, city: e.target.value }))}
-  //         />
-  //         <input
-  //           type="number"
-  //           className="w-full px-4 py-2 border rounded-md"
-  //           placeholder="ZIP Code"
-  //           value={address.zipCode}
-  //           onChange={(e) => setAddress((prev) => ({ ...prev, zipCode: e.target.value }))}
-  //         />
-
-  //         <input
-  //           type="text"
-  //           className="w-full px-4 py-2 border rounded-md"
-  //           placeholder="State"
-  //           value={address.state}
-  //           onChange={(e) => setAddress((prev) => ({ ...prev, state: e.target.value }))}
-  //         />
-          
-  //       </div>
-  //       <div className="flex items-center justify-end gap-4 mt-6">
-  //         <button
-  //           onClick={() => setScheduleService(null)}
-  //           className="px-4 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
-  //         >
-  //           Cancel
-  //         </button>
-  //         <button
-  //           onClick={handleScheduleConfirm}
-  //           className="px-4 py-2 text-sm text-white bg-black rounded-md hover:bg-gray-800"
-  //         >
-  //           Confirm
-  //         </button>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="relative w-full max-w-3xl mx-4 my-6 bg-white rounded-lg shadow-xl">
@@ -474,6 +388,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
             </button>
         </div>
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto p-6">
+          {servicesLoading && <ModalLoader />}
           {renderProductServices(category?.name || "Unknown")}
         </div>
       </div>

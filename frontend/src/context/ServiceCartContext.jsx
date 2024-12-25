@@ -47,29 +47,46 @@ export const ServiceCartProvider = ({ children }) => {
     }
   };
 
-  const addToServiceCart = async (user, service) => {
+  const addToServiceCart = async (user, scheduleService) => {
     const token = localStorage.getItem('token');
 
     if (!isAuthenticated) {
       toast.info('Please log in to add this service to your cart.');
     } else {
-      console.log('Service: ', service);
+      console.log('Service: ', scheduleService);
       try {
-        const response = await axios.post(backendUrl + '/api/service-cart/add', {
-          userId: user._id,
-          serviceId: service._id,
-          price: parseFloat((service.price * (1 - service.discount)).toFixed(2)),
-          name: service.name,
-          description: service.description,
-          duration: service.estimatedDuration
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        console.log("Scheduled Service:", scheduleService);
+        const scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
+        const response = await axios.post(`${backendUrl}/api/serviceRequests/`, {
+          user: user._id,
+          service: scheduleService.service._id,
+          userLocation: {
+            type: "Point",
+            coordinates: [0.0, 0.0], // Replace with actual coordinates if available
+            address: `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
           },
+          scheduledFor: scheduledDateTime,
+          // scheduledFor: `${selectedDate}T${selectedTime}:00`,
+          price: scheduleService.service.price,
+          remarks,
         });
-        console.log('Add to service cart: ', response.data);
-        setServiceCart(response.data.serviceCart);
-        toast.success('Service cart updated');
+        console.log('service request: ', response.data);
+
+        if (response.data.success) {
+          alert("Service scheduled successfully.");
+          setScheduleService(null);
+          setSelectedDate("");
+          setSelectedTime("");
+          setRemarks("");
+          setAddress({
+            street: "",
+            city: "",
+            state: "",
+            zipCode: "",
+          });
+        } else {
+          alert("Failed to schedule the service.");
+        }
       } catch (err) {
         toast.error('Something went wrong');
         console.error('Error while adding service to cart: ', err);
