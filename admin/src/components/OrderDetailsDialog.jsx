@@ -26,7 +26,7 @@ import {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Order Details</DialogTitle>
-          <DialogDescription>Order ID: {order.id}</DialogDescription>
+          <DialogDescription>Order ID: {order._id}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
@@ -35,7 +35,7 @@ import {
                 <CardTitle>Customer Details</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>User ID: {order.userId}</p>
+                <p>User ID: {order.userId.name}</p>
                 <p>Address: {order.address?.street}</p>
                 <p>{order.address?.city}, {order.address?.state} {order.address?.zipCode}</p>
               </CardContent>
@@ -75,7 +75,7 @@ import {
                 <TableBody>
                   {order.products.map((item, index) => (
                     <TableRow key={index}>
-                      <TableCell>{item.product.name}</TableCell>
+                      <TableCell>{item.product}</TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>${item.price}</TableCell>
                       <TableCell>${(item.quantity * item.price).toFixed(2)}</TableCell>

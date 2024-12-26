@@ -218,6 +218,10 @@ const allOrders = async (req,res) => {
     try {
         
         const orders = await orderModel.find({})
+        .populate({
+            path: 'userId', // Path to populate
+            model: 'User'
+        })
         res.json({success:true,orders})
 
     } catch (error) {
