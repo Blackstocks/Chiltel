@@ -286,7 +286,6 @@ const RiderManagement = ({ token }) => {
                   <TableHead>Contact</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Rating</TableHead>
-                  <TableHead>Location</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -324,24 +323,14 @@ const RiderManagement = ({ token }) => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        {rider?.location?.coordinates?.[1]?.toFixed(4) ||
-                          "0.0000"}
-                        , {/* Latitude */}
-                        {rider?.location?.coordinates?.[0]?.toFixed(4) ||
-                          "0.0000"}{" "}
-                        {/* Longitude */}
-                      </div>
-                    </TableCell>
-                    <TableCell>
                       <div className="flex space-x-2">
-                        <Button
+                        {/*<Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEditClick(rider)}
                         >
                           <Pencil className="h-4 w-4" />
-                        </Button>
+                        </Button>*/}
                         <Button
                           variant="ghost"
                           size="sm"

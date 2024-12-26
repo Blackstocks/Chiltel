@@ -28,7 +28,13 @@ import OrderDetailsDialog from "@/components/OrderDetailsDialog";
 import ServiceDetailsDialog from "@/components/ServiceDetailsDialog";
 import { toast } from "react-toastify";
 //import RiderAssignmentCell from "@/components/RiderAssignmentCell";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -56,8 +62,11 @@ const OrderManagement = ({ token }) => {
       );
       if (!response.ok) throw new Error("Failed to fetch orders");
       const data = await response.json();
-      console.log("orders: ", data.orders)
-      setOrders(data.orders);
+      const sortedOrders = data.orders.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setOrders(sortedOrders);
+      console.log("orders: ", sortedOrders);
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -110,6 +119,7 @@ const OrderManagement = ({ token }) => {
 
   // Assign rider to service request
   const handleRiderAssignment = async (requestId, riderId) => {
+    console.log("Assigning rider to service request: ", requestId, riderId);
     try {
       const response = await fetch(
         `${
@@ -119,17 +129,21 @@ const OrderManagement = ({ token }) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            token: token,
           },
           body: JSON.stringify({ riderId }),
         }
       );
+
+      const data = await response.json();
+      console.log("assigned service request: ", data);
 
       if (!response.ok) throw new Error("Failed to assign rider");
 
       // Refresh service requests to get updated data
       await fetchServiceRequests();
 
-      toast.success("Rider assigned successfully");
+      if (response.ok) toast.success("Rider assigned successfully");
     } catch (error) {
       toast.error(error.message);
     }
@@ -256,7 +270,7 @@ const OrderManagement = ({ token }) => {
                     <TableRow key={service._id}>
                       <TableCell>{service._id}</TableCell>
                       <TableCell>{service.service.name}</TableCell>
-                      <TableCell>{"null"}</TableCell>
+                      <TableCell>{service.user.name}</TableCell>
                       <TableCell>
                         <Badge className={getStatusBadgeColor(service.status)}>
                           {service.status}
@@ -334,7 +348,9 @@ const OrderManagement = ({ token }) => {
                                         </Card>
                                       ))
                                   ) : (
-                                    <p>No rider with the specialization found</p>
+                                    <p>
+                                      No rider with the specialization found
+                                    </p>
                                   )}
                                 </div>
                               </ScrollArea>

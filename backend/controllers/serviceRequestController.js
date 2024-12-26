@@ -199,6 +199,12 @@ export const serviceRequestController = {
         { new: true, runValidators: true }
       );
 
+      await mongoose.model('Rider').findByIdAndUpdate(
+        riderId,
+        { $push: { assignedServices: serviceRequest._id } },
+        { new: true, runValidators: true }
+      );
+
       if (!serviceRequest) {
         return res.status(404).json({
           success: false,

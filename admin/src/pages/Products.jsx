@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Star } from "lucide-react";
 import AddProductForm from "@/components/AddProductForm";
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 const ProductsPage = ({ token }) => {
   // Add pagination state
@@ -106,9 +107,18 @@ const ProductsPage = ({ token }) => {
     setEditingProduct(null);
   };
 
-  const handleDeleteProduct = (id) => {
-    setProducts(products.filter((product) => product.id !== id));
-  };
+  const handleDeleteProduct = async (id) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/product/remove/${id}`, {
+        headers: { token }
+      });
+      setProducts(products.filter((product) => product.id !== id));
+      toast.success("Product deleted successfully");
+      fetchProducts(); 
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete product");
+    }
+   };
 
   // Update filtered products with pagination
   const filteredProducts = products?.filter((product) => {
@@ -330,7 +340,7 @@ const ProductsPage = ({ token }) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDeleteProduct(product.id)}
+                        onClick={() => handleDeleteProduct(product._id)}
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>

@@ -163,6 +163,101 @@ const removeProduct = async (req, res) => {
   }
 };
 
+// Update Product Controller
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Check if product ID is provided
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required." });
+    }
+
+    // Validate enum fields if they are being updated
+    const validMainCategories = ["Retail", "Domestic Appliance", "Kitchen"];
+    const validTypes = [
+      "water",
+      "cooling",
+      "heating",
+      "cooking",
+      "cleaning",
+      "display",
+    ];
+
+    if (updateData.mainCategory && !validMainCategories.includes(updateData.mainCategory)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid main category. Must be one of: Retail, Domestic Appliance, Kitchen",
+      });
+    }
+
+    if (updateData.type && !validTypes.includes(updateData.type)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid type. Must be one of: water, cooling, heating, cooking, cleaning, display",
+      });
+    }
+
+    // Validate numeric fields if they are being updated
+    if (updateData.discount && (updateData.discount < 0 || updateData.discount > 1)) {
+      return res.status(400).json({
+        success: false,
+        message: "Discount must be between 0 and 1",
+      });
+    }
+
+    if (updateData.rating && (updateData.rating < 0 || updateData.rating > 5)) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 0 and 5",
+      });
+    }
+
+    // Find and update the product by ID
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    // Check if product was found and updated
+    if (!updatedProduct) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found." });
+    }
+
+    // Send success response
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully!",
+      data: updatedProduct,
+    });
+  } catch (error) {
+    console.error("Error updating product:", error.message);
+
+    // Handle Mongoose validation errors
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Validation Error",
+        errors: Object.values(error.errors).map((err) => err.message),
+      });
+    }
+
+    // Send error response
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error. Could not update product.",
+      error: error.message,
+    });
+  }
+};
+
 // Get Single Product Controller
 const getProduct = async (req, res) => {
   try {
@@ -227,4 +322,4 @@ const listProducts = async (req, res) => {
   }
 };
 
-export { addProduct, removeProduct, getProduct, listProducts };
+export { addProduct, removeProduct, getProduct, listProducts, updateProduct };

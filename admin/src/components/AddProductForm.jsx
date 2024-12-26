@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -90,43 +91,46 @@ const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // AddProductForm.jsx - Update handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
     if (validateForm()) {
       setIsSubmitting(true);
       try {
         const formattedData = {
           ...formData,
           price: Number(formData.price),
-          discount: Number(formData.discount)/100,
+          discount: Number(formData.discount) / 100,
           rating: Number(formData.rating),
           reviews: Number(formData.reviews),
+          inStock: Number(formData.inStock),
           features: formData.features.filter((f) => f.trim() !== ""),
           imageUrls: formData.imageUrls.filter((url) => url.trim() !== ""),
         };
-        console.log("formatteddata", formattedData);
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/product`, {
-          method: initialData ? 'PUT' : 'POST',
+        const url = initialData
+          ? `${import.meta.env.VITE_BACKEND_URL}/api/product/update/${
+              initialData._id
+            }`
+          : `${import.meta.env.VITE_BACKEND_URL}/api/product/add`;
+
+        const response = await axios.request({
+          url,
+          method: initialData ? "PUT" : "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'token': token,
+            "Content-Type": "application/json",
+            token: token,
           },
-          body: JSON.stringify(formattedData),
+          data: formattedData,
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to save product');
-        }
-
-        const result = await response.json();
-        console.log('Response:', result);
-        
-        toast.success(`Successfully ${initialData ? 'updated' : 'added'} ${formData.name}`);
-        onSubmit(result);
+        toast.success(
+          `Product ${initialData ? "updated" : "added"} successfully`
+        );
+        onSubmit(response.data.data);
+        onClose();
       } catch (error) {
-        toast.error(error.message);
+        toast.error(error.response?.data?.message || "Failed to save product");
       } finally {
         setIsSubmitting(false);
       }
@@ -615,8 +619,10 @@ const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
               {initialData ? "Updating..." : "Adding..."}
             </div>
+          ) : initialData ? (
+            "Update Product"
           ) : (
-            initialData ? "Update Product" : "Add Product"
+            "Add Product"
           )}
         </Button>
       </div>

@@ -37,10 +37,20 @@ import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
 // Product types and categories based on schema
 const PRODUCT_TYPES = [
   "Air Conditioner",
-  "Refrigerator",
-  "Microwave",
-  "Water Heater",
-  "Washing Machine"
+	"Water Heater",
+	"Microwave",
+	"Geyser",
+	"Refrigerator",
+	"Washing Machine",
+	"Air Cooler",
+	"Air Purifier",
+	"Water Purifier",
+	"Deep Freezer",
+	"Visi Cooler",
+	"Cassette AC",
+	"Water Cooler cum Purifier",
+	"Water Dispenser",
+	"Display Counter",
 ];
 
 const CATEGORIES = ["Installation", "Service", "Repair"];
@@ -138,24 +148,20 @@ const ServicesManagement = ({ token }) => {
     }
   };
 
-  const handleEditService = async () => {
+  const handleEditService = async (formData) => {  // Add formData parameter
     try {
       setIsLoading(true);
       const response = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/services/${editingService._id}`,
-        {
-          ...editingService,
-          price: Number(editingService.price),
-          discount: Number(editingService.discount)
-        },
+        `${import.meta.env.VITE_BACKEND_URL}/api/services/update/${editingService._id}`,
+        formData,  // Use formData instead of editingService
         {
           headers: { token }
         }
       );
-
+  
       setServices(prev => 
         prev.map(service => 
-          service._id === editingService._id ? response.data : service
+          service._id === editingService._id ? response.data.data : service  // Access response.data.data
         )
       );
       setIsEditDialogOpen(false);
@@ -163,7 +169,7 @@ const ServicesManagement = ({ token }) => {
       toast.success('Service updated successfully');
     } catch (error) {
       console.error('Error updating service:', error);
-      toast.error('Failed to update service');
+      toast.error(error.response?.data?.message || 'Failed to update service');
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +179,7 @@ const ServicesManagement = ({ token }) => {
     try {
       setIsLoading(true);
       await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URL}/api/services/${id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/services/delete/${id}`,
         {
           headers: { token }
         }
@@ -302,8 +308,8 @@ const ServicesManagement = ({ token }) => {
 
   const filteredServices = services.filter(service => {
     const matchesSearch = 
-      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase());
+    (service.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (service.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
     const matchesProduct = 
       filters.product === "all" || service.product === filters.product;
@@ -487,6 +493,7 @@ const ServicesManagement = ({ token }) => {
               isEdit={true}
               onSave={handleEditService}
               onCancel={() => setIsEditDialogOpen(false)}
+              initialData={editingService} 
             />
           )}
         </DialogContent>
