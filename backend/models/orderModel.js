@@ -6,11 +6,25 @@ const orderSchema = new mongoose.Schema({
 		ref: "User",
 		required: true,
 	},
+	orderType: {
+		type: String,
+		enum: ["product", 'service']
+	},
 	products: [
 		{
 			product: {
 				type: mongoose.Schema.Types.ObjectId,
 				ref: "Product",
+			},
+			quantity: Number,
+			price: Number,
+		},
+	],
+	services: [
+		{
+			service: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "Service"
 			},
 			quantity: Number,
 			price: Number,

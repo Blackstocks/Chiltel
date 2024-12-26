@@ -1,5 +1,6 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
+import serviceRequestModel from '../models/serviceRequestModel.js';
 import Stripe from 'stripe'
 import razorpay from 'razorpay'
 
@@ -20,11 +21,13 @@ const placeOrder = async (req,res) => {
     
     try {
         
-        const { userId, products, totalAmount, paymentDetails, address} = req.body
+        const { userId, orderType, products, services, totalAmount, paymentDetails, address} = req.body
 
         const orderData = {
             userId,
+            orderType,
             products,
+            services,
             totalAmount,
             status: "ORDERED",
             paymentDetails,
@@ -129,11 +132,13 @@ const verifyStripe = async (req,res) => {
 const placeOrderRazorpay = async (req,res) => {
     try {
         
-        const { userId, products, totalAmount, paymentDetails, address} = req.body
+        const { userId, orderType, products, services, totalAmount, paymentDetails, address} = req.body
 
         const orderData = {
             userId,
+            orderType,
             products,
+            services,
             totalAmount,
             status: "PENDING",
             paymentDetails,
@@ -180,12 +185,19 @@ const placeOrderRazorpay = async (req,res) => {
 const verifyRazorpay = async (req,res) => {
     try {
         
-        const { userId, razorpay_order_id  } = req.body
+        const { serviceRequestId, razorpay_order_id  } = req.body
+        console.log('ServiceRequestId: ', serviceRequestId);
 
         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
         if (orderInfo.status === 'paid') {
             console.log('order info post payment: ', orderInfo);
             await orderModel.findOneAndUpdate({"paymentDetails.transactionId": orderInfo.receipt},{status:"ORDERED", "paymentDetails.paidAt": new Date()});  // added time here
+            if(serviceRequestId){
+                await serviceRequestModel.findOneAndUpdate({"_id":serviceRequestId},{
+                    status:"IN_PROGRESS",
+                    paymentStatus: "PAID",
+                });
+            }
             // await orderModel.findByIdAndUpdate(orderInfo.receipt,{payment:true});
             // await userModel.findByIdAndUpdate(userId,{cartData:{}})
             res.json({ success: true, message: "Payment Successful", orderInfo })
