@@ -86,7 +86,9 @@ const PlaceOrder = ({buyNowProduct=null}) => {
             console.log('user: ', user);
             let orderData = {
                 userId: user._id,
+                orderType: 'product',
                 products: orderItems,
+                services: [],
                 totalAmount: cart.totalAmount + delivery_fee,
                 status: "ORDERED",
                 paymentDetails: {
