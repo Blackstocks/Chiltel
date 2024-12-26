@@ -97,6 +97,13 @@ class ApiService {
 		return this.handleResponse(response);
 	}
 
+	async getCurrentService(token) {
+		const response = await fetch(`${this.baseURL}/rider/services/current`, {
+			headers: this.getHeaders(token),
+		});
+		return this.handleResponse(response);
+	}
+
 	async getServiceHistory(token, page = 1, limit = 10) {
 		const response = await fetch(
 			`${this.baseURL}/rider/services/history?page=${page}&limit=${limit}`,

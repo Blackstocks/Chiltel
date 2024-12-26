@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { apiService } from "../services/api.service";
-import { wsService } from "../services/websocket.service";
 
 export const useServices = () => {
 	const { state } = useAuth();
@@ -41,14 +40,10 @@ export const useServices = () => {
 
 		if (state.token) {
 			fetchServices();
-			wsService.on("newService", handleNewService);
-			wsService.on("serviceUpdate", handleServiceUpdate);
 		}
 
 		return () => {
 			mounted = false;
-			wsService.off("newService", handleNewService);
-			wsService.off("serviceUpdate", handleServiceUpdate);
 		};
 	}, [state.token]);
 
@@ -58,11 +53,7 @@ export const useServices = () => {
 				state.token,
 				serviceId
 			);
-			setServices((prev) =>
-				prev.map((service) =>
-					service._id === serviceId ? updatedService : service
-				)
-			);
+			setServices(updatedService);
 			return updatedService;
 		} catch (err) {
 			setError(err.message);
@@ -105,6 +96,30 @@ export const useServices = () => {
 		}
 	};
 
+	const getServiceHistory = async (page = 1, limit = 10) => {
+		try {
+			const history = await apiService.getServiceHistory(
+				state.token,
+				page,
+				limit
+			);
+			return history;
+		} catch (err) {
+			setError(err.message);
+			throw err;
+		}
+	};
+
+	const getCurrentService = async () => {
+		try {
+			const currentService = await apiService.getCurrentService(state.token);
+			return currentService;
+		} catch (err) {
+			setError(err.message);
+			throw err;
+		}
+	};
+
 	return {
 		services,
 		loading,
@@ -112,5 +127,7 @@ export const useServices = () => {
 		acceptService,
 		completeService,
 		updateServiceStatus,
+		getCurrentService,
+		getServiceHistory,
 	};
 };

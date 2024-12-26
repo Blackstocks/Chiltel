@@ -1,5 +1,6 @@
 // Rider Schema
 import mongoose from "mongoose";
+import ServiceRequest from "./serviceRequestModel.js";
 
 const riderSchema = {
 	firstName: String,
@@ -20,7 +21,7 @@ const riderSchema = {
 	assignedServices: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "ServiceRequest",
+			ref: ServiceRequest,
 		},
 	],
 	rating: {

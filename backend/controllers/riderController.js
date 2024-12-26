@@ -1,6 +1,6 @@
 // src/controllers/rider.controller.js
 import Rider from "../models/riderModel.js";
-import Service from "../models/serviceModel.js";
+import ServiceRequest from "../models/serviceRequestModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -162,12 +162,33 @@ const riderController = {
 	// Service Controllers
 	async getAssignedServices(req, res) {
 		try {
-			const services = await Service.find({
+			const services = await ServiceRequest.find({
 				rider: req.rider._id,
-				status: { $in: ["ASSIGNED", "IN_PROGRESS"] },
-			}).populate("user", "firstName lastName");
+				status: "ASSIGNED",
+			})
+				.populate("service", "name estimatedDuration")
+				.populate("user", "firstName lastName");
 
 			res.json(services);
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async getCurrentService(req, res) {
+		try {
+			const service = await ServiceRequest.findOne({
+				rider: req.rider._id,
+				status: { $in: ["IN_PROGRESS"] },
+			})
+				.populate("user", "firstName lastName")
+				.populate("service", "name");
+
+			if (!service) {
+				return res.status(404).json({ message: "No current service found" });
+			}
+
+			res.json(service);
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
@@ -177,16 +198,17 @@ const riderController = {
 		try {
 			const { page = 1, limit = 10 } = req.query;
 
-			const services = await Service.find({
+			const services = await ServiceRequest.find({
 				rider: req.rider._id,
 				status: "COMPLETED",
 			})
-				.populate("user", "firstName lastName")
+				.populate("user", "name")
+				.populate("service", "name")
 				.sort({ completedAt: -1 })
 				.limit(limit * 1)
 				.skip((page - 1) * limit);
 
-			const count = await Service.countDocuments({
+			const count = await ServiceRequest.countDocuments({
 				rider: req.rider._id,
 				status: "COMPLETED",
 			});
@@ -203,7 +225,7 @@ const riderController = {
 
 	async acceptService(req, res) {
 		try {
-			const service = await Service.findById(req.params.id);
+			const service = await ServiceRequest.findById(req.params.id);
 
 			if (!service) {
 				return res.status(404).json({ message: "Service not found" });
@@ -224,7 +246,7 @@ const riderController = {
 
 	async completeService(req, res) {
 		try {
-			const service = await Service.findById(req.params.id);
+			const service = await ServiceRequest.findById(req.params.id);
 
 			if (!service) {
 				return res.status(404).json({ message: "Service not found" });
@@ -247,7 +269,7 @@ const riderController = {
 	async updateServiceStatus(req, res) {
 		try {
 			const { status } = req.body;
-			const service = await Service.findOneAndUpdate(
+			const service = await ServiceRequest.findOneAndUpdate(
 				{ _id: req.params.id, rider: req.rider._id },
 				{ status },
 				{ new: true }

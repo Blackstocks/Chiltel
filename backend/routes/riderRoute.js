@@ -18,6 +18,11 @@ riderRouter.put("/location", verifyRider, riderController.updateLocation);
 
 // Service routes
 riderRouter.get("/services", verifyRider, riderController.getAssignedServices);
+riderRouter.get(
+	"/services/current",
+	verifyRider,
+	riderController.getCurrentService
+);
 riderRouter.put(
 	"/services/:id/status",
 	verifyRider,
