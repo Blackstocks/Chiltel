@@ -48,11 +48,16 @@ const OrderManagement = ({ token }) => {
     try {
       setLoading((prev) => ({ ...prev, orders: true }));
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/orders`
+        `${import.meta.env.VITE_BACKEND_URL}/api/order/list`,
+        {
+          method: "POST",
+          headers: { token },
+        }
       );
       if (!response.ok) throw new Error("Failed to fetch orders");
       const data = await response.json();
-      setOrders(data);
+      console.log("orders: ", data.orders)
+      setOrders(data.orders);
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -157,7 +162,7 @@ const OrderManagement = ({ token }) => {
   };
 
   useEffect(() => {
-    //fetchOrders();
+    fetchOrders();
     fetchServiceRequests();
     fetchRiders();
   }, []);
@@ -204,10 +209,10 @@ const OrderManagement = ({ token }) => {
                 </TableHeader>
                 <TableBody>
                   {orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>{order.id}</TableCell>
-                      <TableCell>{order.userId}</TableCell>
-                      <TableCell>${order.totalAmount}</TableCell>
+                    <TableRow key={order._id}>
+                      <TableCell>{order._id}</TableCell>
+                      <TableCell>{order.userId.name}</TableCell>
+                      <TableCell>₹{order.totalAmount}</TableCell>
                       <TableCell>
                         <Badge className={getStatusBadgeColor(order.status)}>
                           {order.status}
