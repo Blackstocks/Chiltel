@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 import ServiceRequest from "./serviceRequestModel.js";
 
 const riderSchema = {
-	firstName: String,
-	lastName: String,
-	email: { type: String, unique: true },
-	password: String,
-	phoneNumber: String,
+	firstName: { type: String, required: true },
+	lastName: { type: String, required: true },
+	email: { type: String, unique: true, required: true },
+	password: { type: String, required: true },
+	phoneNumber: { type: String, required: true },
 	specialization: {
 		type: String,
 		enum: ["AC", "Cooler", "Microwave"],

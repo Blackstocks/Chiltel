@@ -10,8 +10,19 @@ import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useEffect, useState } from "react";
+import { useProfile } from "../hooks/useProfile";
 
 const OverviewTab = () => {
+	const { profile, loading, error } = useProfile();
+	if (loading) {
+		return <div>Loading...</div>;
+	}
+	if (error) {
+		return <div>Error loading your profile</div>;
+	}
+
+	console.log(profile);
+
 	return (
 		<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 			{/* Stats Cards */}
@@ -29,13 +40,13 @@ const OverviewTab = () => {
 
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-sm font-medium">
-						Completed Services
-					</CardTitle>
+					<CardTitle className="text-sm font-medium">Total Services</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="text-2xl font-bold">8</div>
-					<p className="text-xs text-gray-500">Today's completion</p>
+					<div className="text-2xl font-bold">
+						{profile.assignedServices.length}
+					</div>
+					{/* <p className="text-xs text-gray-500">Today's completion</p> */}
 				</CardContent>
 			</Card>
 
@@ -44,8 +55,17 @@ const OverviewTab = () => {
 					<CardTitle className="text-sm font-medium">Rating</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="text-2xl font-bold">4.8</div>
-					<p className="text-xs text-gray-500">Based on 150 reviews</p>
+					{profile.rating.count > 0 ? (
+						<>
+							<div className="text-2xl font-bold">{profile.rating.average}</div>
+							<p className="text-xs text-gray-500">
+								Based on {profile.rating.count}{" "}
+								{profile.rating.count > 1 ? "ratings" : "rating"}
+							</p>
+						</>
+					) : (
+						<p className="text-xs text-gray-500">No reviews yet</p>
+					)}
 				</CardContent>
 			</Card>
 

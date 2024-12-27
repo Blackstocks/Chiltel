@@ -23,27 +23,62 @@ import {
 } from "./ui/card";
 import { useState } from "react";
 import { useEffect } from "react";
-import { apiService } from "../services/api.service";
+import { useProfile } from "../hooks/useProfile";
+import { toast } from "react-toastify";
 
 const ProfileTab = () => {
 	const { logout } = useAuthActions();
-	const [profile, setProfile] = useState({
-		firstName: "Loading...",
-		lastName: "Loading...",
-		email: "Loading...",
-		phoneNumber: "Loading...",
+	const [profileData, setProfileData] = useState({
+		firstName: "",
+		lastName: "",
+		email: "",
+		phoneNumber: "",
 	});
 
+	const { profile, loading, error, updateProfile } = useProfile();
+
 	useEffect(() => {
-		const fetchProfile = async () => {
-			const response = await apiService.getProfile(
-				localStorage.getItem("riderToken")
-			);
-			console.log("response", response);
-			setProfile(response);
-		};
-		fetchProfile();
-	}, []);
+		if (profile) {
+			setProfileData({
+				firstName: profile.firstName,
+				lastName: profile.lastName,
+				email: profile.email,
+				phoneNumber: profile.phoneNumber,
+			});
+		}
+	}, [profile]);
+
+	if (loading) {
+		return <div>Loading...</div>;
+	}
+
+	if (error) {
+		return <div>Error loading profile</div>;
+	}
+
+	const handleChange = (e) => {
+		setProfileData((prev) => ({
+			...prev,
+			[e.target.id]: e.target.value,
+		}));
+	};
+
+	const handleSaveChanges = async () => {
+		if (
+			!profileData.firstName ||
+			!profileData.lastName ||
+			!profileData.email ||
+			!profileData.phoneNumber
+		) {
+			toast.error("All fields are required");
+			return;
+		}
+		try {
+			await updateProfile(profileData);
+		} catch (err) {
+			console.error(err);
+		}
+	};
 
 	return (
 		<div className="space-y-6">
@@ -55,23 +90,40 @@ const ProfileTab = () => {
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
 						<Label htmlFor="name">First Name</Label>
-						<Input id="firstName" defaultValue={profile.firstName} />
+						<Input
+							id="firstName"
+							defaultValue={profile.firstName}
+							onChange={handleChange}
+						/>
 					</div>
 					<div className="space-y-2">
 						<Label htmlFor="name">Last Name</Label>
-						<Input id="lastName" defaultValue={profile.lastName} />
+						<Input
+							id="lastName"
+							defaultValue={profile.lastName}
+							onChange={handleChange}
+						/>
 					</div>
 					<div className="space-y-2">
 						<Label htmlFor="email">Email</Label>
-						<Input id="email" type="email" defaultValue={profile.email} />
+						<Input
+							id="email"
+							type="email"
+							defaultValue={profile.email}
+							onChange={handleChange}
+						/>
 					</div>
 					<div className="space-y-2">
 						<Label htmlFor="phone">Phone</Label>
-						<Input id="phoneNumber" defaultValue={profile.phoneNumber} />
+						<Input
+							id="phoneNumber"
+							defaultValue={profile.phoneNumber}
+							onChange={handleChange}
+						/>
 					</div>
 				</CardContent>
 				<CardFooter>
-					<Button>Save Changes</Button>
+					<Button onClick={handleSaveChanges}>Save Changes</Button>
 				</CardFooter>
 			</Card>
 
