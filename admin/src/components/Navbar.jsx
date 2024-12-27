@@ -1,6 +1,6 @@
-import { useContext } from 'react'
+
 import {assets} from '../assets/assets'
-import AuthContext from '../../../frontend/src/context/AuthContext'
+
 
 const Navbar = ({setToken}) => {
   //const { logout } = useContext(AuthContext);
