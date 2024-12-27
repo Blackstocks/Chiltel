@@ -501,7 +501,7 @@ const Footer = () => {
       <div className="mt-8 text-center text-gray-500">
         <div className="flex flex-col items-center mx-4 space-y-2 md:flex-row justify-evenly md:mx-8 md:space-y-0 md:space-x-4">
           <p className="md:ml-5">
-            &copy; 2024 Copyright: All Rights Reserved.
+            &copy; 2024 Copyright: All Rights Reserved by Chiltel.
           </p>
           <p className="md:mr-5">Made with Love in India</p>
         </div>
