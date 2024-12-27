@@ -189,28 +189,31 @@ export const serviceRequestController = {
       const { id } = req.params;
       const { riderId } = req.body;
 
-      const serviceRequest = await ServiceRequest.findByIdAndUpdate(
-        id,
-        {
-          rider: riderId,
-          status: "ASSIGNED",
-          updatedAt: new Date(),
-        },
-        { new: true, runValidators: true }
-      );
-
-      await mongoose.model('Rider').findByIdAndUpdate(
-        riderId,
-        { $push: { assignedServices: serviceRequest._id } },
-        { new: true, runValidators: true }
-      );
-
-      if (!serviceRequest) {
+      // First check if the service request exists
+      const existingRequest = await ServiceRequest.findById(id);
+      if (!existingRequest) {
         return res.status(404).json({
           success: false,
           message: "Service request not found",
         });
       }
+
+      // Add rider to requestedRiders array if not already present
+      if (!existingRequest.requestedRiders.includes(riderId)) {
+        existingRequest.requestedRiders.push(riderId);
+      }
+
+      // Update the service request
+      const serviceRequest = await ServiceRequest.findByIdAndUpdate(
+        id,
+        {
+          rider: riderId,
+          status: "ASSIGNED",
+          requestedRiders: existingRequest.requestedRiders,
+          updatedAt: new Date(),
+        },
+        { new: true, runValidators: true }
+      ).populate('rider'); // Optionally populate rider details
 
       res.status(200).json({
         success: true,
