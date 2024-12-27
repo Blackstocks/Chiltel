@@ -25,6 +25,8 @@ export const ServiceCartProvider = ({ children }) => {
     //   getServiceCartCount(user._id);
     console.log('user: ', user);
       fetchServiceCart();
+    }else{
+      setServiceCart([]);
     }
   }, [isAuthenticated, user, loading]);
 

@@ -121,7 +121,7 @@ const Orders = () => {
       )}
 
       {view === 'services' && (
-        <div className="grid grid-cols-6 gap-4 bg-gray-100 py-3 px-4 text-gray-600 text-sm font-semibold sticky top-0 z-10">
+        <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr_1fr] sm:grid grid-cols-[2fr_2fr_1fr_1fr_1fr_1fr] gap-4 bg-gray-100 py-3 px-4 text-gray-600 text-sm font-semibold sticky top-0 z-10">
           <div>Service</div>
           <div>Description</div>
           <div>Price</div>
@@ -203,7 +203,7 @@ const Orders = () => {
           service.paymentStatus === 'PAID' && 
           <div
             key={service._id}
-            className={`grid grid-cols-6 gap-4 items-center border-b border-gray-200 py-4 px-4 text-sm ${
+            className={`grid grid grid-cols-[2fr_2fr_1fr_1fr_1fr_1fr] sm:grid grid-cols-[2fr_2fr_1fr_1fr_1fr_1fr] gap-4 items-center border-b border-gray-200 py-4 px-4 text-sm ${
               service.status === 'REQUESTED' ? 'border-yellow-500 bg-yellow-50' : ''
             }`}
           >

@@ -16,7 +16,7 @@ const Navbar = () => {
     setToken,
     setCartItems,
   } = useContext(ShopContext);
-  const { user, isAuthenticated, loading } = useContext(AuthContext);
+  const { user, isAuthenticated, loading, logout } = useContext(AuthContext);
   const { cartCount } = useContext(CartContext);
   const [userId, setUserId] = useState("");
   // const [cartCount, setCartCount] = useState(0);
@@ -39,12 +39,13 @@ const Navbar = () => {
   //     }
   // }, [user, loading])
 
-  const logout = () => {
-    navigate("/login");
-    localStorage.removeItem("token");
-    setToken("");
-    setCartItems({});
-  };
+  // const logout = () => {
+  //   localStorage.removeItem("token");
+  //   localStorage.removeItem('chiltel-user-token');
+  //   setToken("");
+  //   setCartItems({});
+  //   navigate("/login");
+  // };
 
   return (
     <div className="flex items-center justify-between py-5 font-medium">
