@@ -6,12 +6,14 @@ import { ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import ModalLoader from "../components/ModalLoader";
+import ServiceCartContext from "../context/ServiceCartContext";
 
 const ServiceModal = ({ isOpen, onClose, category }) => {
   if (!isOpen) return null;
 
   const { user } = useContext(AuthContext);
   const { backendUrl, token } = useContext(ShopContext);
+  const { addToServiceCart } = useContext(ServiceCartContext);
 
   const [services, setServices] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -124,7 +126,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     try {
       console.log("Scheduled Service:", scheduleService);
       const scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
-      const response = await axios.post(`${backendUrl}/api/serviceRequests/`, {
+      const serviceRequest = {
         user: user._id,
         service: scheduleService.service._id,
         userLocation: {
@@ -136,14 +138,30 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
         // scheduledFor: `${selectedDate}T${selectedTime}:00`,
         price: scheduleService.service.price,
         remarks,
-      });
-      console.log('service request: ', response.data);
-
-      if (response.data.success) {
-        toast.success("Service scheduled successfully.");
-      } else {
-        toast.error("Failed to schedule the service.");
       }
+      await addToServiceCart(scheduleService, serviceRequest);
+      onClose();
+      // const response = await axios.post(`${backendUrl}/api/serviceRequests/`, {
+      //   user: user._id,
+      //   service: scheduleService.service._id,
+      //   userLocation: {
+      //     type: "Point",
+      //     coordinates: [0.0, 0.0], // Replace with actual coordinates if available
+      //     address: `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
+      //   },
+      //   scheduledFor: scheduledDateTime,
+      //   // scheduledFor: `${selectedDate}T${selectedTime}:00`,
+      //   price: scheduleService.service.price,
+      //   remarks,
+      // });
+      // console.log('service request: ', response.data);
+
+      // if (response.data.success) {
+      //   toast.success("Service scheduled successfully.");
+      //   onClose();
+      // } else {
+      //   toast.error("Failed to schedule the service.");
+      // }
     } catch (err) {
       console.error("Error scheduling service:", err);
       toast.error("An error occurred while scheduling the service.");

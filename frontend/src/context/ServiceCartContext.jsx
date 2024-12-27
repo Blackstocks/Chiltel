@@ -49,7 +49,7 @@ export const ServiceCartProvider = ({ children }) => {
     }
   };
 
-  const addToServiceCart = async (user, scheduleService) => {
+  const addToServiceCart = async (scheduleService, serviceRequest) => {
     const token = localStorage.getItem('token');
 
     if (!isAuthenticated) {
@@ -58,37 +58,10 @@ export const ServiceCartProvider = ({ children }) => {
       console.log('Service: ', scheduleService);
       try {
         console.log("Scheduled Service:", scheduleService);
-        const scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
-        const response = await axios.post(`${backendUrl}/api/serviceRequests/`, {
-          user: user._id,
-          service: scheduleService.service._id,
-          userLocation: {
-            type: "Point",
-            coordinates: [0.0, 0.0], // Replace with actual coordinates if available
-            address: `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
-          },
-          scheduledFor: scheduledDateTime,
-          // scheduledFor: `${selectedDate}T${selectedTime}:00`,
-          price: scheduleService.service.price,
-          remarks,
-        });
+        const response = await axios.post(`${backendUrl}/api/serviceRequests/`, serviceRequest);
+        fetchServiceCart();
         console.log('service request: ', response.data);
-
-        if (response.data.success) {
-          alert("Service scheduled successfully.");
-          setScheduleService(null);
-          setSelectedDate("");
-          setSelectedTime("");
-          setRemarks("");
-          setAddress({
-            street: "",
-            city: "",
-            state: "",
-            zipCode: "",
-          });
-        } else {
-          alert("Failed to schedule the service.");
-        }
+        toast.success('Service request created');
       } catch (err) {
         toast.error('Something went wrong');
         console.error('Error while adding service to cart: ', err);

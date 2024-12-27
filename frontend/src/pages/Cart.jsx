@@ -15,7 +15,7 @@ const Cart = () => {
   const { backendUrl, navigate, token } = useContext(ShopContext);
   const { user, loading } = useContext(AuthContext);
   const { updateQuantity, removeFromCart } = useContext(CartContext);
-  const { serviceCart } = useContext(ServiceCartContext);
+  const { serviceCart, fetchServiceCart } = useContext(ServiceCartContext);
 
   const [totalAmount, setTotalAmount] = useState(0);
   const [cartLoading, setCartLoading] = useState(true);
@@ -190,7 +190,8 @@ const handlePayment = async (serviceRequest) => {
       });
   
       if (response.data.success) {
-        alert("Service cancelled successfully");
+        toast.info("Service cancelled successfully");
+        fetchServiceCart();
         setShowCancelModal(false);
         setCancelReason("");
         setSelectedServiceId(null);
