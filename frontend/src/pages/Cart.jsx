@@ -24,6 +24,10 @@ const Cart = () => {
 
   const [expandedRow, setExpandedRow] = useState(null);
 
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const fetchCartDetails = async () => {
@@ -173,23 +177,33 @@ const handlePayment = async (serviceRequest) => {
   //   // Implement payment logic here
   // };
 
-  const handleCancel = async (serviceId) => {
+  const handleCancel = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `${backendUrl}/api/service/cancel`,
-        { serviceId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.delete(`${backendUrl}/api/serviceRequests/${selectedServiceId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          cancelReason,
+        },
+      });
+  
       if (response.data.success) {
-        alert("Service canceled successfully!");
+        alert("Service cancelled successfully");
+        setShowCancelModal(false);
+        setCancelReason("");
+        setSelectedServiceId(null);
+        // Optionally, refresh the services list here
       } else {
-        alert("Failed to cancel service.");
+        alert("Failed to cancel service: " + response.data.message);
       }
-    } catch (err) {
-      console.error("Error canceling service:", err);
+    } catch (error) {
+      console.error("Error cancelling service: ", error);
+      alert("Something went wrong while cancelling the service.");
     }
   };
+  
 
   const toggleRow = (rowId) => {
     setExpandedRow(expandedRow === rowId ? null : rowId);
@@ -199,6 +213,36 @@ const handlePayment = async (serviceRequest) => {
 
   return (
     <div className="border-t pt-14">
+            {/* Cancel Modal */}
+            {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-96 shadow-md">
+            <h2 className="text-lg font-bold mb-4">Cancel Service</h2>
+            <p className="text-sm text-gray-600 mb-4">Please provide a reason for cancellation:</p>
+            <textarea
+              className="w-full h-24 p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Enter your reason"
+            ></textarea>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                onClick={() => setShowCancelModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
+                onClick={handleCancel}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="text-2xl mb-6">
         <Title text1="YOUR" text2="CART" />
       </div>
@@ -500,14 +544,17 @@ const handlePayment = async (serviceRequest) => {
 
                       {/* Action Buttons */}
                       <div className="mt-4 flex flex-col gap-2">
-                        {service.status === "CREATED" && (
-                          <button
-                            onClick={() => handleCancel(service._id)}
-                            className="w-full px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
-                          >
-                            Cancel Service
-                          </button>
-                        )}
+                          {service.status === "CREATED" && (
+                            <button
+                              onClick={() => {
+                                setSelectedServiceId(service._id);
+                                setShowCancelModal(true);
+                              }}
+                              className="w-full px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
+                            >
+                              Cancel Service
+                            </button>
+                          )}
                         {service.status === "REQUESTED" && (
                           <button
                             onClick={() => handlePayment(service._id)}
