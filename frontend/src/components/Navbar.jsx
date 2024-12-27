@@ -12,11 +12,10 @@ const Navbar = () => {
     setShowSearch,
     getCartCount,
     navigate,
-    token,
     setToken,
     setCartItems,
   } = useContext(ShopContext);
-  const { user, isAuthenticated, loading, logout } = useContext(AuthContext);
+  const { user, isAuthenticated, loading, logout, token } = useContext(AuthContext);
   const { cartCount } = useContext(CartContext);
   const [userId, setUserId] = useState("");
   // const [cartCount, setCartCount] = useState(0);
@@ -85,7 +84,7 @@ const Navbar = () => {
             alt=""
           />
           {/* Dropdown Menu */}
-          {token && (
+          {/* {token && ( */}
             <div className="absolute right-0 hidden pt-4 group-hover:block dropdown-menu">
               <div className="flex flex-col gap-2 px-5 py-3 text-gray-500 rounded w-36 bg-slate-100">
                 <p className="cursor-pointer hover:text-black">My Profile</p>
@@ -95,12 +94,19 @@ const Navbar = () => {
                 >
                   Orders
                 </p>
-                <p onClick={logout} className="cursor-pointer hover:text-black">
-                  Logout
-                </p>
+                {token && (
+                  <p onClick={logout} className="cursor-pointer hover:text-black">
+                    Logout
+                  </p>
+                )}
+                {!token && (
+                  <p onClick={()=> navigate('/login')} className="cursor-pointer hover:text-black">
+                    Login
+                  </p>
+                )}
               </div>
             </div>
-          )}
+          {/* )} */}
         </div>
         <Link to="/cart" className="relative">
           <img src={assets.cart_icon} className="w-5 min-w-5" alt="" />

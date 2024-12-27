@@ -9,6 +9,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(null);
+	const [token, setToken] = useState(null);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const { backendUrl } = useContext(ShopContext);
@@ -32,6 +33,7 @@ export const AuthProvider = ({ children }) => {
 		setIsAuthenticated(false);
 		try {
 		  const token = localStorage.getItem('token');	
+		  setToken(token);
 		  if (token) {
 			const response = await axios.get(backendUrl + '/api/user/verify', {
 			  headers: {
@@ -81,6 +83,7 @@ export const AuthProvider = ({ children }) => {
 				// Store the token and user data in local storage and state
 				localStorage.setItem("chiltel-user-token", response.data.token);
 				localStorage.setItem("token", response.data.token);
+				setToken(response.data.token);
 				console.log('user: ', response.data);
 				setUser(response.data.user);
 				setIsAuthenticated(true);
@@ -102,25 +105,30 @@ export const AuthProvider = ({ children }) => {
 				name,
 			});
 
-			if (response.status === 200) {
+			console.log('signup response: ', response);
+
+			if (response.data.success) {
 				// Store the token and user data in local storage and state
-				navigate('/');
-				localStorage.setItem("chiltel-user-token", response.data.token);
+				// localStorage.setItem("chiltel-user-token", response.data.token);
 				setUser(response.data.user);
 				// setIsAuthenticated(true);
 				toast.success("Signed up successfully");
+				return true;
 			} else {
 				toast.error(response.data.message);
+				return false;
 			}
 		} catch (error) {
 			console.error("Error signing up:", error);
 			toast.error("Failed to sign up. Please try again.");
+			return false;
 		}
 	};
 
 	const logout = () => {
 		localStorage.removeItem("chiltel-user-token");
 		localStorage.removeItem('token');
+		setToken(null);
 		toast.success("Logged out successfully");
 		setUser(null);
 		setIsAuthenticated(false);
@@ -128,6 +136,7 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	const value = {
+		token,
 		user,
 		isAuthenticated,
 		loading,
