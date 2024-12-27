@@ -23,8 +23,10 @@ import {
 	CheckCircle2,
 	Loader2,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useServices } from "@/hooks/useServices";
 
-const ActiveService = ({ service }) => {
+const ActiveService = () => {
 	const [extraWorks, setExtraWorks] = useState([]);
 	const [showExtraWorkDialog, setShowExtraWorkDialog] = useState(false);
 	const [newWorkDescription, setNewWorkDescription] = useState("");
@@ -32,6 +34,8 @@ const ActiveService = ({ service }) => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [workStarted, setWorkStarted] = useState(false);
+
+	const { getActiveService } = useServices();
 
 	// Function to open navigation
 	const handleNavigate = () => {

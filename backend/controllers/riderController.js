@@ -71,10 +71,26 @@ const riderController = {
 			}
 
 			// Verify password
-			const isMatch = await bcrypt.compare(password, rider.password);
+			const isMatch = bcrypt.compare(password, rider.password);
 			if (!isMatch) {
 				return res.status(400).json({ message: "Invalid credentials" });
 			}
+
+			if (rider.registrationStatus === "PENDING") {
+				return res
+					.status(400)
+					.json({ message: "Registration not approved by the admin" });
+			}
+
+			if (rider.registrationStatus === "REJECTED") {
+				return res
+					.status(400)
+					.json({ message: "Registration rejected by the admin" });
+			}
+
+			// Update rider status to online
+			rider.status = "AVAILABLE";
+			await rider.save();
 
 			// Generate token
 			const token = jwt.sign({ id: rider._id }, process.env.JWT_SECRET, {
@@ -175,7 +191,7 @@ const riderController = {
 		}
 	},
 
-	async getCurrentService(req, res) {
+	async getActiveService(req, res) {
 		try {
 			const service = await ServiceRequest.findOne({
 				rider: req.rider._id,
@@ -189,6 +205,23 @@ const riderController = {
 			}
 
 			res.json(service);
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async getAcceptedServices(req, res) {
+		try {
+			const services = await ServiceRequest.find({
+				rider: req.rider._id,
+				status: "ASSIGNED",
+			})
+				.populate("service", "name estimatedDuration")
+				.populate("user", "firstName lastName");
+			if (services.length === 0) {
+				return res.status(404).json({ message: "No accepted services found" });
+			}
+			res.json(services);
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}

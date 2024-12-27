@@ -77,10 +77,11 @@ const OverviewTab = () => {
 };
 
 const CurrCard = () => {
-	const { getCurrentService, loading, error, completeService } = useServices();
+	const { getAcceptedServices, loading, error, completeService } =
+		useServices();
 	const [currService, setCurrService] = useState(null);
 	useEffect(() => {
-		getCurrentService().then((service) => {
+		getAcceptedServices().then((service) => {
 			setCurrService(service);
 		});
 	}, []);
@@ -94,9 +95,10 @@ const CurrCard = () => {
 
 	return (
 		<>
+			{/* {<ActiveService />} */}
 			<Card className="md:col-span-2 lg:col-span-3">
 				<CardHeader>
-					<CardTitle>Current Service</CardTitle>
+					<CardTitle>Accepted Services</CardTitle>
 					<CardDescription>Active service details</CardDescription>
 				</CardHeader>
 				{!currService && error ? (
@@ -125,7 +127,6 @@ const CurrCard = () => {
 					</>
 				)}
 			</Card>
-			{<ActiveService service={currService} />}
 		</>
 	);
 };

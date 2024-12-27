@@ -110,10 +110,22 @@ export const useServices = () => {
 		}
 	};
 
-	const getCurrentService = async () => {
+	const getActiveService = async () => {
 		try {
-			const currentService = await apiService.getCurrentService(state.token);
+			const currentService = await apiService.getActiveService(state.token);
 			return currentService;
+		} catch (err) {
+			setError(err.message);
+			throw err;
+		}
+	};
+
+	const getAcceptedServices = async () => {
+		try {
+			const acceptedServices = await apiService.getAcceptedServices(
+				state.token
+			);
+			return acceptedServices;
 		} catch (err) {
 			setError(err.message);
 			throw err;
@@ -127,7 +139,8 @@ export const useServices = () => {
 		acceptService,
 		completeService,
 		updateServiceStatus,
-		getCurrentService,
+		getActiveService,
 		getServiceHistory,
+		getAcceptedServices,
 	};
 };

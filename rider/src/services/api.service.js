@@ -97,8 +97,15 @@ class ApiService {
 		return this.handleResponse(response);
 	}
 
-	async getCurrentService(token) {
-		const response = await fetch(`${this.baseURL}/rider/services/current`, {
+	async getActiveService(token) {
+		const response = await fetch(`${this.baseURL}/rider/services/active`, {
+			headers: this.getHeaders(token),
+		});
+		return this.handleResponse(response);
+	}
+
+	async getAcceptedServices(token) {
+		const response = await fetch(`${this.baseURL}/rider/services/accepted`, {
 			headers: this.getHeaders(token),
 		});
 		return this.handleResponse(response);

@@ -18,6 +18,11 @@ const riderSchema = {
 		enum: ["AVAILABLE", "BUSY", "OFFLINE"],
 		default: "OFFLINE",
 	},
+	registrationStatus: {
+		type: String,
+		enum: ["PENDING", "APPROVED", "REJECTED"],
+		default: "PENDING",
+	},
 	AcceptedServices: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
