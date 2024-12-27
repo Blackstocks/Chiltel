@@ -48,8 +48,8 @@ const BuyNow = () => {
             handler: async (response) => {
                 console.log('init pay: ', response)
                 try {
+                    response.cart = false;
                     const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers: { Authorization: `Bearer ${token}` }})
-                    // const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers:{token}})
                     console.log('transaction data: ', data);
                     if (data.success) {
                         console.log('order info: ', data.orderInfo);

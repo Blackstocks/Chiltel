@@ -1,5 +1,6 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
+import cartModel from '../models/cartModel.js';
 import serviceRequestModel from '../models/serviceRequestModel.js';
 import Stripe from 'stripe'
 import razorpay from 'razorpay'
@@ -185,7 +186,7 @@ const placeOrderRazorpay = async (req,res) => {
 const verifyRazorpay = async (req,res) => {
     try {
         
-        const { serviceRequestId, razorpay_order_id  } = req.body
+        const { serviceRequestId, razorpay_order_id, cart, cartId } = req.body
         console.log('ServiceRequestId: ', serviceRequestId);
 
         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
@@ -197,6 +198,14 @@ const verifyRazorpay = async (req,res) => {
                     status:"IN_PROGRESS",
                     paymentStatus: "PAID",
                 });
+            }else{
+                if(cart){
+                    console.log('cartId: ', cartId);
+                    await cartModel.findByIdAndUpdate(cartId, {
+                        items: [],
+                        totalAmount: 0,
+                    })
+                }
             }
             // await orderModel.findByIdAndUpdate(orderInfo.receipt,{payment:true});
             // await userModel.findByIdAndUpdate(userId,{cartData:{}})

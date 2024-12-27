@@ -104,9 +104,10 @@ export const AuthProvider = ({ children }) => {
 
 			if (response.status === 200) {
 				// Store the token and user data in local storage and state
+				navigate('/');
 				localStorage.setItem("chiltel-user-token", response.data.token);
 				setUser(response.data.user);
-				setIsAuthenticated(true);
+				// setIsAuthenticated(true);
 				toast.success("Signed up successfully");
 			} else {
 				toast.error(response.data.message);
