@@ -3,6 +3,7 @@ import axios from "axios";
 import { ShopContext } from "./ShopContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import CartContext from "./CartContext";
 
 const AuthContext = createContext();
 
@@ -28,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 	const checkAuthStatus = async () => {
 		console.log('checking');
 		setLoading(true);
-		
+		setIsAuthenticated(false);
 		try {
 		  const token = localStorage.getItem('token');	
 		  if (token) {
@@ -118,6 +119,7 @@ export const AuthProvider = ({ children }) => {
 
 	const logout = () => {
 		localStorage.removeItem("chiltel-user-token");
+		localStorage.removeItem('token');
 		toast.success("Logged out successfully");
 		setUser(null);
 		setIsAuthenticated(false);

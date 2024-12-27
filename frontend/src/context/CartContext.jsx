@@ -17,13 +17,20 @@ export const CartProvider = ({ children }) => {
     if(isAuthenticated){
       getCartCount(user._id);
       fetchCart();
+    }else{
+      setCartCount(0);
+      setCartAmount(0);
+      setCart([]);
     }
-  },[loading]);
+  },[]);
 
   useEffect(() => {
     if (isAuthenticated) {
       getCartAmount(user._id);
       getCartCount(user._id);
+    }else{
+      setCartCount(0);
+      setCartAmount(0);
     }
   }, [isAuthenticated, cart]);
 
@@ -166,6 +173,8 @@ export const CartProvider = ({ children }) => {
     fetchCart,
     cartAmount,
     cartCount,
+    setCart,
+    setCartCount,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
