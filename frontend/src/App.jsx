@@ -9,10 +9,12 @@ import Product from "./pages/Product";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import PlaceOrder from "./pages/PlaceOrder";
+import Blog from "./pages/Blog";
 import Orders from "./pages/Orders";
 import Verify from "./pages/Verify";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import BlogPost from "./pages/BlogPost";
 import SearchBar from "./components/SearchBar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -37,6 +39,7 @@ const App = () => {
               <Route path="/" element={<Home />} />
               <Route path="/collection" element={<Collection />} />
               <Route path="/about" element={<About />} />
+              <Route path="/blog" element={<Blog />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/product/:productId" element={<Product />} />
               <Route path="/cart" element={<Cart />} />
@@ -48,6 +51,7 @@ const App = () => {
               <Route path="/services" element={<ServiceCollection />} />
               <Route path="/services/:id" element={<ServiceDetail />} />
               <Route path="/products/:category" element={<ProductList />} />
+              <Route path="/blog/:postId" element={<BlogPost />} />
             </Routes>
             <Footer />
           </div>
