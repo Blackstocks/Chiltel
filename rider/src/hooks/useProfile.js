@@ -15,6 +15,7 @@ export const useProfile = () => {
 		const fetchProfile = async () => {
 			try {
 				const data = await apiService.getProfile(state.token);
+				console.log(data);
 				if (mounted) {
 					setProfile(data);
 					setLoading(false);

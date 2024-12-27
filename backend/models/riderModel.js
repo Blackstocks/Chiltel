@@ -1,6 +1,5 @@
 // Rider Schema
 import mongoose from "mongoose";
-import ServiceRequest from "./serviceRequestModel.js";
 
 const riderSchema = {
 	firstName: { type: String, required: true },
@@ -23,16 +22,16 @@ const riderSchema = {
 		enum: ["PENDING", "APPROVED", "REJECTED"],
 		default: "PENDING",
 	},
-	AcceptedServices: [
+	acceptedServices: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
-			ref: ServiceRequest,
+			ref: "ServiceRequest",
 		},
 	],
 	assignedServices: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
-			ref: ServiceRequest,
+			ref: "ServiceRequest",
 		},
 	],
 	rating: {
