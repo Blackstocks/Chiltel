@@ -135,6 +135,7 @@ const riderController = {
 	async getProfile(req, res) {
 		try {
 			const rider = await Rider.findById(req.rider._id).select("-password");
+			console.log(rider);
 			res.json(rider);
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });
