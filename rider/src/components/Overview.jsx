@@ -11,6 +11,7 @@ import { MapPin } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useEffect, useState } from "react";
 import { useProfile } from "../hooks/useProfile";
+import ActiveService from "./ActiveService";
 
 const OverviewTab = () => {
 	const { profile, loading, error } = useProfile();
@@ -92,37 +93,40 @@ const CurrCard = () => {
 	}
 
 	return (
-		<Card className="md:col-span-2 lg:col-span-3">
-			<CardHeader>
-				<CardTitle>Current Service</CardTitle>
-				<CardDescription>Active service details</CardDescription>
-			</CardHeader>
-			{!currService && error ? (
-				<CardDescription className="text-center m-2">{error}</CardDescription>
-			) : (
-				<>
-					<CardContent>
-						<div className="flex items-center space-x-4">
-							<MapPin className="w-6 h-6 text-blue-500" />
-							<div>
-								<p className="font-medium">
-									{currService.userLocation.address}
-								</p>
-								<p className="text-sm text-gray-500">
-									Service: {currService.service.name}
-								</p>
+		<>
+			<Card className="md:col-span-2 lg:col-span-3">
+				<CardHeader>
+					<CardTitle>Current Service</CardTitle>
+					<CardDescription>Active service details</CardDescription>
+				</CardHeader>
+				{!currService && error ? (
+					<CardDescription className="text-center m-2">{error}</CardDescription>
+				) : (
+					<>
+						<CardContent>
+							<div className="flex items-center space-x-4">
+								<MapPin className="w-6 h-6 text-blue-500" />
+								<div>
+									<p className="font-medium">
+										{currService.userLocation.address}
+									</p>
+									<p className="text-sm text-gray-500">
+										Service: {currService.service.name}
+									</p>
+								</div>
 							</div>
-						</div>
-					</CardContent>
-					<CardFooter className="justify-between">
-						<Button variant="outline">Navigate</Button>
-						<Button onClick={() => completeService(currService._id)}>
-							Complete Service
-						</Button>
-					</CardFooter>
-				</>
-			)}
-		</Card>
+						</CardContent>
+						<CardFooter className="justify-between">
+							<Button variant="outline">Navigate</Button>
+							<Button onClick={() => completeService(currService._id)}>
+								Complete Service
+							</Button>
+						</CardFooter>
+					</>
+				)}
+			</Card>
+			{<ActiveService service={currService} />}
+		</>
 	);
 };
 

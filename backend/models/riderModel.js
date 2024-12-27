@@ -18,6 +18,12 @@ const riderSchema = {
 		enum: ["AVAILABLE", "BUSY", "OFFLINE"],
 		default: "OFFLINE",
 	},
+	AcceptedServices: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: ServiceRequest,
+		},
+	],
 	assignedServices: [
 		{
 			type: mongoose.Schema.Types.ObjectId,

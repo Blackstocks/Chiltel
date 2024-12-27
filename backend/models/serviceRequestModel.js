@@ -30,6 +30,12 @@ const serviceRequestSchema = {
 		],
 		default: "CREATED",
 	},
+	requestedRiders: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Rider",
+		},
+	],
 	userLocation: {
 		type: {
 			type: String,
@@ -41,6 +47,7 @@ const serviceRequestSchema = {
 	},
 	scheduledFor: Date,
 	price: Number,
+	rating: Number,
 	paymentStatus: {
 		type: String,
 		enum: ["PENDING", "PAID", "REFUNDED"],
