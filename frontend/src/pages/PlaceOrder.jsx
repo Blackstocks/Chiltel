@@ -36,7 +36,8 @@ const PlaceOrder = ({buyNowProduct=null}) => {
         setFormData(data => ({ ...data, [name]: value }))
     }
 
-    const initPay = (order) => {
+    const initPay = (order, newOrder) => {
+        console.log('Entered init pay');
         const options = {
             key: import.meta.env.VITE_RAZORPAY_KEY_ID,
             amount: order.amount,
@@ -57,12 +58,49 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                         setCartItems({})
                     }
                 } catch (error) {
-                    console.log(error)
+                    console.log('Failed placing order: ', error)
                     toast.error(error)
                 }
-            }
+            },
+            modal: {
+                ondismiss: async () => {
+                    console.log('Payment window was closed by the user.');
+                    toast.error('Payment window closed. Cancelling the order...');
+    
+                    // Cancel the order when the modal is closed
+                    try {
+                        await axios.post(
+                            `${backendUrl}/api/order/cancel`,
+                            { orderId: newOrder._id },
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        );
+                        console.log('Order canceled successfully');
+                    } catch (error) {
+                        console.error('Error while canceling order:', error);
+                        toast.error('Failed to cancel the order. Please contact support.');
+                    }
+                },
+            },
         }
         const rzp = new window.Razorpay(options)
+
+        rzp.on('payment.failed', async (response) => {
+            console.log('Payment failed or user closed dialog:', response);
+            toast.error('Payment failed or was canceled by the user.');
+    
+            try {
+                await axios.post(
+                    `${backendUrl}/api/order/cancel`,
+                    { orderId: newOrder._id },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                console.log('Order canceled successfully');
+            } catch (error) {
+                console.error('Error while canceling order:', error);
+                toast.error('Failed to cancel the order. Please contact support.');
+            }
+        });
+
         rzp.open()
     }
 
@@ -137,7 +175,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     if (responseRazorpay.data.success) {
                         console.log('razorpay init success');
                         console.log('razorpay response: ', responseRazorpay.data);
-                        initPay(responseRazorpay.data.order)
+                        initPay(responseRazorpay.data.order, responseRazorpay.data.newOrder)
                     }
 
                     break;

@@ -174,7 +174,7 @@ const placeOrderRazorpay = async (req,res) => {
         };
         await newOrder.save();
 
-        res.json({success:true,order})
+        res.json({success:true,order, newOrder})
 
     } catch (error) {
         console.log(error)
@@ -265,4 +265,22 @@ const updateStatus = async (req,res) => {
     }
 }
 
-export {verifyRazorpay, verifyStripe ,placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus}
+// delete an order
+const cancelOrder = async (req, res) => {
+    try{
+        const {orderId} = req.body;
+        await orderModel.findByIdAndDelete(orderId);
+        res.json({
+            success: true,
+            message: 'Order cancelled'
+        })
+    }catch(err){
+        console.error(err);
+        res.json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+export {verifyRazorpay, verifyStripe ,placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, cancelOrder}

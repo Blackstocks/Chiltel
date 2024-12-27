@@ -47,7 +47,7 @@ const Cart = () => {
     }
   }, [loading]);
 
-  const initPay = (order, serviceRequest) => {
+  const initPay = (order, newOrder, serviceRequest) => {
     const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
@@ -72,9 +72,46 @@ const Cart = () => {
                 console.log(error)
                 toast.error(error)
             }
-        }
+        },
+        modal: {
+            ondismiss: async () => {
+                console.log('Payment window was closed by the user.');
+                toast.error('Payment window closed. Cancelling the order...');
+
+                // Cancel the order when the modal is closed
+                try {
+                    await axios.post(
+                        `${backendUrl}/api/order/cancel`,
+                        { orderId: newOrder._id },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    console.log('Order canceled successfully');
+                } catch (error) {
+                    console.error('Error while canceling order:', error);
+                    toast.error('Failed to cancel the order. Please contact support.');
+                }
+            },
+        },
     }
     const rzp = new window.Razorpay(options)
+
+    rzp.on('payment.failed', async (response) => {
+      console.log('Payment failed or user closed dialog:', response);
+      toast.error('Payment failed or was canceled by the user.');
+
+      try {
+          await axios.post(
+              `${backendUrl}/api/order/cancel`,
+              { orderId: newOrder._id },
+              { headers: { Authorization: `Bearer ${token}` } }
+          );
+          console.log('Order canceled successfully');
+      } catch (error) {
+          console.error('Error while canceling order:', error);
+          toast.error('Failed to cancel the order. Please contact support.');
+      }
+    });
+
     rzp.open()
 }
 
@@ -122,7 +159,7 @@ const handlePayment = async (serviceRequest) => {
         if (responseRazorpay.data.success) {
             console.log('razorpay init success');
             console.log('razorpay response: ', responseRazorpay.data);
-            initPay(responseRazorpay.data.order, serviceRequest)
+            initPay(responseRazorpay.data.order, responseRazorpay.data.newOrder, serviceRequest)
         }
 
     } catch (error) {
