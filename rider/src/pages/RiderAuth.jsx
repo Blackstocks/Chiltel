@@ -23,6 +23,7 @@ import { AlertCircle } from "lucide-react";
 import { useAuthActions } from "../hooks/useAuthActions";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const RiderAuth = () => {
 	const { state } = useAuth();
@@ -193,7 +194,18 @@ const SignupForm = () => {
 			delete signupData.confirmPassword; // Remove confirmPassword before sending
 
 			await signup(signupData);
-			navigate("/");
+			//empty form data
+			setFormData({
+				firstName: "",
+				lastName: "",
+				email: "",
+				password: "",
+				confirmPassword: "",
+				phoneNumber: "",
+				specialization: "",
+			});
+
+			toast.success("Account created successfully. Please login to continue.");
 		} catch (err) {
 			setError(err.message || "Failed to create account");
 		} finally {

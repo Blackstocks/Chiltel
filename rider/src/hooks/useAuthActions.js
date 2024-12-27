@@ -22,18 +22,13 @@ export const useAuthActions = () => {
 	};
 
 	const signup = async (riderData) => {
-		dispatch({ type: "LOGIN_START" });
+		dispatch({ type: "SIGNUP_START" });
 		try {
 			const response = await apiService.signup(riderData);
-			console.log("response", response);
-			localStorage.setItem("riderToken", response.token);
-			dispatch({
-				type: "LOGIN_SUCCESS",
-				payload: { user: response.user, token: response.token },
-			});
-			return response;
+			dispatch({ type: "SIGNUP_SUCCESS" });
+			return { ...response, message: "Registration successful. Please login to continue." };
 		} catch (error) {
-			dispatch({ type: "LOGIN_ERROR", payload: error.message });
+			dispatch({ type: "SIGNUP_ERROR", payload: error.message });
 			throw error;
 		}
 	};

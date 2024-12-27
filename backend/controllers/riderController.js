@@ -40,21 +40,23 @@ const riderController = {
 
 			await rider.save();
 
-			// Generate token
-			const token = jwt.sign({ id: rider._id }, process.env.JWT_SECRET, {
-				expiresIn: "30d",
-			});
+			res.status(201).json({ message: "Registered.... Waiting for approval." });
 
-			res.status(201).json({
-				token,
-				user: {
-					id: rider._id,
-					email: rider.email,
-					firstName: rider.firstName,
-					lastName: rider.lastName,
-					status: rider.status,
-				},
-			});
+			// // Generate token
+			// const token = jwt.sign({ id: rider._id }, process.env.JWT_SECRET, {
+			// 	expiresIn: "30d",
+			// });
+
+			// res.status(201).json({
+			// 	token,
+			// 	user: {
+			// 		id: rider._id,
+			// 		email: rider.email,
+			// 		firstName: rider.firstName,
+			// 		lastName: rider.lastName,
+			// 		status: rider.status,
+			// 	},
+			// });
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
@@ -135,7 +137,6 @@ const riderController = {
 	async getProfile(req, res) {
 		try {
 			const rider = await Rider.findById(req.rider._id).select("-password");
-			console.log(rider);
 			res.json(rider);
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });

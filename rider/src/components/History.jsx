@@ -39,7 +39,7 @@ const HistoryTab = () => {
 		);
 	}
 
-	if (history.length === 0) {
+	if (history.services.length === 0) {
 		return (
 			<div className="text-center text-gray-500 mt-4">
 				No completed service available
