@@ -1,11 +1,13 @@
 // Rider Schema
 import mongoose from "mongoose";
+import ServiceRequest from "./serviceRequestModel.js";
 
 const riderSchema = {
-	name: String,
-	email: { type: String, unique: true },
-	password: String,
-	phoneNumber: String,
+	firstName: { type: String, required: true },
+	lastName: { type: String, required: true },
+	email: { type: String, unique: true, required: true },
+	password: { type: String, required: true },
+	phoneNumber: { type: String, required: true },
 	specialization: {
 		type: String,
 		enum: ["AC", "Cooler", "Microwave"],
@@ -16,10 +18,21 @@ const riderSchema = {
 		enum: ["AVAILABLE", "BUSY", "OFFLINE"],
 		default: "OFFLINE",
 	},
+	registrationStatus: {
+		type: String,
+		enum: ["PENDING", "APPROVED", "REJECTED"],
+		default: "PENDING",
+	},
+	AcceptedServices: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: ServiceRequest,
+		},
+	],
 	assignedServices: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "ServiceRequest",
+			ref: ServiceRequest,
 		},
 	],
 	rating: {
@@ -34,7 +47,6 @@ const riderSchema = {
 		},
 		coordinates: {
 			type: [Number], // [longitude, latitude]
-			required: true,
 		},
 	},
 };
