@@ -68,6 +68,7 @@ class ApiService {
 		const response = await fetch(`${this.baseURL}/rider/profile`, {
 			headers: this.getHeaders(token),
 		});
+		console.log(response);
 		return this.handleResponse(response);
 	}
 
