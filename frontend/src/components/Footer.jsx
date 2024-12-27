@@ -468,20 +468,20 @@ const Footer = () => {
                 </DialogContent>
               </Dialog>
             </li>
-            <li>
+            {/* <li>
               <a
                 href="#"
                 className="flex items-center text-gray-600 hover:text-black"
               >
                 <span className="mr-2">👥</span> Partners Sign Up
               </a>
-            </li>
+            </li> */}
             <li>
               <a
                 href="#"
                 className="flex items-center text-gray-600 hover:text-black"
               >
-                <span className="mr-2">👤</span> Partners Login
+                <span className="mr-2">👤</span> Partners Portal
               </a>
             </li>
           </ul>
