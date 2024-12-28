@@ -415,24 +415,24 @@ const Footer = () => {
           <h3 className="mb-4 text-lg font-semibold">QUICK LINKS</h3>
           <ul className="space-y-2">
             <li>
-              <Link to="/" className="text-gray-600 hover:text-black">
+              <a href="/" className="text-gray-600 hover:text-black">
                 Home
-              </Link>
+              </a>
             </li>
             <li>
-              <Link to="/collection" className="text-gray-600 hover:text-black">
+              <a href="/collection" className="text-gray-600 hover:text-black">
                 Chill Mart
-              </Link>
+              </a>
             </li>
             <li>
-              <Link to="/contact" className="text-gray-600 hover:text-black">
+              <a href="/contact" className="text-gray-600 hover:text-black">
                 Contact Us
-              </Link>
+              </a>
             </li>
             <li>
-              <Link to="/blog" className="text-gray-600 hover:text-black">
+              <a href="/blog" className="text-gray-600 hover:text-black">
                 Blog
-              </Link>
+              </a>
             </li>
             <li>
               <Dialog>
@@ -473,6 +473,7 @@ const Footer = () => {
                 </DialogContent>
               </Dialog>
             </li>
+
             <li>
               <a
                 href="#"
@@ -485,8 +486,6 @@ const Footer = () => {
               <a
                 href="https://chiltel-rider.vercel.app"
                 className="flex items-center text-gray-600 hover:text-black"
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 <span className="mr-2">👥</span> Register as Service Partner
               </a>
