@@ -12,9 +12,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock, MapPin, Package, IndianRupee, NotepadText } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { getTimeDiffString } from "@/utils/formatters";
+import { set } from "mongoose";
 
 const ServicesTab = () => {
-	const { services, loading, acceptService } = useServices();
+	const { services, loading, acceptService, declineService } = useServices();
 
 	if (loading) {
 		return (
@@ -34,49 +35,69 @@ const ServicesTab = () => {
 	return (
 		<ScrollArea className="h-[600px] rounded-md border p-4">
 			{/* Pending Services */}
-			{services.map((service, index) => (
-				<Card key={service._id} className="mb-4">
-					<CardHeader>
-						<div className="flex justify-between items-center">
-							<CardTitle>Service Request #{index + 1}</CardTitle>
-							<Badge>New Request</Badge>
-						</div>
-						<CardDescription>
-							Posted {getTimeDiffString(service.createdAt)} ago
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="space-y-2">
-							<div className="flex items-center space-x-2">
-								<MapPin className="w-4 h-4" />
-								<span>{service.userLocation.address}</span>
+			{services &&
+				services.map((service, index) => (
+					<Card key={service._id} className="mb-4">
+						<CardHeader>
+							<div className="flex justify-between items-center">
+								<CardTitle>Service Request #{index + 1}</CardTitle>
+								<Badge>New Request</Badge>
 							</div>
-							<div className="flex items-center space-x-2">
-								<Clock className="w-4 h-4" />
-								<span>Estimated time: {service.service.estimatedDuration}</span>
+							<CardDescription>
+								Posted {getTimeDiffString(service.createdAt)} ago
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-2">
+								<div className="flex items-center space-x-2">
+									<MapPin className="w-4 h-4" />
+									<span>{service.userLocation.address}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<Clock className="w-4 h-4" />
+									<span>
+										Estimated time: {service.service.estimatedDuration}
+									</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<Package className="w-4 h-4" />
+									<span>Service: {service.service.name}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<IndianRupee className="w-4 h-4" />
+									<span>Price: {service.price}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<NotepadText className="w-4 h-4" />
+									<span>Note: {service.remarks}</span>
+								</div>
 							</div>
-							<div className="flex items-center space-x-2">
-								<Package className="w-4 h-4" />
-								<span>Service: {service.service.name}</span>
-							</div>
-							<div className="flex items-center space-x-2">
-								<IndianRupee className="w-4 h-4" />
-								<span>Price: {service.price}</span>
-							</div>
-							<div className="flex items-center space-x-2">
-								<NotepadText className="w-4 h-4" />
-								<span>Note: {service.remarks}</span>
-							</div>
-						</div>
-					</CardContent>
-					<CardFooter className="justify-end space-x-2">
-						<Button variant="outline">Decline</Button>
-						<Button onClick={() => acceptService(service._id)}>
-							Accept Service
-						</Button>
-					</CardFooter>
-				</Card>
-			))}
+						</CardContent>
+						<CardFooter className="justify-end space-x-2">
+							<Button
+								variant="outline"
+								onClick={() => {
+									declineService(service._id);
+									setTimeout(() => {
+										window.location.reload();
+									}, 500);
+								}}
+							>
+								Decline
+							</Button>
+							<Button
+								onClick={() => {
+									acceptService(service._id);
+									setTimeout(() => {
+										window.location.reload();
+									}, 500);
+								}}
+							>
+								Accept Service
+							</Button>
+						</CardFooter>
+					</Card>
+				))}
 		</ScrollArea>
 	);
 };

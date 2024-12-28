@@ -1,308 +1,304 @@
 // controllers/serviceRequestController.js
 import ServiceRequest from "../models/serviceRequestModel.js";
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 export const serviceRequestController = {
-  // Create a new service request
-  createServiceRequest: async (req, res) => {
-    try {
-      console.log(req.body);
-      const {
-        user,
-        service,
-        userLocation,
-        scheduledFor,
-        price,
-        remarks
-      } = req.body;
+	// Create a new service request
+	createServiceRequest: async (req, res) => {
+		try {
+			console.log(req.body);
+			const { user, service, userLocation, scheduledFor, price, remarks } =
+				req.body;
 
-      const serviceRequest = new ServiceRequest({
-        user,
-        service,
-        userLocation,
-        scheduledFor: new Date(scheduledFor),
-        price,
-        remarks,
-      });
+			const serviceRequest = new ServiceRequest({
+				user,
+				service,
+				userLocation,
+				scheduledFor: new Date(scheduledFor),
+				price,
+				remarks,
+			});
 
-      await serviceRequest.save();
+			await serviceRequest.save();
 
-      res.status(201).json({
-        success: true,
-        message: "Service request created successfully",
-        data: serviceRequest,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to create service request",
-        error: error.message,
-      });
-    }
-  },
+			res.status(201).json({
+				success: true,
+				message: "Service request created successfully",
+				data: serviceRequest,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to create service request",
+				error: error.message,
+			});
+		}
+	},
 
-  getUserServiceRequests : async (req, res) => {
-    try{
-      const userId = req.params;
-      const serviceRequests = await ServiceRequest.find({user: new mongoose.Types.ObjectId(userId.userId)})
-        .populate('user', 'name email phone')
-        .populate('service', 'name description price estimatedDuration')
-        .populate('rider', 'name phone')
-        .sort({ createdAt: -1 });
+	getUserServiceRequests: async (req, res) => {
+		try {
+			const userId = req.params;
+			const serviceRequests = await ServiceRequest.find({
+				user: new mongoose.Types.ObjectId(userId.userId),
+			})
+				.populate("user", "name email phone")
+				.populate("service", "name description price estimatedDuration")
+				.populate("rider", "name phone")
+				.sort({ createdAt: -1 });
 
-        res.status(200).json({
-          success: true,
-          count: serviceRequests.length,
-          data: serviceRequests
-        });
+			res.status(200).json({
+				success: true,
+				count: serviceRequests.length,
+				data: serviceRequests,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to fetch user service requests",
+				error: error.message,
+			});
+		}
+	},
 
-    }catch(error){
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch user service requests',
-        error: error.message
-      });
-    }
-  },
+	getUserServiceRequests: async (req, res) => {
+		try {
+			const userId = req.params;
+			const serviceRequests = await ServiceRequest.find({
+				user: new mongoose.Types.ObjectId(userId.userId),
+			})
+				.populate("user", "name email phone")
+				.populate("service", "name description price estimatedDuration")
+				.populate("rider", "name phone")
+				.sort({ createdAt: -1 });
 
-  getUserServiceRequests : async (req, res) => {
-    try{
-      const userId = req.params;
-      const serviceRequests = await ServiceRequest.find({user: new mongoose.Types.ObjectId(userId.userId)})
-        .populate('user', 'name email phone')
-        .populate('service', 'name description price estimatedDuration')
-        .populate('rider', 'name phone')
-        .sort({ createdAt: -1 });
+			res.status(200).json({
+				success: true,
+				count: serviceRequests.length,
+				data: serviceRequests,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to fetch user service requests",
+				error: error.message,
+			});
+		}
+	},
 
-        res.status(200).json({
-          success: true,
-          count: serviceRequests.length,
-          data: serviceRequests
-        });
+	// Controller function to get all service requests
+	getAllServiceRequests: async (req, res) => {
+		try {
+			const serviceRequests = await ServiceRequest.find()
+				.populate("user")
+				.populate("service")
+				.populate("rider")
+				.sort({ createdAt: -1 });
 
-    }catch(error){
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch user service requests',
-        error: error.message
-      });
-    }
-  },
+			res.status(200).json({
+				success: true,
+				count: serviceRequests.length,
+				data: serviceRequests,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to fetch service requests",
+				error: error.message,
+			});
+		}
+	},
 
-  // Controller function to get all service requests
-  getAllServiceRequests: async (req, res) => {
-    try {
-      const serviceRequests = await ServiceRequest.find()
-        .populate("user")
-        .populate("service")
-        .populate("rider")
-        .sort({ createdAt: -1 });
+	// Get single service request by ID
+	getServiceRequestById: async (req, res) => {
+		try {
+			const { id } = req.params;
 
-      res.status(200).json({
-        success: true,
-        count: serviceRequests.length,
-        data: serviceRequests,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch service requests",
-        error: error.message,
-      });
-    }
-  },
+			const serviceRequest = await ServiceRequest.findById(id)
+				.populate("user", "name email phone")
+				.populate("service", "name description price")
+				.populate("rider", "name phone");
 
-  // Get single service request by ID
-  getServiceRequestById: async (req, res) => {
-    try {
-      const { id } = req.params;
+			if (!serviceRequest) {
+				return res.status(404).json({
+					success: false,
+					message: "Service request not found",
+				});
+			}
 
-      const serviceRequest = await ServiceRequest.findById(id)
-        .populate("user", "name email phone")
-        .populate("service", "name description price")
-        .populate("rider", "name phone");
+			res.status(200).json({
+				success: true,
+				data: serviceRequest,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to fetch service request",
+				error: error.message,
+			});
+		}
+	},
 
-      if (!serviceRequest) {
-        return res.status(404).json({
-          success: false,
-          message: "Service request not found",
-        });
-      }
+	// Update service request
+	updateServiceRequest: async (req, res) => {
+		try {
+			const { id } = req.params;
+			const updateData = req.body;
 
-      res.status(200).json({
-        success: true,
-        data: serviceRequest,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch service request",
-        error: error.message,
-      });
-    }
-  },
+			// If status is being updated to COMPLETED, set completedAt
+			if (updateData.status === "COMPLETED") {
+				updateData.completedAt = new Date();
+			}
 
-  // Update service request
-  updateServiceRequest: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const updateData = req.body;
+			const serviceRequest = await ServiceRequest.findByIdAndUpdate(
+				id,
+				{
+					...updateData,
+					updatedAt: new Date(),
+				},
+				{ new: true, runValidators: true }
+			);
 
-      // If status is being updated to COMPLETED, set completedAt
-      if (updateData.status === "COMPLETED") {
-        updateData.completedAt = new Date();
-      }
+			if (!serviceRequest) {
+				return res.status(404).json({
+					success: false,
+					message: "Service request not found",
+				});
+			}
 
-      const serviceRequest = await ServiceRequest.findByIdAndUpdate(
-        id,
-        {
-          ...updateData,
-          updatedAt: new Date(),
-        },
-        { new: true, runValidators: true }
-      );
+			res.status(200).json({
+				success: true,
+				message: "Service request updated successfully",
+				data: serviceRequest,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to update service request",
+				error: error.message,
+			});
+		}
+	},
 
-      if (!serviceRequest) {
-        return res.status(404).json({
-          success: false,
-          message: "Service request not found",
-        });
-      }
+	// Assign rider to service request
+	assignRider: async (req, res) => {
+		try {
+			const { id } = req.params;
+			const { riderId } = req.body;
 
-      res.status(200).json({
-        success: true,
-        message: "Service request updated successfully",
-        data: serviceRequest,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to update service request",
-        error: error.message,
-      });
-    }
-  },
+			// First check if the service request exists
+			const existingRequest = await ServiceRequest.findById(id);
+			if (!existingRequest) {
+				return res.status(404).json({
+					success: false,
+					message: "Service request not found",
+				});
+			}
 
-  // Assign rider to service request
-  assignRider: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { riderId } = req.body;
+			// Add rider to requestedRiders array if not already present
+			if (!existingRequest.requestedRiders.includes(riderId)) {
+				existingRequest.requestedRiders.push(riderId);
+			}
 
-      // First check if the service request exists
-      const existingRequest = await ServiceRequest.findById(id);
-      if (!existingRequest) {
-        return res.status(404).json({
-          success: false,
-          message: "Service request not found",
-        });
-      }
+			// Update the service request
+			const serviceRequest = await ServiceRequest.findByIdAndUpdate(
+				id,
+				{
+					rider: null,
+					status: "ASSIGNED",
+					requestedRiders: existingRequest.requestedRiders,
+					updatedAt: new Date(),
+				},
+				{ new: true, runValidators: true }
+			).populate("rider"); // Optionally populate rider details
 
-      // Add rider to requestedRiders array if not already present
-      if (!existingRequest.requestedRiders.includes(riderId)) {
-        existingRequest.requestedRiders.push(riderId);
-      }
+			res.status(200).json({
+				success: true,
+				message: "Rider assigned successfully",
+				data: serviceRequest,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to assign rider",
+				error: error.message,
+			});
+		}
+	},
 
-      // Update the service request
-      const serviceRequest = await ServiceRequest.findByIdAndUpdate(
-        id,
-        {
-          
-          status: "ASSIGNED",
-          requestedRiders: existingRequest.requestedRiders,
-          updatedAt: new Date(),
-        },
-        { new: true, runValidators: true }
-      ).populate('rider'); // Optionally populate rider details
+	// Update payment status and details
+	updatePaymentStatus: async (req, res) => {
+		try {
+			const { id } = req.params;
+			const { paymentStatus, paymentDetails } = req.body;
 
-      res.status(200).json({
-        success: true,
-        message: "Rider assigned successfully",
-        data: serviceRequest,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to assign rider",
-        error: error.message,
-      });
-    }
-  },
+			const serviceRequest = await ServiceRequest.findByIdAndUpdate(
+				id,
+				{
+					paymentStatus,
+					paymentDetails: {
+						...paymentDetails,
+						paidAt: new Date(),
+					},
+					updatedAt: new Date(),
+				},
+				{ new: true, runValidators: true }
+			);
 
-  // Update payment status and details
-  updatePaymentStatus: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { paymentStatus, paymentDetails } = req.body;
+			if (!serviceRequest) {
+				return res.status(404).json({
+					success: false,
+					message: "Service request not found",
+				});
+			}
 
-      const serviceRequest = await ServiceRequest.findByIdAndUpdate(
-        id,
-        {
-          paymentStatus,
-          paymentDetails: {
-            ...paymentDetails,
-            paidAt: new Date(),
-          },
-          updatedAt: new Date(),
-        },
-        { new: true, runValidators: true }
-      );
+			res.status(200).json({
+				success: true,
+				message: "Payment status updated successfully",
+				data: serviceRequest,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to update payment status",
+				error: error.message,
+			});
+		}
+	},
 
-      if (!serviceRequest) {
-        return res.status(404).json({
-          success: false,
-          message: "Service request not found",
-        });
-      }
+	// Cancel service request
+	cancelServiceRequest: async (req, res) => {
+		try {
+			const { id } = req.params;
+			const { cancelReason } = req.body;
 
-      res.status(200).json({
-        success: true,
-        message: "Payment status updated successfully",
-        data: serviceRequest,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to update payment status",
-        error: error.message,
-      });
-    }
-  },
+			const serviceRequest = await ServiceRequest.findByIdAndUpdate(
+				id,
+				{
+					status: "CANCELLED",
+					remarks: cancelReason,
+					updatedAt: new Date(),
+				},
+				{ new: true, runValidators: true }
+			);
 
-  // Cancel service request
-  cancelServiceRequest: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { cancelReason } = req.body;
+			if (!serviceRequest) {
+				return res.status(404).json({
+					success: false,
+					message: "Service request not found",
+				});
+			}
 
-      const serviceRequest = await ServiceRequest.findByIdAndUpdate(
-        id,
-        {
-          status: "CANCELLED",
-          remarks: cancelReason,
-          updatedAt: new Date(),
-        },
-        { new: true, runValidators: true }
-      );
-
-      if (!serviceRequest) {
-        return res.status(404).json({
-          success: false,
-          message: "Service request not found",
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        message: "Service request cancelled successfully",
-        data: serviceRequest,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to cancel service request",
-        error: error.message,
-      });
-    }
-  },
+			res.status(200).json({
+				success: true,
+				message: "Service request cancelled successfully",
+				data: serviceRequest,
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Failed to cancel service request",
+				error: error.message,
+			});
+		}
+	},
 };

@@ -139,7 +139,7 @@ const SignupForm = () => {
 		password: "",
 		confirmPassword: "",
 		phoneNumber: "",
-		specialization: "",
+		specializations: [], // Changed to array for multiple selections
 		status: "OFFLINE", // Default value
 	});
 
@@ -151,10 +151,13 @@ const SignupForm = () => {
 		}));
 	};
 
-	const handleSpecializationChange = (value) => {
+	const handleSpecializationChange = (e) => {
+		const { value, checked } = e.target;
 		setFormData((prev) => ({
 			...prev,
-			specialization: value,
+			specializations: checked
+				? [...prev.specializations, value]
+				: prev.specializations.filter((spec) => spec !== value),
 		}));
 	};
 
@@ -167,8 +170,8 @@ const SignupForm = () => {
 			setError("Password must be at least 6 characters long");
 			return false;
 		}
-		if (!formData.specialization) {
-			setError("Please select a specialization");
+		if (formData.specializations.length === 0) {
+			setError("Please select at least one specialization");
 			return false;
 		}
 		return true;
@@ -202,7 +205,7 @@ const SignupForm = () => {
 				password: "",
 				confirmPassword: "",
 				phoneNumber: "",
-				specialization: "",
+				specializations: [],
 			});
 
 			toast.success("Account created successfully. Please login to continue.");
@@ -230,12 +233,6 @@ const SignupForm = () => {
 
 	return (
 		<Card className="w-full max-w-md mx-auto">
-			{/* <CardHeader>
-				<CardTitle>Create a Rider Account</CardTitle>
-				<CardDescription>
-					Enter your details to register as a service provider
-				</CardDescription>
-			</CardHeader> */}
 			<CardContent>
 				<form onSubmit={handleSubmit} className="space-y-4">
 					{error && (
@@ -294,22 +291,42 @@ const SignupForm = () => {
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="specialization">Specialization</Label>
-						<Select
-							onValueChange={handleSpecializationChange}
-							value={formData.specialization}
-						>
-							<SelectTrigger>
-								<SelectValue placeholder="Select your specialization" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="AC">AC Repair & Service</SelectItem>
-								<SelectItem value="Cooler">Cooler Repair & Service</SelectItem>
-								<SelectItem value="Microwave">
-									Microwave Repair & Service
-								</SelectItem>
-							</SelectContent>
-						</Select>
+						<Label>Specializations</Label>
+						<div className="space-y-2">
+							<div className="flex items-center space-x-2">
+								<input
+									type="checkbox"
+									id="ac"
+									value="AC"
+									checked={formData.specializations.includes("AC")}
+									onChange={handleSpecializationChange}
+									className="w-4 h-4"
+								/>
+								<Label htmlFor="ac">AC Repair & Service</Label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<input
+									type="checkbox"
+									id="cooler"
+									value="Cooler"
+									checked={formData.specializations.includes("Cooler")}
+									onChange={handleSpecializationChange}
+									className="w-4 h-4"
+								/>
+								<Label htmlFor="cooler">Cooler Repair & Service</Label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<input
+									type="checkbox"
+									id="microwave"
+									value="Microwave"
+									checked={formData.specializations.includes("Microwave")}
+									onChange={handleSpecializationChange}
+									className="w-4 h-4"
+								/>
+								<Label htmlFor="microwave">Microwave Repair & Service</Label>
+							</div>
+						</div>
 					</div>
 
 					<div className="space-y-2">

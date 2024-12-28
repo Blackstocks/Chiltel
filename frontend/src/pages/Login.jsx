@@ -17,7 +17,10 @@ const Login = () => {
 		event.preventDefault();
 		try {
 			if (currentState === "Sign Up") {
-				signup(email, password, name);
+				const result = await signup(email, password, name);
+				if (result) {
+					setCurrentState("Login");
+				}
 			} else {
 				login(email, password);
 			}

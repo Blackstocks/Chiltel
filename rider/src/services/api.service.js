@@ -133,6 +133,51 @@ class ApiService {
 		return this.handleResponse(response);
 	}
 
+	async declineService(token, serviceId) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/decline`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+			}
+		);
+		return this.handleResponse(response);
+	}
+
+	async startService(token, serviceId) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/start`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+			}
+		);
+		return this.handleResponse(response);
+	}
+
+	async addExtraWorks(token, serviceId, extraWorks) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/extra-works`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+				body: JSON.stringify({ extraWorks }),
+			}
+		);
+		return this.handleResponse(response);
+	}
+
+	async startWorking(token, serviceId) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/start-working`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+			}
+		);
+		return this.handleResponse(response);
+	}
+
 	async completeService(token, serviceId) {
 		const response = await fetch(
 			`${this.baseURL}/rider/services/${serviceId}/complete`,

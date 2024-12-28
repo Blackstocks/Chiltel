@@ -44,9 +44,30 @@ riderRouter.post(
 	riderController.acceptService
 );
 riderRouter.post(
+	"/services/:id/decline",
+	verifyRider,
+	riderController.declineService
+);
+riderRouter.post(
 	"/services/:id/complete",
 	verifyRider,
 	riderController.completeService
+);
+
+riderRouter.post(
+	"/services/:id/extra-works",
+	verifyRider,
+	riderController.addExtraWorks
+);
+riderRouter.post(
+	"/services/:id/start",
+	verifyRider,
+	riderController.startService
+);
+riderRouter.post(
+	"/services/:id/start-working",
+	verifyRider,
+	riderController.startWorking
 );
 
 export default riderRouter;

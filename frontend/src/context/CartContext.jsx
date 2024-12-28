@@ -8,6 +8,7 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL
   const [cart, setCart] = useState([]);
+  const [cartId, setCartId] = useState(null);
   const [cartAmount, setCartAmount] = useState(0);
   const [cartCount, setCartCount] = useState(0);
   const [cartLoading, setCartLoading] = useState(false);
@@ -22,7 +23,7 @@ export const CartProvider = ({ children }) => {
       setCartAmount(0);
       setCart([]);
     }
-  },[]);
+  },[loading]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -45,8 +46,12 @@ export const CartProvider = ({ children }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data.cartData);
+      console.log('user cart: ',response.data.cartData);
+      console.log('cart Id: ', response.data.cartData._id);
       setCart(response.data.cartData);
+      setCartId(response.data.cartData._id);
+      getCartAmount(user._id);
+      getCartCount(user._id);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
     } finally {
@@ -166,6 +171,7 @@ export const CartProvider = ({ children }) => {
 
   const value = {
     cart,
+    cartId,
     cartLoading,
     addToCart,
     updateQuantity,

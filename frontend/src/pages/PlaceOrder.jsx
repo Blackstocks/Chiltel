@@ -12,7 +12,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
 
     const [method, setMethod] = useState('cod');
     const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
-    const { cart } = useContext(CartContext);
+    const { cart, cartId, fetchCart } = useContext(CartContext);
     const { user } = useContext(AuthContext);
     const [street, setStreet] = useState('');
     const [city, setCity] = useState('');
@@ -48,12 +48,14 @@ const PlaceOrder = ({buyNowProduct=null}) => {
             receipt: order.receipt,
             handler: async (response) => {
                 console.log('init pay: ', response)
+                response.cart = true;
+                response.cartId = cartId;
                 try {
                     const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers: { Authorization: `Bearer ${token}` }})
-                    // const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers:{token}})
                     console.log('transaction data: ', data);
                     if (data.success) {
                         console.log('order info: ', data.orderInfo);
+                        fetchCart();
                         navigate('/orders')
                         setCartItems({})
                     }

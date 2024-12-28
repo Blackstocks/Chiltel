@@ -156,7 +156,7 @@ const ProfileTab = () => {
 					Log Out
 				</Button>
 			</Card>
-
+			{/* 
 			<AlertDialog>
 				<AlertDialogTrigger asChild>
 					<Button variant="destructive" className="w-full">
@@ -178,7 +178,7 @@ const ProfileTab = () => {
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
-			</AlertDialog>
+			</AlertDialog> */}
 		</div>
 	);
 };

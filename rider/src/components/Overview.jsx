@@ -11,6 +11,30 @@ import { MapPin } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useEffect, useState } from "react";
 import { useProfile } from "../hooks/useProfile";
+import {
+	CheckCircle2,
+	Clock,
+	Navigation,
+	Phone,
+	Plus,
+	Package,
+	IndianRupee,
+	NotepadText,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
 import ActiveService from "./ActiveService";
 
 const OverviewTab = () => {
@@ -22,8 +46,6 @@ const OverviewTab = () => {
 		return <div>Error loading your profile</div>;
 	}
 
-	console.log(profile);
-
 	return (
 		<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 			{/* Stats Cards */}
@@ -34,8 +56,8 @@ const OverviewTab = () => {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="text-2xl font-bold">$124.50</div>
-					<p className="text-xs text-gray-500">+12% from yesterday</p>
+					<div className="text-2xl font-bold">₹ 0</div>
+					{/* <p className="text-xs text-gray-500">+12% from yesterday</p> */}
 				</CardContent>
 			</Card>
 
@@ -77,54 +99,120 @@ const OverviewTab = () => {
 };
 
 const CurrCard = () => {
-	const { getAcceptedServices, loading, error, completeService } =
-		useServices();
-	const [currService, setCurrService] = useState(null);
+	const {
+		getAcceptedServices,
+		loading,
+		error,
+		addExtraWorks,
+		startService,
+		startWorking,
+	} = useServices();
+	const [currServices, setCurrServices] = useState(null);
+
 	useEffect(() => {
 		getAcceptedServices().then((service) => {
-			setCurrService(service);
+			setCurrServices(service);
 		});
 	}, []);
 
-	console.log(currService);
 	if (loading) {
 		return (
 			<div className="text-center text-gray-500 mt-4">Loading services...</div>
 		);
 	}
 
+	console.log(currServices);
+
+	const handleStartService = async (serviceId) => {
+		try {
+			await startService(serviceId);
+			window.location.reload();
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
+	// Function to open navigation
+	const handleNavigate = (currService) => {
+		if (currService?.userLocation?.coordinates) {
+			window.open(
+				`https://www.google.com/maps/dir/?api=1&destination=${currService.userLocation.coordinates[0]},${currService.userLocation.coordinates[0]}`,
+				"_blank"
+			);
+		}
+	};
 	return (
 		<>
-			{/* {<ActiveService />} */}
+			{<ActiveService />}
+			<Separator className="md:col-span-2 lg:col-span-3" />
 			<Card className="md:col-span-2 lg:col-span-3">
 				<CardHeader>
 					<CardTitle>Accepted Services</CardTitle>
 					<CardDescription>Active service details</CardDescription>
 				</CardHeader>
-				{!currService && error ? (
+				{!currServices && error ? (
 					<CardDescription className="text-center m-2">{error}</CardDescription>
 				) : (
-					<>
-						<CardContent>
-							<div className="flex items-center space-x-4">
-								<MapPin className="w-6 h-6 text-blue-500" />
-								<div>
-									<p className="font-medium">
-										{currService.userLocation.address}
-									</p>
-									<p className="text-sm text-gray-500">
-										Service: {currService.service.name}
-									</p>
+					currServices &&
+					currServices?.map((currService, index) => (
+						<CardContent className="space-y-6" key={currService._id}>
+							<CardTitle>Service #{index + 1}</CardTitle>
+							{/* Customer Details */}
+							<div className="space-y-4">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center space-x-2">
+										<MapPin className="h-4 w-4 text-muted-foreground" />
+										<span>{currService?.userLocation?.address}</span>
+									</div>
+									<Button
+										variant="outline"
+										onClick={() => handleNavigate(currService)}
+										className="flex items-center space-x-2"
+									>
+										<Navigation className="h-4 w-4" />
+										<span>Navigate</span>
+									</Button>
+								</div>
+
+								{/* <div className="flex items-center space-x-2">
+									<Phone className="h-4 w-4 text-muted-foreground" />
+									<span>{currService?.user?.phone}</span>
+								</div> */}
+
+								<div className="flex items-center space-x-2">
+									<Clock className="h-4 w-4 text-muted-foreground" />
+									<span>
+										Estimated Duration: {currService?.service.estimatedDuration}
+									</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<Package className="w-4 h-4" />
+									<span>Service: {currService?.service.name}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<IndianRupee className="w-4 h-4" />
+									<span>Price: {currService?.price}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<NotepadText className="w-4 h-4" />
+									<span>Note: {currService?.remarks}</span>
 								</div>
 							</div>
-						</CardContent>
-						<CardFooter className="justify-between">
-							<Button variant="outline">Navigate</Button>
-							<Button onClick={() => completeService(currService._id)}>
-								Complete Service
+							<Button
+								onClick={() => handleStartService(currService._id)}
+								disabled={loading}
+							>
+								{loading ? (
+									<>
+										<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+										Starting...
+									</>
+								) : (
+									"Start Service"
+								)}
 							</Button>
-						</CardFooter>
-					</>
+						</CardContent>
+					))
 				)}
 			</Card>
 		</>

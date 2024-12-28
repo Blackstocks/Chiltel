@@ -70,7 +70,7 @@ const ServiceCollection = () => {
   return (
     <div className="container px-4 py-8 mx-auto">
       <header className="flex items-center justify-between pb-4 mb-8 border-b">
-        <h1 className="text-3xl font-bold">ALL COLLECTIONS</h1>
+        <h1 className="text-3xl font-bold">Welcome to Chill Mart</h1>
         <div>
           <label className="text-gray-700">Sort by: </label>
           <select

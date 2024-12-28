@@ -25,11 +25,17 @@ const serviceRequestSchema = {
 			"CREATED",
 			"ASSIGNED",
 			"REQUESTED",
+			"PAID",
 			"IN_PROGRESS",
 			"COMPLETED",
 			"CANCELLED",
 		],
 		default: "CREATED",
+	},
+	workStarted: { type: Boolean, default: false },
+	addedWorks: {
+		type: Object,
+		default: {},
 	},
 	requestedRiders: [
 		{
