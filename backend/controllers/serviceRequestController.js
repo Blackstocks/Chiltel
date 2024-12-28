@@ -207,7 +207,7 @@ export const serviceRequestController = {
       const serviceRequest = await ServiceRequest.findByIdAndUpdate(
         id,
         {
-          rider: riderId,
+          
           status: "ASSIGNED",
           requestedRiders: existingRequest.requestedRiders,
           updatedAt: new Date(),
