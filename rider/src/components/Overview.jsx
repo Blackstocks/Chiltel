@@ -159,6 +159,7 @@ const CurrCard = () => {
 				{!currServices && error ? (
 					<CardDescription className="text-center m-2">{error}</CardDescription>
 				) : (
+					currServices &&
 					currServices?.map((currService, index) => (
 						<CardContent className="space-y-6" key={currService._id}>
 							<CardTitle>Service #{index + 1}</CardTitle>

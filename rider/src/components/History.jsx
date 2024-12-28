@@ -51,41 +51,42 @@ const HistoryTab = () => {
 
 	return (
 		<ScrollArea className="h-[600px] rounded-md border p-4">
-			{history.services?.map((service, index) => (
-				<Card key={service._id} className="mb-4">
-					<CardHeader>
-						<div className="flex justify-between items-center">
-							<CardTitle>Service #{index + 1}</CardTitle>
-							<Badge variant="outline" className="bg-green-50">
-								Completed
-							</Badge>
-						</div>
-						<CardDescription>
-							Completed on {formatDate(service.completedAt)}
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="space-y-2">
-							<div className="flex items-center space-x-2">
-								<User className="w-4 h-4" />
-								<span>{service.user.name}</span>
+			{history &&
+				history.services?.map((service, index) => (
+					<Card key={service._id} className="mb-4">
+						<CardHeader>
+							<div className="flex justify-between items-center">
+								<CardTitle>Service #{index + 1}</CardTitle>
+								<Badge variant="outline" className="bg-green-50">
+									Completed
+								</Badge>
 							</div>
-							<div className="flex items-center space-x-2">
-								<MapPin className="w-4 h-4" />
-								<span>{service.userLocation.address}</span>
+							<CardDescription>
+								Completed on {formatDate(service.completedAt)}
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-2">
+								<div className="flex items-center space-x-2">
+									<User className="w-4 h-4" />
+									<span>{service.user.name}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<MapPin className="w-4 h-4" />
+									<span>{service.userLocation.address}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<Package className="w-4 h-4" />
+									<span>Service: {service.service.name}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<CheckCircle2 className="w-4 h-4 text-green-500" />
+									<span>Rating: 5.0</span>
+								</div>
 							</div>
-							<div className="flex items-center space-x-2">
-								<Package className="w-4 h-4" />
-								<span>Service: {service.service.name}</span>
-							</div>
-							<div className="flex items-center space-x-2">
-								<CheckCircle2 className="w-4 h-4 text-green-500" />
-								<span>Rating: 5.0</span>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-			))}
+						</CardContent>
+					</Card>
+				))}
 		</ScrollArea>
 	);
 };

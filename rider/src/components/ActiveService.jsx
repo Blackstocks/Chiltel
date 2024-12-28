@@ -56,7 +56,7 @@ const ActiveService = () => {
 				</CardTitle>
 			</CardHeader>
 
-			{!error && (
+			{!error && activeService && (
 				<div key={activeService._id}>
 					<CardContent>
 						<div className="flex items-center space-x-4">
