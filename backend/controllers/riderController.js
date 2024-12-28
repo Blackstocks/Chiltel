@@ -264,6 +264,8 @@ const riderController = {
 		try {
 			const service = await ServiceRequest.findById(req.params.id);
 
+			console.log(service);
+
 			if (!service) {
 				return res.status(404).json({ message: "Service not found" });
 			}
@@ -275,6 +277,8 @@ const riderController = {
 			service.rider = req.rider._id;
 			service.requestedRiders = [];
 			await service.save();
+
+			console.log(service);
 
 			res.json(service);
 		} catch (error) {

@@ -236,4 +236,33 @@ const deleteRider = async (req, res) => {
   }
 };
 
-export { addRider, getAllRiders, getRiderById, updateRider, deleteRider };
+// Approve rider
+const approveRider = async (req, res) => {
+  try {
+    const rider = await Rider.findById(req.params.id);
+
+    if (!rider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Rider not found'
+      });
+    }
+
+    rider.registrationStatus = 'APPROVED';
+    await rider.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Rider approved successfully',
+      data: rider
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error approving rider',
+      error: error.message
+    });
+  }
+};
+
+export { addRider, getAllRiders, getRiderById, updateRider, deleteRider, approveRider };
