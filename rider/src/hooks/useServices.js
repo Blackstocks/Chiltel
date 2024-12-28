@@ -43,6 +43,9 @@ export const useServices = () => {
 				state.token,
 				serviceId
 			);
+			setServices((prev) =>
+				prev.filter((service) => service._id !== serviceId)
+			);
 			setLoading(false);
 			return updatedService;
 		} catch (err) {
