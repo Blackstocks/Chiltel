@@ -109,6 +109,34 @@ const Hero = () => {
         "Professional air cooler services for optimal cooling performance",
     },
     {
+      name: "Refrigerator",
+      mainCategory: "Appliance",
+      type: "Cooling",
+      image: "/assets/refrigwrator.jpeg",
+      description: "Professional refrigerator repair and maintenance services",
+    },
+    {
+      name: "Deep Freezer",
+      mainCategory: "Retail",
+      type: "Cooling",
+      image: "/assets/deep_freeze.png",
+      description: "High-quality deep freezers for your storage needs.",
+    },
+    {
+      name: "Cassette AC",
+      mainCategory: "Retail",
+      type: "Cooling",
+      image: "/assets/cas.webp",
+      description: "Efficient cooling with cassette air conditioners.",
+    },
+    {
+      name: "Display Counter",
+      mainCategory: "Retail",
+      type: "Display",
+      image: "/assets/display-counter.png",
+      description: "Attractive display counters for showcasing products.",
+    },
+    {
       name: "Air Purifier",
       mainCategory: "Domestic",
       type: "Cooling",
@@ -139,13 +167,6 @@ const Hero = () => {
       description: "Expert microwave repair and maintenance services",
     },
     {
-      name: "Refrigerator",
-      mainCategory: "Appliance",
-      type: "Cooling",
-      image: "/assets/refrigwrator.jpeg",
-      description: "Professional refrigerator repair and maintenance services",
-    },
-    {
       name: "Washing Machine",
       mainCategory: "Appliance",
       type: "Cleaning",
@@ -153,25 +174,11 @@ const Hero = () => {
       description: "Expert washing machine repair and maintenance services",
     },
     {
-      name: "Deep Freezer",
-      mainCategory: "Retail",
-      type: "Cooling",
-      image: "/assets/deep_freeze.png",
-      description: "High-quality deep freezers for your storage needs.",
-    },
-    {
       name: "Visi Cooler",
       mainCategory: "Retail",
       type: "Cooling",
       image: "/assets/Visi _Coole.png",
       description: "Reliable visi coolers for commercial use.",
-    },
-    {
-      name: "Cassette AC",
-      mainCategory: "Retail",
-      type: "Cooling",
-      image: "/assets/Cassett.jpg",
-      description: "Efficient cooling with cassette air conditioners.",
     },
     {
       name: "Water Cooler Cum Purifier",
@@ -186,13 +193,6 @@ const Hero = () => {
       type: "Water",
       image: "/assets/Water-dis.jpg",
       description: "Convenient and portable water dispensers.",
-    },
-    {
-      name: "Display Counter",
-      mainCategory: "Retail",
-      type: "Display",
-      image: "/assets/display-counter.png",
-      description: "Attractive display counters for showcasing products.",
     },
   ];
 
@@ -395,7 +395,7 @@ const Hero = () => {
 
           {/* Categories Grid */}
           <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
-            {allCategories.slice(0, 4).map((category) => (
+            {allCategories.slice(0, 6).map((category) => (
               <div
                 key={category.name}
                 className="block p-2.5 bg-white border border-gray-100 rounded-lg shadow-sm sm:p-3 md:p-4"

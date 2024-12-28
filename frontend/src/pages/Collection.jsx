@@ -79,7 +79,7 @@ const categories = [
         name: "Cassette AC",
         mainCategory: "Retail Appliance",
         type: "Cooling",
-        image: "/assets/Cassett.jpg",
+        image: "/assets/cas.webp",
         description: "Efficient cooling with cassette air conditioners.",
     },
     {
