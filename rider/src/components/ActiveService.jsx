@@ -41,7 +41,7 @@ const ActiveService = () => {
 	const [showExtraWorkDialog, setShowExtraWorkDialog] = useState(false);
 	const [selectedWorks, setSelectedWorks] = useState([]);
 	const [workStarted, setWorkStarted] = useState(false);
-	const [openAccordions, setOpenAccordions] = useState(["ac_installation"]); // Start with first category open
+	const [openAccordions, setOpenAccordions] = useState([]);
 
 	useEffect(() => {
 		getActiveService().then((service) => {
@@ -65,6 +65,8 @@ const ActiveService = () => {
 			price: parseFloat(work.service_charge.replace(/[₹,\s]/g, "")),
 			approved: false,
 		}));
+
+		
 
 		setExtraWorks((prev) => [...prev, ...newExtraWorks]);
 		setSelectedWorks([]);
@@ -102,7 +104,7 @@ const ActiveService = () => {
 	}
 
 	const RateChartContent = () => {
-		if (!activeService?.service.rateChart) {
+		if (!activeService?.service?.rateChart) {
 			return (
 				<div className="p-4 text-center text-gray-500">
 					No rate chart available
@@ -113,65 +115,51 @@ const ActiveService = () => {
 		return (
 			<Accordion
 				type="multiple"
-				defaultValue={Object.keys(activeService.service.rateChart)}
+				value={openAccordions}
+				onValueChange={setOpenAccordions}
 				className="w-full"
 			>
 				{Object.entries(activeService.service.rateChart).map(
 					([category, items]) => (
-						<AccordionItem
-							key={category}
-							value={category}
-							className="focus-within:!data-[state=closed]"
-						>
-							<AccordionTrigger
-								className="text-lg font-semibold capitalize"
-								onClick={(e) => {
-									if (
-										e.target.tagName === "BUTTON" ||
-										e.target.tagName === "INPUT" ||
-										e.target.tagName === "LABEL"
-									) {
-										e.preventDefault();
-										e.stopPropagation();
-									}
-								}}
-							>
+						<AccordionItem key={category} value={category}>
+							<AccordionTrigger className="text-lg font-semibold capitalize">
 								{category.replace(/_/g, " ")}
 							</AccordionTrigger>
-							<AccordionContent
-								onClick={(e) => {
-									e.preventDefault();
-									e.stopPropagation();
-								}}
-								className="pointer-events-auto"
-							>
+							<AccordionContent>
 								<div className="space-y-4">
 									{items.map((item, index) => (
 										<div
 											key={index}
 											className="flex items-center space-x-4 py-2 hover:bg-gray-50 rounded-lg px-2"
-											onClick={(e) => {
-												e.preventDefault();
-												e.stopPropagation();
-											}}
 										>
-											<div onClick={(e) => e.stopPropagation()}>
+											<div
+												onClick={(e) => {
+													e.stopPropagation();
+													if (!openAccordions.includes(category)) {
+														setOpenAccordions((prev) => [...prev, category]);
+													}
+												}}
+											>
 												<Checkbox
 													id={`${category}-${index}`}
 													checked={selectedWorks.some(
 														(work) =>
 															work.key === `${category}-${item.description}`
 													)}
-													onCheckedChange={(checked) => {
-														handleCheckboxChange(category, item);
-														e.stopPropagation();
-													}}
+													onCheckedChange={() =>
+														handleCheckboxChange(category, item)
+													}
 												/>
 											</div>
 											<Label
 												htmlFor={`${category}-${index}`}
 												className="flex-1 cursor-pointer"
-												onClick={(e) => e.stopPropagation()}
+												onClick={(e) => {
+													e.stopPropagation();
+													if (!openAccordions.includes(category)) {
+														setOpenAccordions((prev) => [...prev, category]);
+													}
+												}}
 											>
 												{item.description}
 											</Label>
