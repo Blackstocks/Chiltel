@@ -181,7 +181,7 @@ const riderController = {
 	async getAssignedServices(req, res) {
 		try {
 			const services = await ServiceRequest.find({
-				rider: req.rider._id,
+				requestedRiders: { $in: [req.rider._id] },
 				status: "ASSIGNED",
 			})
 				.populate("service", "name estimatedDuration")
@@ -197,13 +197,13 @@ const riderController = {
 		try {
 			const service = await ServiceRequest.findOne({
 				rider: req.rider._id,
-				status: { $in: ["IN_PROGRESS"] },
+				status: { $in: ["ASSIGNED"] },
 			})
-				.populate("user", "firstName lastName")
+				.populate("user", "name phoneNumber address")
 				.populate("service", "name");
 
 			if (!service) {
-				return res.status(404).json({ message: "No current service found" });
+				return res.status(404).json({ message: "No service is active now" });
 			}
 
 			res.json(service);
@@ -219,7 +219,7 @@ const riderController = {
 				status: "ASSIGNED",
 			})
 				.populate("service", "name estimatedDuration")
-				.populate("user", "firstName lastName");
+				.populate("user", "name phoneNumber address");
 			if (services.length === 0) {
 				return res.status(404).json({ message: "No accepted services found" });
 			}
@@ -270,7 +270,8 @@ const riderController = {
 				return res.status(400).json({ message: "Service cannot be accepted" });
 			}
 
-			service.status = "IN_PROGRESS";
+			service.rider = req.rider._id;
+			service.requestedRiders = [];
 			await service.save();
 
 			res.json(service);

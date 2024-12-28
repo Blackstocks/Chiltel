@@ -39,7 +39,7 @@ const HistoryTab = () => {
 		);
 	}
 
-	if (history.services.length === 0) {
+	if (history.services?.length === 0) {
 		return (
 			<div className="text-center text-gray-500 mt-4">
 				No completed service available
@@ -51,7 +51,7 @@ const HistoryTab = () => {
 
 	return (
 		<ScrollArea className="h-[600px] rounded-md border p-4">
-			{history.services.map((service, index) => (
+			{history.services?.map((service, index) => (
 				<Card key={service._id} className="mb-4">
 					<CardHeader>
 						<div className="flex justify-between items-center">
