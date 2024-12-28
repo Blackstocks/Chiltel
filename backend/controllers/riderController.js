@@ -195,9 +195,9 @@ const riderController = {
 
 	async getActiveService(req, res) {
 		try {
-			const service = await ServiceRequest.findOne({
+			const service = await ServiceRequest.find({
 				rider: req.rider._id,
-				status: { $in: ["ASSIGNED"] },
+				status: "ASSIGNED",
 			})
 				.populate("user", "name phoneNumber address")
 				.populate("service", "name");
@@ -316,6 +316,7 @@ const riderController = {
 			}
 
 			service.status = "COMPLETED";
+			service.workStarted = false;
 			service.completedAt = new Date();
 			await service.save();
 

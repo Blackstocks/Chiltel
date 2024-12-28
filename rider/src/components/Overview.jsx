@@ -89,7 +89,14 @@ const OverviewTab = () => {
 };
 
 const CurrCard = () => {
-	const { getAcceptedServices, loading, error } = useServices();
+	const {
+		getAcceptedServices,
+		loading,
+		error,
+		addExtraWorks,
+		startService,
+		startWorking,
+	} = useServices();
 	const [currServices, setCurrServices] = useState(null);
 	const [extraWorks, setExtraWorks] = useState([]);
 	const [showExtraWorkDialog, setShowExtraWorkDialog] = useState(false);
@@ -112,7 +119,6 @@ const CurrCard = () => {
 
 	// Function to open navigation
 	const handleNavigate = (currService) => {
-		console.log(currService);
 		if (currService?.userLocation?.coordinates) {
 			window.open(
 				`https://www.google.com/maps/dir/?api=1&destination=${currService.userLocation.coordinates[0]},${currService.userLocation.coordinates[0]}`,
@@ -121,88 +127,24 @@ const CurrCard = () => {
 		}
 	};
 
-	// Function to request extra work
-	const handleExtraWorkRequest = async () => {
+	const handleExtraWorkRequest = async (id) => {
 		try {
-			setLoading(true);
-			setError(null);
-
-			const response = await fetch("/api/service/extra-work", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${localStorage.getItem("token")}`,
-				},
-				body: JSON.stringify({
-					serviceId: service.id,
-					description: newWorkDescription,
-					price: parseFloat(newWorkPrice),
-				}),
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to request extra work");
-			}
-
-			const data = await response.json();
-			setExtraWorks([...extraWorks, data]);
+			const newWork = await addExtraWorks(id, extraWorks);
+			setExtraWorks((prev) => [...prev, newWork]);
 			setShowExtraWorkDialog(false);
 			setNewWorkDescription("");
 			setNewWorkPrice("");
 		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
+			console.error(err);
 		}
 	};
 
-	// Function to start work
-	const handleStartWork = async () => {
+	const handleStartService = async (id) => {
 		try {
-			setLoading(true);
-			setError(null);
-
-			const response = await fetch(`/api/service/${service.id}/start`, {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem("token")}`,
-				},
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to start work");
-			}
-
+			await startService(id);
 			setWorkStarted(true);
 		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	// Function to complete work
-	const handleCompleteWork = async () => {
-		try {
-			setLoading(true);
-			setError(null);
-
-			const response = await fetch(`/api/service/${service.id}/complete`, {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem("token")}`,
-				},
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to complete work");
-			}
-
-			// Handle successful completion (e.g., redirect or update UI)
-		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
+			console.error(err);
 		}
 	};
 
@@ -245,8 +187,7 @@ const CurrCard = () => {
 								<div className="flex items-center space-x-2">
 									<Clock className="h-4 w-4 text-muted-foreground" />
 									<span>
-										Estimated Duration: {currService?.service.estimatedDuration}{" "}
-										minutes
+										Estimated Duration: {currService?.service.estimatedDuration}
 									</span>
 								</div>
 							</div>
@@ -298,7 +239,9 @@ const CurrCard = () => {
 											<DialogFooter>
 												<Button
 													type="submit"
-													onClick={handleExtraWorkRequest}
+													onClick={() =>
+														handleExtraWorkRequest(currService._id)
+													}
 													disabled={loading}
 												>
 													{loading ? (
@@ -339,14 +282,17 @@ const CurrCard = () => {
 							{/* Action Buttons */}
 							<div className="flex justify-end space-x-4">
 								{!workStarted ? (
-									<Button onClick={handleStartWork} disabled={loading}>
+									<Button
+										onClick={() => handleStartService(currService._id)}
+										disabled={loading}
+									>
 										{loading ? (
 											<>
 												<Loader2 className="h-4 w-4 mr-2 animate-spin" />
 												Starting...
 											</>
 										) : (
-											"Start Work"
+											"Start Service"
 										)}
 									</Button>
 								) : (
