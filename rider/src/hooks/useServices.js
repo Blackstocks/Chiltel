@@ -43,7 +43,6 @@ export const useServices = () => {
 				state.token,
 				serviceId
 			);
-			setServices(updatedService);
 			setLoading(false);
 			return updatedService;
 		} catch (err) {

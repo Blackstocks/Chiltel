@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock, MapPin, Package, IndianRupee, NotepadText } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { getTimeDiffString } from "@/utils/formatters";
+import { set } from "mongoose";
 
 const ServicesTab = () => {
 	const { services, loading, acceptService, declineService } = useServices();
@@ -77,7 +78,9 @@ const ServicesTab = () => {
 								variant="outline"
 								onClick={() => {
 									declineService(service._id);
-									window.location.reload();
+									setTimeout(() => {
+										window.location.reload();
+									}, 500);
 								}}
 							>
 								Decline
@@ -85,7 +88,9 @@ const ServicesTab = () => {
 							<Button
 								onClick={() => {
 									acceptService(service._id);
-									window.location.reload();
+									setTimeout(() => {
+										window.location.reload();
+									}, 500);
 								}}
 							>
 								Accept Service
