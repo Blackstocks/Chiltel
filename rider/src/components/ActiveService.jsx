@@ -66,7 +66,7 @@ const ActiveService = () => {
 									{activeService?.userLocation?.address}
 								</p>
 								<p className="text-sm text-gray-500">
-									Service: {activeService.service?.name}
+									Service: {activeService?.service?.name}
 								</p>
 							</div>
 						</div>
