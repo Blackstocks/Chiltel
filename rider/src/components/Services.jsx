@@ -12,7 +12,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock, MapPin, Package, IndianRupee, NotepadText } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { getTimeDiffString } from "@/utils/formatters";
-import { set } from "mongoose";
 
 const ServicesTab = () => {
 	const { services, loading, acceptService, declineService } = useServices();
