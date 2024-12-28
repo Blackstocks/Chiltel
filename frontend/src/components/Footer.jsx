@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../components/ui/dialog";
-import Link from 'next/link';
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const TermsContent = () => (
@@ -416,17 +416,17 @@ const Footer = () => {
           <h3 className="mb-4 text-lg font-semibold">QUICK LINKS</h3>
           <ul className="space-y-2">
           <li>
-              <Link href="/collection" className="text-gray-600 hover:text-black">
+              <Link to="/collection" className="text-gray-600 hover:text-black">
                 Chill Mart
               </Link>
             </li>
             <li>
-              <Link href="/contact" className="text-gray-600 hover:text-black">
+              <Link to="/contact" className="text-gray-600 hover:text-black">
                 Contact Us
               </Link>
             </li>
             <li>
-              <Link href="/blog" className="text-gray-600 hover:text-black">
+              <Link to="/blog" className="text-gray-600 hover:text-black">
                 Blog
               </Link>
             </li>
