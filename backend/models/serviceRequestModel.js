@@ -33,6 +33,10 @@ const serviceRequestSchema = {
 		default: "CREATED",
 	},
 	workStarted: { type: Boolean, default: false },
+	addedWorks: {
+		type: Object,
+		default: {},
+	},
 	requestedRiders: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
