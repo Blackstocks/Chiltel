@@ -1,6 +1,8 @@
 // controllers/serviceController.js
 import Service from "../models/serviceModel.js";
-import ACRateChart from "../data/AC_Rate_Charge.json";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const ACRateChart = require("../data/AC_Rate_Charge.json");
 
 // Get all services
 const getAllServices = async (req, res) => {
