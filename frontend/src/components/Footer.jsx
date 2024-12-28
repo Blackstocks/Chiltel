@@ -372,13 +372,13 @@ const Footer = () => {
           </p>
           <div className="flex space-x-4">
             <a
-              href="#"
+              href="https://www.chiltel.com"
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img src="/assets/google.png" alt="Google" className="w-5 h-5" />
             </a>
             <a
-              href="#"
+              href="https://www.facebook.com/chiltelindia/"
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img
@@ -415,17 +415,22 @@ const Footer = () => {
           <h3 className="mb-4 text-lg font-semibold">QUICK LINKS</h3>
           <ul className="space-y-2">
             <li>
-              <a href="#" className="text-gray-600 hover:text-black">
-                Services
+              <a href="/" className="text-gray-600 hover:text-black">
+                Home
               </a>
             </li>
             <li>
-              <a href="#" className="text-gray-600 hover:text-black">
+              <a href="/collection" className="text-gray-600 hover:text-black">
+                Chill Mart
+              </a>
+            </li>
+            <li>
+              <a href="/contact" className="text-gray-600 hover:text-black">
                 Contact Us
               </a>
             </li>
             <li>
-              <a href="#" className="text-gray-600 hover:text-black">
+              <a href="/blog" className="text-gray-600 hover:text-black">
                 Blog
               </a>
             </li>
@@ -468,20 +473,21 @@ const Footer = () => {
                 </DialogContent>
               </Dialog>
             </li>
-            {/* <li>
-              <a
-                href="#"
-                className="flex items-center text-gray-600 hover:text-black"
-              >
-                <span className="mr-2">👥</span> Partners Sign Up
-              </a>
-            </li> */}
+
             <li>
               <a
                 href="#"
                 className="flex items-center text-gray-600 hover:text-black"
               >
-                <span className="mr-2">👤</span> Partners Portal
+                <span className="mr-2">👤</span> Register as Seller
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://chiltel-rider.vercel.app"
+                className="flex items-center text-gray-600 hover:text-black"
+              >
+                <span className="mr-2">👥</span> Register as Service Partner
               </a>
             </li>
           </ul>
@@ -494,14 +500,25 @@ const Footer = () => {
             🏠 Shristi Apartment, Flat No - 1 D/2, Nowbhanga, SEC-IV, North 24
             Parganas, Kolkata - 700105
           </p>
-          <p className="mb-2 text-gray-600">📧 info@chiltel.com</p>
-          <p className="mb-2 text-gray-600">📞 +91 70033 26830</p>
+          <p className="mb-2 text-gray-600">
+            📧{" "}
+            <a href="mailto:info@chiltel.com" className="hover:text-black">
+              info@chiltel.com
+            </a>
+          </p>
+          <p className="mb-2 text-gray-600">
+            📞{" "}
+            <a href="tel:+917003326830" className="hover:text-black">
+              +91 70033 26830
+            </a>
+          </p>
         </div>
       </div>
       <div className="mt-8 text-center text-gray-500">
         <div className="flex flex-col items-center mx-4 space-y-2 md:flex-row justify-evenly md:mx-8 md:space-y-0 md:space-x-4">
           <p className="md:ml-5">
-            &copy; 2024 Copyright: All Rights Reserved by Chiltel.
+            &copy; Copyright 2024 Chiltel India Private Limited. All rights
+            reserved. | CIN: U52100WB2021PTC250206
           </p>
           <p className="md:mr-5">Made with Love in India</p>
         </div>

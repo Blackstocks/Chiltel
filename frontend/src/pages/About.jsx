@@ -10,21 +10,21 @@ const images = [
 
 const About = () => {
   const [currentImage, setCurrentImage] = useState(images[0]);
-  const [fade, setFade] = useState(true); // State to handle fading
+  const [fade, setFade] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false); // Start fading out
+      setFade(false);
       setTimeout(() => {
         setCurrentImage((prevImage) => {
           const currentIndex = images.indexOf(prevImage);
           return images[(currentIndex + 1) % images.length];
         });
-        setFade(true); // Start fading in
-      }, 500); // Adjust to match fade-out duration
-    }, 3000); // Change image every 3 seconds
+        setFade(true);
+      }, 500);
+    }, 3000);
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -38,7 +38,7 @@ const About = () => {
           <img
             src={currentImage}
             alt="About Us"
-            className="object-cover w-full h-192" // Increased height to h-160 (40rem)
+            className="object-cover w-full h-192"
           />
         </div>
         <div className="flex flex-col justify-center gap-6 text-gray-600 md:w-2/4">
@@ -60,7 +60,7 @@ const About = () => {
           </p>
           <b className="text-gray-800">Our Mission</b>
           <p>
-          At Chiltel India, our vision is centered on delivering
+            At Chiltel India, our vision is centered on delivering
             premium services to customers at affordable rates, all within the
             convenience of their doorstep. Specializing in a range of products,
             including Deep Freezers, Visi-Coolers, Chest Freezers, Back Bar
@@ -71,30 +71,62 @@ const About = () => {
         </div>
       </div>
 
-      <div className="py-4 text-xl ">
+      <div className="py-4 text-xl">
         <Title text1={"WHY"} text2={"CHOOSE US"} />
       </div>
 
-      <div className="flex flex-col mb-20 text-sm md:flex-row">
-        <div className="flex flex-col gap-5 px-10 py-8 border md:px-16 sm:py-10">
-          <b>Quality Assurance:</b>
-          <p className="text-gray-600 ">
+      {/* Grid container for all boxes */}
+      <div className="grid grid-cols-1 gap-6 mb-20 md:grid-cols-2 lg:grid-cols-3">
+        {/* First row boxes */}
+        <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
+          <b className="mb-3 text-lg">Quality Assurance</b>
+          <p className="text-gray-600">
             We meticulously select and vet each product to ensure it meets our
-            stringent quality standards.
+            stringent quality standards, providing you with the best in the market.
           </p>
         </div>
-        <div className="flex flex-col gap-5 px-10 py-8 border md:px-16 sm:py-10">
-          <b>Convenience:</b>
-          <p className="text-gray-600 ">
+
+        <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
+          <b className="mb-3 text-lg">Convenience</b>
+          <p className="text-gray-600">
             With our user-friendly interface and hassle-free ordering process,
-            shopping has never been easier.
+            shopping has never been easier. We ensure a seamless experience from start to finish.
           </p>
         </div>
-        <div className="flex flex-col gap-5 px-10 py-8 border md:px-16 sm:py-10">
-          <b>Exceptional Customer Service:</b>
-          <p className="text-gray-600 ">
-            Our team of dedicated professionals is here to assist you, ensuring
-            your satisfaction is our top priority.
+
+        <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
+          <b className="mb-3 text-lg">Exceptional Customer Service</b>
+          <p className="text-gray-600">
+            Our team of dedicated professionals is here to assist you at every step,
+            ensuring your complete satisfaction is our top priority.
+          </p>
+        </div>
+
+        {/* Second row boxes */}
+        <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
+          <b className="mb-3 text-lg">Your Trusted Partner</b>
+          <p className="text-gray-600">
+            As your trusted partner for home appliance sales and services, we are committed
+            to delivering excellence in every interaction and maintaining the highest standards
+            of service quality.
+          </p>
+        </div>
+
+        <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
+          <b className="mb-3 text-lg">Authorized Expertise</b>
+          <p className="text-gray-600">
+            As authorized dealers and service experts for leading brands, we bring you
+            certified quality and reliability. Our expertise ensures you receive genuine
+            products and professional service.
+          </p>
+        </div>
+
+        <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
+          <b className="mb-3 text-lg">Comprehensive Solutions</b>
+          <p className="text-gray-600">
+            We provide reliable sales and service solutions as an authorized dealer for
+            Rockwell Industries and trusted partner for Western Refrigeration and Daikin India.
+            We proudly support Haier India and other leading brands.
           </p>
         </div>
       </div>
