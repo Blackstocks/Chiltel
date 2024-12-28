@@ -75,11 +75,19 @@ const ServicesTab = () => {
 						<CardFooter className="justify-end space-x-2">
 							<Button
 								variant="outline"
-								onClick={() => declineService(service._id)}
+								onClick={() => {
+									declineService(service._id);
+									window.location.reload();
+								}}
 							>
 								Decline
 							</Button>
-							<Button onClick={() => acceptService(service._id)}>
+							<Button
+								onClick={() => {
+									acceptService(service._id);
+									window.location.reload();
+								}}
+							>
 								Accept Service
 							</Button>
 						</CardFooter>

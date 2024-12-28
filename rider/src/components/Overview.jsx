@@ -11,7 +11,16 @@ import { MapPin } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useEffect, useState } from "react";
 import { useProfile } from "../hooks/useProfile";
-import { CheckCircle2, Clock, Navigation, Phone, Plus } from "lucide-react";
+import {
+	CheckCircle2,
+	Clock,
+	Navigation,
+	Phone,
+	Plus,
+	Package,
+	IndianRupee,
+	NotepadText,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
 	Dialog,
@@ -24,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import ActiveService from "./ActiveService";
 
@@ -126,31 +136,10 @@ const CurrCard = () => {
 			);
 		}
 	};
-
-	const handleExtraWorkRequest = async (id) => {
-		try {
-			const newWork = await addExtraWorks(id, extraWorks);
-			setExtraWorks((prev) => [...prev, newWork]);
-			setShowExtraWorkDialog(false);
-			setNewWorkDescription("");
-			setNewWorkPrice("");
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
-	const handleStartService = async (id) => {
-		try {
-			await startService(id);
-			setWorkStarted(true);
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
 	return (
 		<>
 			{<ActiveService />}
+			<Separator className="md:col-span-2 lg:col-span-3" />
 			<Card className="md:col-span-2 lg:col-span-3">
 				<CardHeader>
 					<CardTitle>Accepted Services</CardTitle>
@@ -180,10 +169,10 @@ const CurrCard = () => {
 									</Button>
 								</div>
 
-								<div className="flex items-center space-x-2">
+								{/* <div className="flex items-center space-x-2">
 									<Phone className="h-4 w-4 text-muted-foreground" />
 									<span>{currService?.user?.phone}</span>
-								</div>
+								</div> */}
 
 								<div className="flex items-center space-x-2">
 									<Clock className="h-4 w-4 text-muted-foreground" />
@@ -191,131 +180,32 @@ const CurrCard = () => {
 										Estimated Duration: {currService?.service.estimatedDuration}
 									</span>
 								</div>
-							</div>
-
-							{/* Extra Works Section */}
-							<div>
-								<div className="flex justify-between items-center mb-4">
-									<h3 className="font-semibold">Extra Works</h3>
-									<Dialog
-										open={showExtraWorkDialog}
-										onOpenChange={setShowExtraWorkDialog}
-									>
-										<DialogTrigger asChild>
-											<Button variant="outline" size="sm">
-												<Plus className="h-4 w-4 mr-2" />
-												Add Extra Work
-											</Button>
-										</DialogTrigger>
-										<DialogContent>
-											<DialogHeader>
-												<DialogTitle>Request Extra Work</DialogTitle>
-												<DialogDescription>
-													Describe the additional work required and set a price.
-												</DialogDescription>
-											</DialogHeader>
-											<div className="space-y-4">
-												<div>
-													<Label htmlFor="description">Description</Label>
-													<Input
-														id="description"
-														value={newWorkDescription}
-														onChange={(e) =>
-															setNewWorkDescription(e.target.value)
-														}
-														placeholder="Describe the extra work"
-													/>
-												</div>
-												<div>
-													<Label htmlFor="price">Price</Label>
-													<Input
-														id="price"
-														type="number"
-														value={newWorkPrice}
-														onChange={(e) => setNewWorkPrice(e.target.value)}
-														placeholder="Enter price"
-													/>
-												</div>
-											</div>
-											<DialogFooter>
-												<Button
-													type="submit"
-													onClick={() =>
-														handleExtraWorkRequest(currService._id)
-													}
-													disabled={loading}
-												>
-													{loading ? (
-														<>
-															<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-															Requesting...
-														</>
-													) : (
-														"Request Approval"
-													)}
-												</Button>
-											</DialogFooter>
-										</DialogContent>
-									</Dialog>
+								<div className="flex items-center space-x-2">
+									<Package className="w-4 h-4" />
+									<span>Service: {currService?.service.name}</span>
 								</div>
-
-								{/* Extra Works List */}
-								<div className="space-y-2">
-									{extraWorks.map((work, index) => (
-										<div
-											key={index}
-											className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
-										>
-											<div>
-												<p className="font-medium">{work.description}</p>
-												<p className="text-sm text-muted-foreground">
-													${work.price}
-												</p>
-											</div>
-											<Badge variant={work.approved ? "success" : "pending"}>
-												{work.approved ? "Approved" : "Pending"}
-											</Badge>
-										</div>
-									))}
+								<div className="flex items-center space-x-2">
+									<IndianRupee className="w-4 h-4" />
+									<span>Price: {currService?.price}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<NotepadText className="w-4 h-4" />
+									<span>Note: {currService?.remarks}</span>
 								</div>
 							</div>
-
-							{/* Action Buttons */}
-							<div className="flex justify-end space-x-4">
-								{!workStarted ? (
-									<Button
-										onClick={() => handleStartService(currService._id)}
-										disabled={loading}
-									>
-										{loading ? (
-											<>
-												<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-												Starting...
-											</>
-										) : (
-											"Start Service"
-										)}
-									</Button>
+							<Button
+								onClick={() => handleStartService(currService._id)}
+								disabled={loading}
+							>
+								{loading ? (
+									<>
+										<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+										Starting...
+									</>
 								) : (
-									<Button
-										onClick={handleCompleteWork}
-										disabled={loading}
-										className="bg-green-600 hover:bg-green-700"
-									>
-										{loading ? (
-											<>
-												<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-												Completing...
-											</>
-										) : (
-											<>
-												<CheckCircle2 className="h-4 w-4 mr-2" />
-												Complete Work
-											</>
-										)}
-									</Button>
+									"Start Service"
 								)}
-							</div>
+							</Button>
 						</CardContent>
 					))
 				)}
