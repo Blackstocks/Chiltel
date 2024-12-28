@@ -56,8 +56,8 @@ const OverviewTab = () => {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="text-2xl font-bold">$124.50</div>
-					<p className="text-xs text-gray-500">+12% from yesterday</p>
+					<div className="text-2xl font-bold">₹ 0</div>
+					{/* <p className="text-xs text-gray-500">+12% from yesterday</p> */}
 				</CardContent>
 			</Card>
 
@@ -108,11 +108,6 @@ const CurrCard = () => {
 		startWorking,
 	} = useServices();
 	const [currServices, setCurrServices] = useState(null);
-	const [extraWorks, setExtraWorks] = useState([]);
-	const [showExtraWorkDialog, setShowExtraWorkDialog] = useState(false);
-	const [newWorkDescription, setNewWorkDescription] = useState("");
-	const [newWorkPrice, setNewWorkPrice] = useState("");
-	const [workStarted, setWorkStarted] = useState(false);
 
 	useEffect(() => {
 		getAcceptedServices().then((service) => {
@@ -120,12 +115,22 @@ const CurrCard = () => {
 		});
 	}, []);
 
-	console.log(currServices);
 	if (loading) {
 		return (
 			<div className="text-center text-gray-500 mt-4">Loading services...</div>
 		);
 	}
+
+	console.log(currServices);
+
+	const handleStartService = async (serviceId) => {
+		try {
+			await startService(serviceId);
+			window.location.reload();
+		} catch (err) {
+			console.error(err);
+		}
+	};
 
 	// Function to open navigation
 	const handleNavigate = (currService) => {

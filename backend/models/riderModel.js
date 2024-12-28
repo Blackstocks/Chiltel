@@ -7,11 +7,13 @@ const riderSchema = {
 	email: { type: String, unique: true, required: true },
 	password: { type: String, required: true },
 	phoneNumber: { type: String, required: true },
-	specialization: {
-		type: String,
-		enum: ["AC", "Cooler", "Microwave"],
-		required: true,
-	},
+	specializations: [
+		{
+			type: String,
+			enum: ["AC", "Cooler", "Microwave"],
+			required: true,
+		},
+	],
 	status: {
 		type: String,
 		enum: ["AVAILABLE", "BUSY", "OFFLINE"],

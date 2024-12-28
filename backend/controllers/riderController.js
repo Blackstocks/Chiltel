@@ -14,8 +14,9 @@ const riderController = {
 				firstName,
 				lastName,
 				phoneNumber,
-				specialization,
+				specializations,
 			} = req.body;
+			console.log(specializations);
 
 			// Check if rider exists
 			let rider = await Rider.findOne({ email });
@@ -30,7 +31,7 @@ const riderController = {
 				firstName,
 				lastName,
 				phoneNumber,
-				specialization,
+				specializations,
 				status: "OFFLINE",
 			});
 
@@ -200,7 +201,7 @@ const riderController = {
 				workStarted: true,
 			})
 				.populate("user", "name phoneNumber address")
-				.populate("service", "name");
+				.populate("service", "name rateChart");
 
 			if (!service) {
 				return res.status(404).json({ message: "No service is active now" });
@@ -217,6 +218,7 @@ const riderController = {
 			const services = await ServiceRequest.find({
 				rider: req.rider._id,
 				status: "ASSIGNED",
+				workStarted: false,
 			})
 				.populate("service", "name estimatedDuration")
 				.populate("user", "name phoneNumber address");
@@ -344,6 +346,44 @@ const riderController = {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
 	},
+
+	async addExtraWorks(req, res) {
+		const { extraWorks } = req.body;
+		console.log(extraWorks);
+		res.json({ message: "Extra works added" });
+	},
+
+	async startService(req, res) {
+		const service = await ServiceRequest.findById(req.params.id);
+
+		if (!service) {
+			return res.status(404).json({ message: "Service not found" });
+		}
+
+		const isActiveService = await ServiceRequest.findOne({
+			rider: req.rider._id,
+			workStarted: true,
+		});
+
+		if (isActiveService) {
+			return res
+				.status(400)
+				.json({ message: "You have already started a service" });
+		}
+
+		console.log(service);
+		if (service.status !== "ASSIGNED") {
+			return res.status(400).json({ message: "Service cannot be started" });
+		}
+
+		service.workStarted = true;
+
+		await service.save();
+
+		res.status(200).json({ message: "Service Stated successfully" });
+	},
+
+	async startWorking(req, res) {},
 };
 
 export default riderController;

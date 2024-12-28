@@ -20,9 +20,15 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	DialogDescription,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -33,15 +39,45 @@ const ActiveService = () => {
 	const { getActiveService, loading, error, completeService } = useServices();
 	const [extraWorks, setExtraWorks] = useState([]);
 	const [showExtraWorkDialog, setShowExtraWorkDialog] = useState(false);
-	const [newWorkDescription, setNewWorkDescription] = useState("");
-	const [newWorkPrice, setNewWorkPrice] = useState("");
+	const [selectedWorks, setSelectedWorks] = useState([]);
 	const [workStarted, setWorkStarted] = useState(false);
+	const [openAccordions, setOpenAccordions] = useState(["ac_installation"]); // Start with first category open
 
 	useEffect(() => {
 		getActiveService().then((service) => {
 			setActiveService(service);
 		});
 	}, []);
+
+	const handleCheckboxChange = (category, item) => {
+		const workKey = `${category}-${item.description}`;
+		setSelectedWorks((prev) => {
+			if (prev.find((work) => work.key === workKey)) {
+				return prev.filter((work) => work.key !== workKey);
+			}
+			return [...prev, { key: workKey, category, ...item }];
+		});
+	};
+
+	const handleAddExtraWorks = () => {
+		const newExtraWorks = selectedWorks.map((work) => ({
+			description: work.description,
+			price: parseFloat(work.service_charge.replace(/[₹,\s]/g, "")),
+			approved: false,
+		}));
+
+		setExtraWorks((prev) => [...prev, ...newExtraWorks]);
+		setSelectedWorks([]);
+		setShowExtraWorkDialog(false);
+	};
+
+	const handleStartService = async (serviceId) => {
+		setWorkStarted(true);
+	};
+
+	const handleCompleteWork = async () => {
+		// Implementation here
+	};
 
 	// Loading skeleton
 	if (loading) {
@@ -65,20 +101,92 @@ const ActiveService = () => {
 		);
 	}
 
-	console.log(activeService);
+	const RateChartContent = () => {
+		if (!activeService?.service.rateChart) {
+			return (
+				<div className="p-4 text-center text-gray-500">
+					No rate chart available
+				</div>
+			);
+		}
 
-	const handleStartService = async (serviceId) => {
-		// Implementation here
-		setWorkStarted(true);
-	};
-
-	const handleCompleteWork = async () => {
-		// Implementation here
-	};
-
-	const handleExtraWorkRequest = async (serviceId) => {
-		// Implementation here
-		setShowExtraWorkDialog(false);
+		return (
+			<Accordion
+				type="multiple"
+				defaultValue={Object.keys(activeService.service.rateChart)}
+				className="w-full"
+			>
+				{Object.entries(activeService.service.rateChart).map(
+					([category, items]) => (
+						<AccordionItem
+							key={category}
+							value={category}
+							className="focus-within:!data-[state=closed]"
+						>
+							<AccordionTrigger
+								className="text-lg font-semibold capitalize"
+								onClick={(e) => {
+									if (
+										e.target.tagName === "BUTTON" ||
+										e.target.tagName === "INPUT" ||
+										e.target.tagName === "LABEL"
+									) {
+										e.preventDefault();
+										e.stopPropagation();
+									}
+								}}
+							>
+								{category.replace(/_/g, " ")}
+							</AccordionTrigger>
+							<AccordionContent
+								onClick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+								}}
+								className="pointer-events-auto"
+							>
+								<div className="space-y-4">
+									{items.map((item, index) => (
+										<div
+											key={index}
+											className="flex items-center space-x-4 py-2 hover:bg-gray-50 rounded-lg px-2"
+											onClick={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+											}}
+										>
+											<div onClick={(e) => e.stopPropagation()}>
+												<Checkbox
+													id={`${category}-${index}`}
+													checked={selectedWorks.some(
+														(work) =>
+															work.key === `${category}-${item.description}`
+													)}
+													onCheckedChange={(checked) => {
+														handleCheckboxChange(category, item);
+														e.stopPropagation();
+													}}
+												/>
+											</div>
+											<Label
+												htmlFor={`${category}-${index}`}
+												className="flex-1 cursor-pointer"
+												onClick={(e) => e.stopPropagation()}
+											>
+												{item.description}
+											</Label>
+											<span className="text-green-600 font-medium min-w-[100px] text-right">
+												{item.service_charge}
+											</span>
+										</div>
+									))}
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+					)
+				)}
+			</Accordion>
+		);
 	};
 
 	return (
@@ -203,7 +311,28 @@ const ActiveService = () => {
 											Add Extra Work
 										</Button>
 									</DialogTrigger>
-									{/* Dialog content remains the same */}
+									<DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+										<DialogHeader>
+											<DialogTitle>Select Extra Works</DialogTitle>
+										</DialogHeader>
+
+										<RateChartContent />
+
+										<DialogFooter className="mt-6">
+											<div className="flex justify-between items-center w-full">
+												<div className="text-sm text-gray-600">
+													{selectedWorks.length} items selected
+												</div>
+												<Button
+													onClick={handleAddExtraWorks}
+													disabled={selectedWorks.length === 0}
+													className="bg-green-600 hover:bg-green-700 text-white"
+												>
+													Add Selected Works
+												</Button>
+											</div>
+										</DialogFooter>
+									</DialogContent>
 								</Dialog>
 							</div>
 
@@ -223,7 +352,7 @@ const ActiveService = () => {
 													{work.description}
 												</p>
 												<p className="text-sm text-green-600">
-													${work.price.toFixed(2)}
+													₹{work.price.toFixed(2)}
 												</p>
 											</div>
 											<Badge
