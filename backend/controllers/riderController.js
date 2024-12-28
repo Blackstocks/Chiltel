@@ -195,9 +195,9 @@ const riderController = {
 
 	async getActiveService(req, res) {
 		try {
-			const service = await ServiceRequest.find({
+			const service = await ServiceRequest.findOne({
 				rider: req.rider._id,
-				status: "ASSIGNED",
+				workStarted: true,
 			})
 				.populate("user", "name phoneNumber address")
 				.populate("service", "name");
