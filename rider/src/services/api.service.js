@@ -133,6 +133,17 @@ class ApiService {
 		return this.handleResponse(response);
 	}
 
+	async declineService(token, serviceId) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/decline`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+			}
+		);
+		return this.handleResponse(response);
+	}
+
 	async completeService(token, serviceId) {
 		const response = await fetch(
 			`${this.baseURL}/rider/services/${serviceId}/complete`,

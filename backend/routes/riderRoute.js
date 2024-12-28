@@ -44,6 +44,11 @@ riderRouter.post(
 	riderController.acceptService
 );
 riderRouter.post(
+	"/services/:id/decline",
+	verifyRider,
+	riderController.declineService
+);
+riderRouter.post(
 	"/services/:id/complete",
 	verifyRider,
 	riderController.completeService

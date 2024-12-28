@@ -280,6 +280,29 @@ const riderController = {
 		}
 	},
 
+	async declineService(req, res) {
+		try {
+			const service = await ServiceRequest.findById(req.params.id);
+
+			if (!service) {
+				return res.status(404).json({ message: "Service not found" });
+			}
+
+			if (service.status !== "ASSIGNED") {
+				return res.status(400).json({ message: "Service cannot be declined" });
+			}
+
+			service.requestedRiders = service.requestedRiders.filter(
+				(id) => id.toString() !== req.rider._id.toString()
+			);
+			await service.save();
+
+			res.json(service);
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
 	async completeService(req, res) {
 		try {
 			const service = await ServiceRequest.findById(req.params.id);

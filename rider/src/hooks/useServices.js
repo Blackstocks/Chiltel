@@ -61,6 +61,22 @@ export const useServices = () => {
 		}
 	};
 
+	const declineService = async (serviceId) => {
+		try {
+			const updatedService = await apiService.declineService(
+				state.token,
+				serviceId
+			);
+			setServices((prev) =>
+				prev.filter((service) => service._id !== serviceId)
+			);
+			return updatedService;
+		} catch (err) {
+			setError(err.message);
+			throw err;
+		}
+	};
+
 	const completeService = async (serviceId) => {
 		try {
 			const updatedService = await apiService.completeService(
@@ -132,12 +148,12 @@ export const useServices = () => {
 		}
 	};
 
-
 	return {
 		services,
 		loading,
 		error,
 		acceptService,
+		declineService,
 		completeService,
 		updateServiceStatus,
 		getActiveService,

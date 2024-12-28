@@ -14,7 +14,7 @@ import { useServices } from "@/hooks/useServices";
 import { getTimeDiffString } from "@/utils/formatters";
 
 const ServicesTab = () => {
-	const { services, loading, acceptService } = useServices();
+	const { services, loading, acceptService, declineService } = useServices();
 
 	if (loading) {
 		return (
@@ -70,7 +70,12 @@ const ServicesTab = () => {
 						</div>
 					</CardContent>
 					<CardFooter className="justify-end space-x-2">
-						<Button variant="outline">Decline</Button>
+						<Button
+							variant="outline"
+							onClick={() => declineService(service._id)}
+						>
+							Decline
+						</Button>
 						<Button onClick={() => acceptService(service._id)}>
 							Accept Service
 						</Button>
