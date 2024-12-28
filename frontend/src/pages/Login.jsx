@@ -18,8 +18,8 @@ const Login = () => {
 		try {
 			if (currentState === "Sign Up") {
 				const result = await signup(email, password, name);
-				if(result){
-					setCurrentState('Login');
+				if (result) {
+					setCurrentState("Login");
 				}
 			} else {
 				login(email, password);

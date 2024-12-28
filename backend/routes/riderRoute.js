@@ -54,4 +54,20 @@ riderRouter.post(
 	riderController.completeService
 );
 
+riderRouter.post(
+	"/services/:id/extra-works",
+	verifyRider,
+	riderController.addExtraWorks
+);
+riderRouter.post(
+	"/services/:id/start",
+	verifyRider,
+	riderController.startService
+);
+riderRouter.post(
+	"/services/:id/start-working",
+	verifyRider,
+	riderController.startWorking
+);
+
 export default riderRouter;

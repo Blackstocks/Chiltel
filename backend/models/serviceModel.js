@@ -17,6 +17,11 @@ const serviceSchema = {
 	},
 	estimatedDuration: String,
 	isAvailable: Boolean,
+	rateChart: {
+		type: Object,
+		default: {},
+	},
+
 	requirements: [String],
 	createdAt: { type: Date, default: Date.now },
 	updatedAt: { type: Date, default: Date.now },

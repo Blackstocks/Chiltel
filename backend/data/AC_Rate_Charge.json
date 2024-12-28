@@ -1,0 +1,278 @@
+{
+	"electrical_parts": [
+		{
+			"description": "Non-Inverter PCB repaired",
+			"service_charge": "₹ 1,500.00"
+		},
+		{
+			"description": "Inverter PCB repaired",
+			"service_charge": "₹ 4,000.00"
+		},
+		{
+			"description": "Replace LVT",
+			"service_charge": "₹ 900.00"
+		},
+		{
+			"description": "Capacitor 2-5 mfd",
+			"service_charge": "₹ 250.00"
+		},
+		{
+			"description": "Capacitor 10-25 mfd",
+			"service_charge": "₹ 400.00"
+		},
+		{
+			"description": "Capacitor 35-50 mfd",
+			"service_charge": "₹ 400.00"
+		},
+		{
+			"description": "Capacitor 50-60 mfd",
+			"service_charge": "₹ 400.00"
+		},
+		{
+			"description": "Replace sensor",
+			"service_charge": "₹ 350.00"
+		},
+		{
+			"description": "Contactor replaced",
+			"service_charge": "₹ 500.00"
+		},
+		{
+			"description": "Contactor Daikin/ O-General",
+			"service_charge": "₹ 1,500.00"
+		},
+		{
+			"description": "Convert PCB with remote",
+			"service_charge": "₹ 1,500.00"
+		}
+	],
+	"fan_motors": [
+		{
+			"description": "Fan motor - Split AC",
+			"service_charge": "₹ 1,800.00"
+		},
+		{
+			"description": "Blower motor - Split AC",
+			"service_charge": "₹ 2,200.00"
+		},
+		{
+			"description": "Blower replaced",
+			"service_charge": "₹ 1,100.00"
+		},
+		{
+			"description": "Replace Flap/Swing Motor",
+			"service_charge": "₹ 400.00"
+		},
+		{
+			"description": "Motor Bearing Change",
+			"service_charge": "₹ 1,000.00"
+		},
+		{
+			"description": "Fan motor - Window AC",
+			"service_charge": "₹ 2,600.00"
+		},
+		{
+			"description": "Noise issue repair",
+			"service_charge": "₹ 499.00"
+		}
+	],
+	"gas_charging": [
+		{
+			"description": "Gas Charging",
+			"service_charge": "₹ 2,500.00"
+		},
+		{
+			"description": "Replacement Compressor (1 Ton)",
+			"service_charge": "₹ 4,000.00"
+		},
+		{
+			"description": "Replacement Compressor (1.5 Ton)",
+			"service_charge": "₹ 4,500.00"
+		},
+		{
+			"description": "Replacement Compressor (2 Ton)",
+			"service_charge": "₹ 5,000.00"
+		},
+		{
+			"description": "Flair nut replaced",
+			"service_charge": "₹ 150.00"
+		},
+		{
+			"description": "Cooling Coil / Condenser Coil repair",
+			"service_charge": "₹ 500.00"
+		},
+		{
+			"description": "Copper Coil Condensor 1 ton Split",
+			"service_charge": "₹ 3,500.00"
+		},
+		{
+			"description": "Copper Coil Condensor 1.5 ton Split",
+			"service_charge": "₹ 4,000.00"
+		},
+		{
+			"description": "Copper Coil Condensor 2 ton Split",
+			"service_charge": "₹ 4,500.00"
+		},
+		{
+			"description": "Service valve replaced (1 Pc)",
+			"service_charge": "₹ 400.00"
+		},
+		{
+			"description": "Copper Cooling Coil (Split AC)",
+			"service_charge": "₹ 6,000.00"
+		},
+		{
+			"description": "Capillary and filter replaced",
+			"service_charge": "₹ 350.00"
+		},
+		{
+			"description": "Compressor 0.8-1 ton",
+			"service_charge": "₹ 6,500.00"
+		},
+		{
+			"description": "Compressor 1.5 ton",
+			"service_charge": "₹ 7,500.00"
+		},
+		{
+			"description": "Compressor 2 ton",
+			"service_charge": "₹ 9,200.00"
+		},
+		{
+			"description": "Electronic Expansion valve (inverter AC)",
+			"service_charge": "₹ 1,200.00"
+		},
+		{
+			"description": "Dead nut (1 pc)",
+			"service_charge": "₹ 50.00"
+		},
+		{
+			"description": "U Band replaced (1 pc)",
+			"service_charge": "₹ 50.00"
+		},
+		{
+			"description": "Pin Valve for window AC",
+			"service_charge": "₹ 50.00"
+		},
+		{
+			"description": "Copper Cooling Coil/Condensor Coil (Window AC)",
+			"service_charge": "₹ 4,500.00"
+		},
+		{
+			"description": "R-22 Gas Top Up 1 Ton Split 1 Pcs.",
+			"service_charge": "₹ 2,000.00"
+		},
+		{
+			"description": "R-22 Gas Top Up 1.5 Ton Split 1 Pcs.",
+			"service_charge": "₹ 2,500.00"
+		},
+		{
+			"description": "R-22 Gas Top Up 2 Ton Split 1 Pcs.",
+			"service_charge": "₹ 3,000.00"
+		},
+		{
+			"description": "R-22 Gas Top Up 2.5 Ton Split 1 Pcs.",
+			"service_charge": "₹ 3,500.00"
+		},
+		{
+			"description": "R-32 Gas Top Up 1 Ton Split 1 Pcs.",
+			"service_charge": "₹ 3,000.00"
+		},
+		{
+			"description": "R-32 Gas Top Up 1.5 Ton Split 1 Pcs.",
+			"service_charge": "₹ 3,500.00"
+		},
+		{
+			"description": "R-32 Gas Top Up 2 Ton Split 1 Pcs.",
+			"service_charge": "₹ 4,000.00"
+		},
+		{
+			"description": "R-32 Gas Top Up 2.5 Ton Split 1 Pcs.",
+			"service_charge": "₹ 4,500.00"
+		},
+		{
+			"description": "R-410a Gas Top Up 1 Ton Split 1 Pcs.",
+			"service_charge": "₹ 4,000.00"
+		},
+		{
+			"description": "R-410a Gas Top Up 1.5 Ton Split 1 Pcs.",
+			"service_charge": "₹ 4,500.00"
+		},
+		{
+			"description": "R-410a Gas Top Up 2 Ton Split 1 Pcs.",
+			"service_charge": "₹ 5,000.00"
+		},
+		{
+			"description": "R-410a Gas Top Up 2.5 Ton Split 1 Pcs.",
+			"service_charge": "₹ 5,500.00"
+		}
+	],
+	"ac_installation": [
+		{
+			"description": "Split AC Standard Installation 1 Pcs.",
+			"service_charge": "₹ 1,750"
+		},
+		{
+			"description": "Window AC Standard Installation 1 Pcs.",
+			"service_charge": "₹ 750"
+		},
+		{
+			"description": "Standard Angle 1 Pcs.",
+			"service_charge": "₹ 750"
+		},
+		{
+			"description": "Copper Pipe with Insulation 1 Pcs.",
+			"service_charge": "₹ 260"
+		},
+		{
+			"description": "Power Cable 3 Core 1 Feet",
+			"service_charge": "₹ 45"
+		},
+		{
+			"description": "Power Cable 4 Core 1 Feet",
+			"service_charge": "₹ 65"
+		},
+		{
+			"description": "Indoor Brackets 1 Pcs. (Missing Purchased and Installed)",
+			"service_charge": "₹ 400"
+		},
+		{
+			"description": "Fushnut 1 Set",
+			"service_charge": "₹ 280"
+		},
+		{
+			"description": "16 Amps Plug 1 Pcs.",
+			"service_charge": "₹ 150"
+		},
+		{
+			"description": "Water Pipe 1 Feet",
+			"service_charge": "₹ 35"
+		},
+		{
+			"description": "Wraping Tape (10 Feet) 1 Pcs.",
+			"service_charge": "₹ 35"
+		},
+		{
+			"description": "Rubber Pad 1 Set",
+			"service_charge": "₹ 250"
+		},
+		{
+			"description": "Vaccume Charge 1 Pcs.",
+			"service_charge": "₹ 500"
+		},
+		{
+			"description": "Angle Fitting Charge 1 Pcs.",
+			"service_charge": "₹ 350"
+		},
+		{
+			"description": "White Cement 1 Set",
+			"service_charge": "₹ 100"
+		},
+		{
+			"description": "China Clam Big 1 Pcs.",
+			"service_charge": "₹ 20"
+		},
+		{
+			"description": "China Clam Small 1 Pcs.",
+			"service_charge": "₹ 10"
+		}
+	]
+}
