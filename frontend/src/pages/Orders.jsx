@@ -20,7 +20,11 @@ const Orders = () => {
   const [view, setView] = useState('products'); // Toggle between products and services
   const [expandedRow, setExpandedRow] = useState(null);
 
-
+  const openPDF = (pdfPath) => {
+    const pdfUrl = `${window.location.origin}${pdfPath}`;
+    window.open(pdfUrl, "_blank", "noopener,noreferrer");
+  };
+  
   const toggleRow = (rowId) => {
     setExpandedRow(expandedRow === rowId ? null : rowId);
   };
@@ -366,6 +370,17 @@ const Orders = () => {
                             className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
                           >
                             Pay Now
+                          </button>
+                        )}
+                      </div>
+
+                      <div>
+                        {service.status === "COMPLETED" && (
+                          <button
+                            onClick={() => openPDF(`/rate_charts/ac_rate_chart.pdf`)}
+                            className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 w-full"
+                          >
+                            View Rate Chart
                           </button>
                         )}
                       </div>
