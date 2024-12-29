@@ -14,6 +14,7 @@ import serviceRequestRoutes from "./routes/serviceRequestRoute.js";
 import emailRoutes from "./routes/emailRoute.js";
 import dashboardRouter from "./routes/dashboardRoute.js";
 import riderRouter from "./routes/riderRoute.js";
+import sellerRoutes from './routes/sellerRoutes.js';
 
 // App Config
 const app = express();
@@ -37,6 +38,7 @@ app.use("/api/order", orderRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/user", userRouter);
 app.use("/api/rider", riderRouter);
+app.use('/api/seller', sellerRoutes);
 
 app.get("/", (req, res) => {
 	res.send("API Working");
