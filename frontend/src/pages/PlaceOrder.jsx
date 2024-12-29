@@ -72,7 +72,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     // Cancel the order when the modal is closed
                     try {
                         await axios.post(
-                            `${backendUrl}/api/order/cancel`,
+                            `${backendUrl}/api/order/delete`,
                             { orderId: newOrder._id },
                             { headers: { Authorization: `Bearer ${token}` } }
                         );
@@ -92,7 +92,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
     
             try {
                 await axios.post(
-                    `${backendUrl}/api/order/cancel`,
+                    `${backendUrl}/api/order/delete`,
                     { orderId: newOrder._id },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
