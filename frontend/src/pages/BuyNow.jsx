@@ -53,7 +53,7 @@ const BuyNow = () => {
                     console.log('transaction data: ', data);
                     if (data.success) {
                         console.log('order info: ', data.orderInfo);
-                        navigate('/orders')
+                        navigate('/order-success')
                         setCartItems({})
                     }
                 } catch (error) {
@@ -107,7 +107,7 @@ const BuyNow = () => {
                     const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{ Authorization: `Bearer ${token}` }})
                     if (response.data.success) {
                         setCartItems({})
-                        navigate('/orders')
+                        navigate('/order-success')
                     } else {
                         toast.error(response.data.message)
                     }

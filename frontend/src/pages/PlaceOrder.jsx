@@ -56,7 +56,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     if (data.success) {
                         console.log('order info: ', data.orderInfo);
                         fetchCart();
-                        navigate('/orders')
+                        navigate('/order-success')
                         setCartItems({})
                     }
                 } catch (error) {
