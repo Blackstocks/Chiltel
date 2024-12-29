@@ -273,9 +273,12 @@ const riderController = {
 			if (service.status !== "ASSIGNED") {
 				return res.status(400).json({ message: "Service cannot be accepted" });
 			}
+			const rider = await Rider.findById(req.rider._id);
 
 			service.rider = req.rider._id;
 			service.requestedRiders = [];
+			rider.services.total += 1;
+			await rider.save();
 			await service.save();
 
 			console.log(service);
@@ -321,10 +324,14 @@ const riderController = {
 				return res.status(400).json({ message: "Service cannot be completed" });
 			}
 
+			const rider = await Rider.findById(req.rider._id);
+
 			service.status = "COMPLETED";
 			service.workStarted = false;
+			rider.services.completed += 1;
 			service.completedAt = new Date();
 			await service.save();
+			await rider.save();
 
 			res.json(service);
 		} catch (error) {

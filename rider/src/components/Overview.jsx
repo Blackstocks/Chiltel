@@ -63,16 +63,35 @@ const OverviewTab = () => {
 
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-sm font-medium">Total Services</CardTitle>
+					<CardTitle className="text-sm font-medium">
+						Services Overview
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="text-2xl font-bold">
-						{profile.assignedServices.length}
+					<div className="space-y-4">
+						<div>
+							<div className="text-2xl font-bold">{profile.services.total}</div>
+							<p className="text-sm text-muted-foreground">Total Services</p>
+						</div>
+
+						<div className="grid grid-cols-2 gap-4">
+							<div>
+								<div className="text-xl font-semibold text-yellow-600">
+									{profile.services.total - profile.services.completed}
+								</div>
+								<p className="text-sm text-muted-foreground">Pending</p>
+							</div>
+
+							<div>
+								<div className="text-xl font-semibold text-green-600">
+									{profile.services.completed}
+								</div>
+								<p className="text-sm text-muted-foreground">Completed</p>
+							</div>
+						</div>
 					</div>
-					{/* <p className="text-xs text-gray-500">Today's completion</p> */}
 				</CardContent>
 			</Card>
-
 			<Card>
 				<CardHeader>
 					<CardTitle className="text-sm font-medium">Rating</CardTitle>

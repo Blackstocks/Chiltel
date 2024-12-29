@@ -77,7 +77,7 @@ const HistoryTab = () => {
 								</div>
 								<div className="flex items-center space-x-2">
 									<Package className="w-4 h-4" />
-									<span>Service: {service.service.name}</span>
+									<span>Service: {service?.service?.name}</span>
 								</div>
 								<div className="flex items-center space-x-2">
 									<CheckCircle2 className="w-4 h-4 text-green-500" />

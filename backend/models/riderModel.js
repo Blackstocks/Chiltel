@@ -24,18 +24,10 @@ const riderSchema = {
 		enum: ["PENDING", "APPROVED", "REJECTED"],
 		default: "PENDING",
 	},
-	acceptedServices: [
-		{
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "ServiceRequest",
-		},
-	],
-	assignedServices: [
-		{
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "ServiceRequest",
-		},
-	],
+	services: {
+		completed: Number,
+		total: Number,
+	},
 	rating: {
 		average: { type: Number, default: 0 },
 		count: { type: Number, default: 0 },
