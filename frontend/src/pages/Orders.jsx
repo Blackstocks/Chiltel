@@ -226,6 +226,7 @@ const Orders = () => {
         ))}
 
       {/* Service Orders */}
+      <div className="min-h-[40rem] bg-white border rounded-lg overflow-auto">
       {view === 'services' &&
         serviceCart.map((service, index) => (
           service.paymentStatus === 'PAID' && 
@@ -373,6 +374,7 @@ const Orders = () => {
                 </div>
           </div>
         ))}
+        </div>
     </div>
   </div>
 </div>
