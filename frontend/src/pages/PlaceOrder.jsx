@@ -150,10 +150,13 @@ const PlaceOrder = ({buyNowProduct=null}) => {
 
                 // API Calls for COD
                 case 'cod':
+                    orderData.cart = true;
+                    orderData.cartId = cartId;
                     const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{ Authorization: `Bearer ${token}` }})
                     if (response.data.success) {
+                        fetchCart();
                         setCartItems({})
-                        navigate('/orders')
+                        navigate('/order-success')
                     } else {
                         toast.error(response.data.message)
                     }

@@ -8,6 +8,7 @@ const orderSchema = new mongoose.Schema({
 	},
 	orderType: {
 		type: String,
+		default: 'product',
 		enum: ["product", 'service']
 	},
 	products: [
