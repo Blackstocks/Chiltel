@@ -418,13 +418,13 @@ const handlePayment = async (serviceRequest) => {
                 {/* Service Name */}
                 <div>
                   <p className="text-xs sm:text-lg font-medium">
-                    {service.service.name}
+                    {service.service?.name}
                   </p>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <p className="text-sm">{service.service.description}</p>
+                  <p className="text-sm">{service.service?.description}</p>
                 </div>
 
                 {/* Price */}
@@ -434,7 +434,7 @@ const handlePayment = async (serviceRequest) => {
 
                 {/* Duration */}
                 <div>
-                  <p>{service.service.estimatedDuration}</p>
+                  <p>{service.service?.estimatedDuration}</p>
                 </div>
 
                 {/* Status */}
