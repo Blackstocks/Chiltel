@@ -15,12 +15,15 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
   const { backendUrl, token } = useContext(ShopContext);
   const { addToServiceCart } = useContext(ServiceCartContext);
 
+  const today = new Date();
+
   const [services, setServices] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [servicesLoading, setServicesLoading] = useState(true);
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [scheduleService, setScheduleService] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDay, setSelectedDay] = useState(today.toISOString().split("T")[0]); // Default to today
   const [selectedTime, setSelectedTime] = useState("");
   const [remarks, setRemarks] = useState("");
   const [address, setAddress] = useState({
@@ -104,7 +107,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 
   const generateTimeSlots = () => {
     const slots = [];
-    for (let hour = 9; hour <= 17; hour++) {
+    for (let hour = 9; hour <= 22; hour++) {
       slots.push(`${hour}:00`);
     }
     return slots;
@@ -112,8 +115,22 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 
   const timeSlots = generateTimeSlots();
 
+  // Utility function to convert 12-hour AM/PM to 24-hour format
+  const convertTo24HourFormat = (time12hr) => {
+    const [time, modifier] = time12hr.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (modifier === "PM" && hours !== 12) {
+      hours += 12;
+    } else if (modifier === "AM" && hours === 12) {
+      hours = 0;
+    }
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  };
+
   const handleScheduleConfirm = async () => {
-    if (!selectedDate || !selectedTime) {
+    if (!selectedDay || !selectedTime) {
       alert("Please select both date and time.");
       return;
     }
@@ -125,7 +142,9 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 
     try {
       console.log("Scheduled Service:", scheduleService);
-      const scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
+      const time24hr = convertTo24HourFormat(selectedTime);
+      const scheduledDateTime = new Date(`${selectedDay}T${time24hr}:00`).toISOString();
+      // const scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
       const serviceRequest = {
         user: user._id,
         service: scheduleService.service._id,
@@ -217,169 +236,314 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     </div>
   );
 
-  const renderScheduleModal = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
-       {/* overflow-y-auto above */}
-      <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-lg font-bold">Schedule Service</h2>
-        <div className="mt-4 space-y-4">
-          {/* Date Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Select Date
-            </label>
-            <input
-              type="date"
-              className="w-full px-4 py-2 mt-1 border rounded-md"
-              value={selectedDate}
-              min={new Date(new Date().setDate(new Date().getDate() + 1))
-                .toISOString()
-                .split("T")[0]} // Disable today and past dates
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-          </div>
-
-          {/* Time Slot Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Select Time
-            </label>
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {timeSlots.map((slot, idx) => (
-                <button
-                  key={idx}
-                  className={`px-4 py-2 border rounded-md ${
-                    selectedTime === slot
-                      ? "bg-black text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                  onClick={() => setSelectedTime(slot)}
-                >
-                  {slot}
-                </button>
-              ))}
+  const renderScheduleModal = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const dayAfterTomorrow = new Date(today);
+    dayAfterTomorrow.setDate(today.getDate() + 2);
+  
+  
+    // Calculate valid time slots
+    const getValidTimeSlots = () => {
+      const allSlots = ["08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM"];
+      if (selectedDay === today.toISOString().split("T")[0]) {
+        const currentTime = new Date();
+        currentTime.setHours(currentTime.getHours() + 4); // Add 4-hour buffer
+        const currentHour = currentTime.getHours();
+        const validSlots = allSlots.filter((slot) => {
+          const slotHour = parseInt(slot.split(":")[0], 10);
+          const isPM = slot.includes("PM");
+          const adjustedHour = isPM && slotHour !== 12 ? slotHour + 12 : slotHour; // Convert to 24-hour format
+          return adjustedHour >= currentHour;
+        });
+        return validSlots;
+      }
+      return allSlots; // Return all slots for tomorrow and day after
+    };
+  
+    const validTimeSlots = getValidTimeSlots();
+  
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+        <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
+          <h2 className="text-lg font-bold">Schedule Service</h2>
+          <div className="mt-4 space-y-4">
+            {/* Day Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Select Day</label>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {[today, tomorrow, dayAfterTomorrow].map((date, idx) => (
+                  <button
+                    key={idx}
+                    className={`px-4 py-2 border rounded-md ${
+                      selectedDay === date.toISOString().split("T")[0]
+                        ? "bg-black text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                    onClick={() => setSelectedDay(date.toISOString().split("T")[0])}
+                  >
+                    {idx === 0 ? "Today" : idx === 1 ? "Tomorrow" : "Day After"}
+                  </button>
+                ))}
+              </div>
+            </div>
+  
+            {/* Time Slot Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Select Time</label>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {validTimeSlots.map((slot, idx) => (
+                  <button
+                    key={idx}
+                    className={`px-4 py-2 border rounded-md ${
+                      selectedTime === slot
+                        ? "bg-black text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                    onClick={() => setSelectedTime(slot)}
+                  >
+                    {slot}
+                  </button>
+                ))}
+              </div>
+            </div>
+  
+            {/* Address Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Address</label>
+              <div className="mt-4 space-y-4">
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 border rounded-md"
+                  placeholder="Street"
+                  value={address.street}
+                  onChange={(e) => setAddress((prev) => ({ ...prev, street: e.target.value }))}
+                />
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 border rounded-md"
+                  placeholder="City"
+                  value={address.city}
+                  onChange={(e) => setAddress((prev) => ({ ...prev, city: e.target.value }))}
+                />
+                <input
+                  type="number"
+                  className="w-full px-4 py-2 border rounded-md"
+                  placeholder="PIN Code"
+                  value={address.zipCode}
+                  onChange={handleZipCodeChange}
+                />
+                <p className="mt-2 text-sm text-gray-700">State: {address.state || "Enter a valid PIN code to auto-fill"}</p>
+              </div>
+            </div>
+  
+            {/* Remarks */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Remarks</label>
+              <input
+                type="text"
+                className="w-full px-4 py-2 mt-1 border rounded-md"
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+              />
             </div>
           </div>
-
-          {/* Address Input */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Address
-            </label>
-                  <div className="mt-4 space-y-4">
-        {/* Street Input */}
-        <input
-          type="text"
-          className="w-full px-4 py-2 border rounded-md"
-          placeholder="Street"
-          value={address.street}
-          onChange={(e) =>
-            setAddress((prev) => ({ ...prev, street: e.target.value }))
-          }
-        />
-
-        {/* City Input */}
-        <input
-          type="text"
-          className="w-full px-4 py-2 border rounded-md"
-          placeholder="City"
-          value={address.city}
-          onChange={(e) =>
-            setAddress((prev) => ({ ...prev, city: e.target.value }))
-          }
-        />
-
-        {/* ZIP Code Input */}
-        <input
-          type="number"
-          className="w-full px-4 py-2 border rounded-md"
-          placeholder="PIN Code"
-          value={address.zipCode}
-          onChange={handleZipCodeChange}
-        />
-      </div>
-      <p className="mt-2 text-sm text-gray-700">
-        State: {address.state || "Enter a valid PIN code to auto-fill"}
-      </p>
-
-        {/* State Input */}
-        <div className="relative">
-          <input
-            type="text"
-            className="w-full px-4 py-2 border rounded-md"
-            placeholder="State"
-            value={address.state}
-            readOnly // Make state field read-only
-          />
-          {isLoading && (
-            <div className="absolute inset-y-0 right-3 flex items-center">
-              <svg
-                className="w-5 h-5 text-gray-500 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg>
-            </div>
-          )}
-        </div>
-
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Remarks
-            </label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 mt-1 border rounded-md"
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-            />
+          <div className="flex items-center justify-end gap-4 mt-6">
+            <button
+              onClick={() => {
+                setScheduleService(null);
+                setAddress({
+                  street: "",
+                  city: "",
+                  state: "",
+                  zipCode: "",
+                });
+                setRemarks("");
+                setSelectedDate("");
+                setSelectedDay(today.toISOString().split("T")[0])
+                setSelectedTime("");
+              }}
+              className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleScheduleConfirm(scheduleService.service)}
+              className="px-4 py-2 text-sm text-white bg-black rounded-md hover:bg-gray-800"
+            >
+              Confirm
+            </button>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-4 mt-6">
-          <button
-            onClick={() => {
-              setScheduleService(null)
-              setAddress({
-                street: "",
-                city: "",
-                state: "",
-                zipCode: "",
-              })
-              setSelectedServices([])
-              setRemarks('')
-              setSelectedDate("")
-              setSelectedTime("")
-            }}
-            className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={()=>handleScheduleConfirm(scheduleService.service)}
-            className="px-4 py-2 text-sm text-white bg-black rounded-md hover:bg-gray-800"
-          >
-            Confirm
-          </button>
-        </div>
       </div>
-    </div>
-  );
+    );
+  };
+  
+
+  // const renderScheduleModal = () => (
+  //   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+  //      {/* overflow-y-auto above */}
+  //     <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
+  //       <h2 className="text-lg font-bold">Schedule Service</h2>
+  //       <div className="mt-4 space-y-4">
+  //         {/* Date Selection */}
+  //         <div>
+  //           <label className="block text-sm font-medium text-gray-700">
+  //             Select Date
+  //           </label>
+  //           <input
+  //             type="date"
+  //             className="w-full px-4 py-2 mt-1 border rounded-md"
+  //             value={selectedDate}
+  //             min={new Date(new Date().setDate(new Date().getDate() + 1))
+  //               .toISOString()
+  //               .split("T")[0]} // Disable today and past dates
+  //             onChange={(e) => setSelectedDate(e.target.value)}
+  //           />
+  //         </div>
+
+  //         {/* Time Slot Selection */}
+  //         <div>
+  //           <label className="block text-sm font-medium text-gray-700">
+  //             Select Time
+  //           </label>
+  //           <div className="grid grid-cols-4 gap-2 mt-2">
+  //             {timeSlots.map((slot, idx) => (
+  //               <button
+  //                 key={idx}
+  //                 className={`px-4 py-2 border rounded-md ${
+  //                   selectedTime === slot
+  //                     ? "bg-black text-white"
+  //                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+  //                 }`}
+  //                 onClick={() => setSelectedTime(slot)}
+  //               >
+  //                 {slot}
+  //               </button>
+  //             ))}
+  //           </div>
+  //         </div>
+
+  //         {/* Address Input */}
+  //         <div>
+  //           <label className="block text-sm font-medium text-gray-700">
+  //             Address
+  //           </label>
+  //                 <div className="mt-4 space-y-4">
+  //       {/* Street Input */}
+  //       <input
+  //         type="text"
+  //         className="w-full px-4 py-2 border rounded-md"
+  //         placeholder="Street"
+  //         value={address.street}
+  //         onChange={(e) =>
+  //           setAddress((prev) => ({ ...prev, street: e.target.value }))
+  //         }
+  //       />
+
+  //       {/* City Input */}
+  //       <input
+  //         type="text"
+  //         className="w-full px-4 py-2 border rounded-md"
+  //         placeholder="City"
+  //         value={address.city}
+  //         onChange={(e) =>
+  //           setAddress((prev) => ({ ...prev, city: e.target.value }))
+  //         }
+  //       />
+
+  //       {/* ZIP Code Input */}
+  //       <input
+  //         type="number"
+  //         className="w-full px-4 py-2 border rounded-md"
+  //         placeholder="PIN Code"
+  //         value={address.zipCode}
+  //         onChange={handleZipCodeChange}
+  //       />
+  //     </div>
+  //     <p className="mt-2 text-sm text-gray-700">
+  //       State: {address.state || "Enter a valid PIN code to auto-fill"}
+  //     </p>
+
+  //       {/* State Input */}
+  //       <div className="relative">
+  //         <input
+  //           type="text"
+  //           className="w-full px-4 py-2 border rounded-md"
+  //           placeholder="State"
+  //           value={address.state}
+  //           readOnly // Make state field read-only
+  //         />
+  //         {isLoading && (
+  //           <div className="absolute inset-y-0 right-3 flex items-center">
+  //             <svg
+  //               className="w-5 h-5 text-gray-500 animate-spin"
+  //               xmlns="http://www.w3.org/2000/svg"
+  //               fill="none"
+  //               viewBox="0 0 24 24"
+  //             >
+  //               <circle
+  //                 className="opacity-25"
+  //                 cx="12"
+  //                 cy="12"
+  //                 r="10"
+  //                 stroke="currentColor"
+  //                 strokeWidth="4"
+  //               ></circle>
+  //               <path
+  //                 className="opacity-75"
+  //                 fill="currentColor"
+  //                 d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+  //               ></path>
+  //             </svg>
+  //           </div>
+  //         )}
+  //       </div>
+
+  //         </div>
+
+  //         <div>
+  //           <label className="block text-sm font-medium text-gray-700">
+  //             Remarks
+  //           </label>
+  //           <input
+  //             type="text"
+  //             className="w-full px-4 py-2 mt-1 border rounded-md"
+  //             value={remarks}
+  //             onChange={(e) => setRemarks(e.target.value)}
+  //           />
+  //         </div>
+  //       </div>
+  //       <div className="flex items-center justify-end gap-4 mt-6">
+  //         <button
+  //           onClick={() => {
+  //             setScheduleService(null)
+  //             setAddress({
+  //               street: "",
+  //               city: "",
+  //               state: "",
+  //               zipCode: "",
+  //             })
+  //             setSelectedServices([])
+  //             setRemarks('')
+  //             setSelectedDate("")
+  //             setSelectedTime("")
+  //           }}
+  //           className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+  //         >
+  //           Cancel
+  //         </button>
+  //         <button
+  //           onClick={()=>handleScheduleConfirm(scheduleService.service)}
+  //           className="px-4 py-2 text-sm text-white bg-black rounded-md hover:bg-gray-800"
+  //         >
+  //           Confirm
+  //         </button>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
