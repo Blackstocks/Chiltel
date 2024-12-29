@@ -10,6 +10,7 @@ import CartContext from "../context/CartContext";
 import ServiceCartContext from "../context/ServiceCartContext";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "react-toastify";
+import { Modal } from "../components/Modal";
 
 const Cart = () => {
   const { backendUrl, navigate, token } = useContext(ShopContext);
@@ -27,6 +28,83 @@ const Cart = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState(null);
+
+  const [selectedService, setSelectedService] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [allWorks, setAllWorks] = useState([]);
+  const [selectedWorks, setSelectedWorks] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  const updateServiceRequest = async (serviceRequestId, updatedWorks) => {
+    try {
+      const response = await axios.put(
+        `${backendUrl}/api/serviceRequests/${serviceRequestId}`,
+        {
+          addedWorks: updatedWorks, // Send the updated array of works
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add authorization token if required
+          },
+        }
+      );
+  
+      if (response.data.success) {
+        console.log('Service request updated successfully:', response.data);
+        toast.success('Service request updated successfully');
+      } else {
+        console.error('Failed to update service request:', response.data.message);
+        toast.error('Failed to update service request');
+      }
+    } catch (error) {
+      console.error('Error while updating service request:', error);
+      toast.error('An error occurred while updating the service request');
+    }
+  };
+  
+
+  const handlePaymentModal = (service) => {
+    console.log('service request: ', service);
+    setSelectedService(service);
+    setAllWorks(service.addedWorks);
+    setSelectedWorks([]); // Clear previously selected works
+    setTotalPrice(service.price); // Start with base price
+    setShowPaymentModal(true);
+  };
+
+  // const handleWorkSelection = (work, isSelected) => {
+  //   if (isSelected) {
+  //     setSelectedWorks((prev) => [...prev, work]);
+  //     setTotalPrice((prev) => prev + work.price);
+  //   } else {
+  //     setSelectedWorks((prev) => prev.filter((item) => item !== work));
+  //     setTotalPrice((prev) => prev - work.price);
+  //   }
+  //   console.log(selectedWorks);
+  // };
+
+  const handleWorkSelection = (work, isSelected) => {
+    // Update selected works
+    setSelectedWorks((prev) => {
+      if (isSelected) {
+        return [...prev, { ...work, approved: true }];
+      } else {
+        return prev.filter((item) => item.description !== work.description);
+      }
+    });
+  
+    // Update all works with approved status
+    setAllWorks((prev) =>
+      prev.map((item) =>
+        item.description === work.description
+          ? { ...item, approved: isSelected }
+          : item
+      )
+    );
+  
+    // Update total price
+    setTotalPrice((prev) => (isSelected ? prev + work.price : prev - work.price));
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -52,6 +130,7 @@ const Cart = () => {
   }, [loading]);
 
   const initPay = (order, newOrder, serviceRequest) => {
+    setShowPaymentModal(false);
     const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
@@ -68,6 +147,8 @@ const Cart = () => {
                 // const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers:{token}})
                 console.log('transaction data: ', data);
                 if (data.success) {
+                    updateServiceRequest(selectedService._id, allWorks);
+                    console.log(selectedService._id, allWorks);
                     console.log('order info: ', data.orderInfo);
                     navigate('/orders')
                     setCartItems({})
@@ -119,8 +200,9 @@ const Cart = () => {
     rzp.open()
 }
 
-const handlePayment = async (serviceRequest) => {
+const handlePayment = async (serviceRequest, addedWorks, totalPrice) => {
     console.log('serive details: ', serviceRequest);
+    toast.info('Initiating Payment')
     try {
 
         const services = [
@@ -139,7 +221,8 @@ const handlePayment = async (serviceRequest) => {
             orderType: 'service',
             products: [],
             services: services,
-            totalAmount: serviceRequest.price,
+            totalAmount: totalPrice,
+            // totalAmount: serviceRequest.price,
             status: "ORDERED",
             paymentDetails: {
                 method: 'Razorpay',
@@ -214,8 +297,41 @@ const handlePayment = async (serviceRequest) => {
 
   return (
     <div className="border-t pt-14">
-            {/* Cancel Modal */}
-            {showCancelModal && (
+      {showPaymentModal && (
+        <Modal onClose={() => setShowPaymentModal(false)}>
+          <h2 className="text-lg font-bold mb-4">Add Additional Works</h2>
+          <div className="space-y-3">
+            {selectedService?.addedWorks?.map((work, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    onChange={(e) =>
+                      handleWorkSelection(work, e.target.checked)
+                    }
+                  />
+                  <span>{work.description}</span>
+                </label>
+                <span className="text-gray-700 font-medium">₹ {work.price}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4">
+            <p className="text-sm text-gray-600">
+              Total Price: <span className="font-bold">₹ {totalPrice}</span>
+            </p>
+            <button
+              onClick={()=> handlePayment(selectedService, selectedWorks, totalPrice)}
+              className="mt-4 px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            >
+              Proceed to Payment
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Cancel Modal */}
+      {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-md">
             <h2 className="text-lg font-bold mb-4">Cancel Service</h2>
@@ -397,7 +513,7 @@ const handlePayment = async (serviceRequest) => {
           <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr_1fr] sm:grid-cols-[2fr_2fr_1fr_1fr_1fr_1fr] items-center border-b pb-2 text-gray-600 text-sm font-medium">
             <div>Service</div>
             <div>Description</div>
-            <div>Price</div>
+            <div>Price</div>  
             <div>Duration</div>
             <div>Status</div>
             <div>Payment Status</div>
@@ -462,7 +578,8 @@ const handlePayment = async (serviceRequest) => {
                 <div>
                   {service.status === "REQUESTED" ? (
                     <button
-                      onClick={() => handlePayment(service)}
+                      onClick={() => handlePaymentModal(service)}
+                      // onClick={() => handlePayment(service)}
                       className="px-4 py-2 text-sm text-white bg-red-500 rounded hover:bg-red-600"
                     >
                       Pay Now
@@ -558,8 +675,9 @@ const handlePayment = async (serviceRequest) => {
                           )}
                         {service.status === "REQUESTED" && (
                           <button
-                            onClick={() => handlePayment(service._id)}
-                            className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                            onClick={() => handlePaymentModal(service)}
+                            // onClick={() => handlePayment(service)}
+                            className="w-full px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
                           >
                             Pay Now
                           </button>
