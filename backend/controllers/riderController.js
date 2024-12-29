@@ -337,8 +337,7 @@ const riderController = {
 			const { status } = req.body;
 			const service = await ServiceRequest.findOneAndUpdate(
 				{ _id: req.params.id, rider: req.rider._id },
-				{ status },
-				{ new: true }
+				{ status }
 			);
 
 			if (!service) {
@@ -353,7 +352,24 @@ const riderController = {
 
 	async addExtraWorks(req, res) {
 		const { extraWorks } = req.body;
-		console.log(extraWorks);
+		const service = await ServiceRequest.findById(req.params.id);
+
+		if (!service) {
+			return res.status(404).json({ message: "Service not found" });
+		}
+
+		if (!service.workStarted) {
+			return res.status(400).json({ message: "Service not started yet" });
+		}
+
+		if (service.status !== "ASSIGNED") {
+			return res.status(400).json({ message: "Extra work cannot be assigned" });
+		}
+
+		service.addedWorks = extraWorks;
+		service.status = "REQUESTED";
+		await service.save();
+
 		res.json({ message: "Extra works added" });
 	},
 

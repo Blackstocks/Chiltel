@@ -36,7 +36,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const ActiveService = () => {
 	const [activeService, setActiveService] = useState(null);
-	const { getActiveService, loading, error, completeService } = useServices();
+	const {
+		getActiveService,
+		loading,
+		error,
+		completeService,
+		addExtraWorks,
+		updateServiceStatus,
+	} = useServices();
 	const [extraWorks, setExtraWorks] = useState([]);
 	const [showExtraWorkDialog, setShowExtraWorkDialog] = useState(false);
 	const [selectedWorks, setSelectedWorks] = useState([]);
@@ -46,6 +53,8 @@ const ActiveService = () => {
 	useEffect(() => {
 		getActiveService().then((service) => {
 			setActiveService(service);
+			setExtraWorks(service?.addedWorks || []);
+			setWorkStarted(service?.status === "IN_PROGRESS" || false);
 		});
 	}, []);
 
@@ -59,26 +68,29 @@ const ActiveService = () => {
 		});
 	};
 
-	const handleAddExtraWorks = () => {
+	const handleAddExtraWorks = async () => {
 		const newExtraWorks = selectedWorks.map((work) => ({
 			description: work.description,
 			price: parseFloat(work.service_charge.replace(/[₹,\s]/g, "")),
 			approved: false,
 		}));
-
-		
-
+		await addExtraWorks(activeService._id, newExtraWorks);
 		setExtraWorks((prev) => [...prev, ...newExtraWorks]);
 		setSelectedWorks([]);
 		setShowExtraWorkDialog(false);
 	};
 
 	const handleStartService = async (serviceId) => {
+		await updateServiceStatus(serviceId, "IN_PROGRESS");
 		setWorkStarted(true);
 	};
 
 	const handleCompleteWork = async () => {
 		// Implementation here
+		await completeService(activeService._id);
+		setTimeout(() => {
+			window.location.reload();
+		}, 500);
 	};
 
 	// Loading skeleton
@@ -102,6 +114,8 @@ const ActiveService = () => {
 			</Card>
 		);
 	}
+
+	console.log(activeService);
 
 	const RateChartContent = () => {
 		if (!activeService?.service?.rateChart) {
