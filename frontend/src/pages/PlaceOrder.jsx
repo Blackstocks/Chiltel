@@ -56,7 +56,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     if (data.success) {
                         console.log('order info: ', data.orderInfo);
                         fetchCart();
-                        navigate('/orders')
+                        navigate('/order-success')
                         setCartItems({})
                     }
                 } catch (error) {
@@ -72,7 +72,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     // Cancel the order when the modal is closed
                     try {
                         await axios.post(
-                            `${backendUrl}/api/order/cancel`,
+                            `${backendUrl}/api/order/delete`,
                             { orderId: newOrder._id },
                             { headers: { Authorization: `Bearer ${token}` } }
                         );
@@ -92,7 +92,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
     
             try {
                 await axios.post(
-                    `${backendUrl}/api/order/cancel`,
+                    `${backendUrl}/api/order/delete`,
                     { orderId: newOrder._id },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -150,10 +150,13 @@ const PlaceOrder = ({buyNowProduct=null}) => {
 
                 // API Calls for COD
                 case 'cod':
+                    orderData.cart = true;
+                    orderData.cartId = cartId;
                     const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{ Authorization: `Bearer ${token}` }})
                     if (response.data.success) {
+                        fetchCart();
                         setCartItems({})
-                        navigate('/orders')
+                        navigate('/order-success')
                     } else {
                         toast.error(response.data.message)
                     }

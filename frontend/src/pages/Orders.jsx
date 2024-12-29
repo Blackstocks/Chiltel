@@ -31,7 +31,6 @@ const Orders = () => {
       if (!token) {
         return null;
       }
-
       const response = await axios.post(
         `${backendUrl}/api/order/userorders`,
         { userId: user._id },
@@ -46,6 +45,7 @@ const Orders = () => {
         response.data.orders.forEach((order) => {
           // Extract product orders
           order.products.forEach((item) => {
+            item['orderId'] = order._id;
             item['status'] = order.status;
             item['paymentMethod'] = order.paymentDetails.method;
             item['date'] = order.updatedAt;
@@ -61,8 +61,10 @@ const Orders = () => {
           });
         });
 
-        setOrderData(allProductOrders.reverse());
+        setOrderData(allProductOrders);
         setServiceData(allServiceOrders.reverse());
+
+        console.log('Order data: ', allProductOrders.reverse());
       }
     } catch (error) {
       toast.error('Something went wrong');
@@ -71,6 +73,24 @@ const Orders = () => {
       setOrdersLoading(false);
     }
   };
+
+  const handleCancel = async (orderId) => {
+    try{
+      const response = await axios.post(backendUrl + '/api/order/cancel', {orderId}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      if (response.data.success) {
+        loadOrderData();
+        toast.success('Order cancelled')
+      }else{
+        toast.error(response.data.message);
+      }
+    }catch(err){
+      console.error(err);
+    }
+  }
 
   useEffect(() => {
     loadOrderData();
@@ -141,12 +161,12 @@ const Orders = () => {
             <div>
               <img
                 className="w-16 h-16 object-cover rounded-md"
-                src={item.thumbnail}
-                alt={item.product.name || 'Product Image'}
+                src={item.product?.thumbnail}
+                alt={item.product?.name || 'Product Image'}
               />
             </div>
             <div>
-              <p className="font-medium text-gray-900">{item.product.name}</p>
+              <p className="font-medium text-gray-900">{item.product?.name}</p>
             </div>
             <div>
               <p>
@@ -168,6 +188,8 @@ const Orders = () => {
                     ? 'bg-blue-100 text-blue-700'
                     : item.status === 'DELIVERED'
                     ? 'bg-green-100 text-green-700'
+                    : item.status === 'CANCELLED'
+                    ? 'bg-red-100 text-red-700'
                     : 'bg-gray-100 text-gray-500'
                 }`}
               >
@@ -192,6 +214,12 @@ const Orders = () => {
                 className="w-24 h-10 bg-blue-600 text-white rounded-md text-sm shadow-md hover:bg-blue-500 transition"
               >
                 Track Order
+              </button>
+              <button
+                className="w-24 h-10 bg-red-600 text-white rounded-md text-sm shadow-md hover:bg-red-500 transition"
+                onClick={()=> handleCancel(item.orderId)}
+              >
+                Cancel Order
               </button>
             </div>
           </div>

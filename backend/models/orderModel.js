@@ -8,6 +8,7 @@ const orderSchema = new mongoose.Schema({
 	},
 	orderType: {
 		type: String,
+		default: 'product',
 		enum: ["product", 'service']
 	},
 	products: [
@@ -33,7 +34,7 @@ const orderSchema = new mongoose.Schema({
 	totalAmount: Number,
 	status: {
 		type: String,
-		enum: ["PENDING", "ORDERED", "DELIVERED"],
+		enum: ["PENDING", "ORDERED", "DELIVERED", "CANCELLED"],
 		default: "PENDING",
 	},
 	paymentDetails: {

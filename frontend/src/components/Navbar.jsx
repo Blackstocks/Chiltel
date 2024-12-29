@@ -91,9 +91,12 @@ const Navbar = () => {
             <div className="absolute right-0 hidden w-48 pt-2 group-hover:block dropdown-menu">
               <div className="bg-white border border-gray-100">
                 <div className="flex flex-col divide-y divide-gray-100">
-                  <p className="px-4 py-2 text-gray-600 transition-colors cursor-pointer hover:bg-gray-50 hover:text-blue-600">
+                  {/* <p 
+                    className="px-4 py-2 text-gray-600 transition-colors cursor-pointer hover:bg-gray-50 hover:text-blue-600"
+                    onClick={() => navigate('/')}
+                  >
                     My Profile
-                  </p>
+                  </p> */}
                   <p 
                     onClick={() => navigate("/orders")} 
                     className="px-4 py-2 text-gray-600 transition-colors cursor-pointer hover:bg-gray-50 hover:text-blue-600"

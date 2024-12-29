@@ -25,6 +25,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ServiceCartProvider } from "./context/ServiceCartContext";
 import BuyNow from "./pages/BuyNow";
+import OrderSuccess from "./pages/OrderSuccess";
 
 const App = () => {
   return (
@@ -47,6 +48,7 @@ const App = () => {
               <Route path="/place-order" element={<PlaceOrder />} />
               <Route path='/checkout' element={<BuyNow />} />
               <Route path="/orders" element={<Orders />} />
+              <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/verify" element={<Verify />} />
               <Route path="/services" element={<ServiceCollection />} />
               <Route path="/services/:id" element={<ServiceDetail />} />

@@ -41,6 +41,7 @@ export const ServiceCartProvider = ({ children }) => {
         });
         console.log(response);
         setServiceCart(response.data.data);
+        console.log('Requested services: ', response.data.data);
       } catch (error) {
         console.error('Failed to fetch service cart:', error);
       } finally {

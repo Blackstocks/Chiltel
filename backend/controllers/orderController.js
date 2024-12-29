@@ -22,7 +22,7 @@ const placeOrder = async (req,res) => {
     
     try {
         
-        const { userId, orderType, products, services, totalAmount, paymentDetails, address} = req.body
+        const { userId, orderType, products, services, totalAmount, paymentDetails, address, cart, cartId} = req.body
 
         const orderData = {
             userId,
@@ -39,6 +39,14 @@ const placeOrder = async (req,res) => {
 
         const newOrder = new orderModel(orderData)
         await newOrder.save()
+
+        if(cart){
+            console.log('cartId: ', cartId);
+            await cartModel.findByIdAndUpdate(cartId, {
+                items: [],
+                totalAmount: 0,
+            })
+        }
 
         res.json({success:true,message:"Order Placed"})
 
@@ -274,8 +282,52 @@ const updateStatus = async (req,res) => {
     }
 }
 
-// delete an order
+// cancel an order
 const cancelOrder = async (req, res) => {
+    try{
+        const {orderId} = req.body;
+        const order = await orderModel.findById(orderId);
+        if(!order){
+            res.json({
+                success: false,
+                message: 'Order not found'
+            })
+        }else{
+            if(order.status==="ORDERED"){
+                console.log('order: ', order);
+                if(order.paymentDetails.method === 'Razorpay'){
+                    res.json({
+                        success: false,
+                        message: 'Cannot cancel an order that has been paid'
+                    })
+                }else{
+                    // order.status = "CANCELLED"; 
+                    await orderModel.findByIdAndUpdate(orderId, { status: 'CANCELLED' });
+                    res.json({
+                        success: true,
+                        message: 'Order cancelled'
+                    })
+                }
+            }else{
+                console.log(order);
+                console.log(order.status);
+                res.json({
+                    success: false,
+                    message: 'Cannot cancel this order'
+                })
+            }
+        }
+    }catch(err){
+        console.log(err);
+        res.json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+// delete an order
+const deleteOrder = async (req, res) => {
     try{
         const {orderId} = req.body;
         await orderModel.findByIdAndDelete(orderId);
@@ -284,7 +336,7 @@ const cancelOrder = async (req, res) => {
             message: 'Order cancelled'
         })
     }catch(err){
-        console.error(err);
+        console.log(err);
         res.json({
             success: false,
             message: err.message
@@ -292,4 +344,4 @@ const cancelOrder = async (req, res) => {
     }
 }
 
-export {verifyRazorpay, verifyStripe ,placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, cancelOrder}
+export {verifyRazorpay, verifyStripe ,placeOrder, placeOrderStripe, placeOrderRazorpay, allOrders, userOrders, updateStatus, cancelOrder, deleteOrder}
