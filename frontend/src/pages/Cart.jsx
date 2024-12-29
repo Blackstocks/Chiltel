@@ -299,35 +299,38 @@ const handlePayment = async (serviceRequest, addedWorks, totalPrice) => {
     <div className="border-t pt-14">
       {showPaymentModal && (
         <Modal onClose={() => setShowPaymentModal(false)}>
-          <h2 className="text-lg font-bold mb-4">Add Additional Works</h2>
-          <div className="space-y-3">
-            {selectedService?.addedWorks?.map((work, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    onChange={(e) =>
-                      handleWorkSelection(work, e.target.checked)
-                    }
-                  />
-                  <span>{work.description}</span>
-                </label>
-                <span className="text-gray-700 font-medium">₹ {work.price}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4">
-            <p className="text-sm text-gray-600">
-              Total Price: <span className="font-bold">₹ {totalPrice}</span>
-            </p>
-            <button
-              onClick={()=> handlePayment(selectedService, selectedWorks, totalPrice)}
-              className="mt-4 px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-            >
-              Proceed to Payment
-            </button>
-          </div>
-        </Modal>
+  <h2 className="text-lg font-bold mb-4">Add Additional Works</h2>
+  <div className="space-y-3">
+    {selectedService?.addedWorks?.map((work, index) => (
+      <div key={index} className="flex items-center justify-between">
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            onChange={(e) =>
+              handleWorkSelection(work, e.target.checked)
+            }
+          />
+          <span>{work.description}</span>
+        </label>
+        <span className="text-gray-700 font-medium">₹ {work.price}</span>
+      </div>
+    ))}
+  </div>
+  <div className="mt-4">
+    <p className="text-sm text-gray-600">
+      Total Price: <span className="font-bold">₹ {totalPrice}</span>
+    </p>
+  </div>
+  <div className="mt-4 flex justify-end">
+    <button
+      onClick={() => handlePayment(selectedService, selectedWorks, totalPrice)}
+      className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+    >
+      Proceed to Payment
+    </button>
+  </div>
+</Modal>
+
       )}
 
       {/* Cancel Modal */}
