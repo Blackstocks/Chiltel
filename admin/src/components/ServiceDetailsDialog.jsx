@@ -39,7 +39,7 @@ const ServiceDetailsDialog = ({ service }) => (
               <CardTitle>Service Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Service: {service.service.name}</p>
+              <p>Service: {service.service?.name}</p>
               <p>Price: ${service.price}</p>
               <p>
                 Scheduled For: {new Date(service.scheduledFor).toLocaleString()}

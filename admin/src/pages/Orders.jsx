@@ -266,122 +266,129 @@ const OrderManagement = ({ token }) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {serviceRequests.map((service) => (
-                    <TableRow key={service._id}>
-                      <TableCell>{service._id}</TableCell>
-                      <TableCell>{service.service.name}</TableCell>
-                      <TableCell>{service.user.name}</TableCell>
-                      <TableCell>
-                        <Badge className={getStatusBadgeColor(service.status)}>
-                          {service.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(service.scheduledFor).toLocaleDateString()}
-                      </TableCell>
+                  {Array.isArray(serviceRequests) &&
+                    serviceRequests.map((service) => (
+                      <TableRow key={service._id}>
+                        <TableCell>{service._id}</TableCell>
+                        {<TableCell>{service.service?.name}</TableCell>}
+                        {<TableCell>{service.user.name}</TableCell>}
+                        
+                        <TableCell>
+                          <Badge
+                            className={getStatusBadgeColor(service.status)}
+                          >
+                            {service.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(service.scheduledFor).toLocaleDateString()}
+                        </TableCell>
 
-                      <TableCell>
-                        <div className="space-y-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                {service.assignedRider
-                                  ? "Reassign Rider"
-                                  : "Assign Rider"}
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                              <DialogHeader>
-                                <DialogTitle>
+                        <TableCell>
+                          <div className="space-y-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
                                   {service.assignedRider
                                     ? "Reassign Rider"
                                     : "Assign Rider"}
-                                </DialogTitle>
-                              </DialogHeader>
-                              <ScrollArea className="max-h-[400px] pr-4">
-                                <div className="space-y-2">
-                                  {Array.isArray(riders) &&
-                                  riders.filter(
-                                    (rider) =>
-                                      rider.specialization ===
-                                      service.service.product
-                                  ).length > 0 ? (
-                                    riders
-                                      .filter(
-                                        (rider) =>
-                                          rider.specialization ===
-                                          service.service.product
-                                      )
-                                      .map((rider) => (
-                                        <Card
-                                          key={rider._id}
-                                          className={`cursor-pointer hover:bg-accent transition-colors ${
-                                            service.assignedRider === rider._id
-                                              ? "border-primary"
-                                              : ""
-                                          }`}
-                                          onClick={() => {
-                                            handleRiderAssignment(
-                                              service._id,
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    {service.assignedRider
+                                      ? "Reassign Rider"
+                                      : "Assign Rider"}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <ScrollArea className="max-h-[400px] pr-4">
+                                  <div className="space-y-2">
+                                    {Array.isArray(riders) &&
+                                    riders.filter(
+                                      (rider) =>
+                                        service.service &&
+                                        rider.specialization ===
+                                        service.service.product
+                                    ).length > 0 ? (
+                                      riders
+                                        .filter(
+                                          (rider) =>
+                                            service.service &&
+                                            rider.specialization ===
+                                            service.service.product
+                                        )
+                                        .map((rider) => (
+                                          <Card
+                                            key={rider._id}
+                                            className={`cursor-pointer hover:bg-accent transition-colors ${
+                                              service.assignedRider ===
                                               rider._id
-                                            );
-                                          }}
-                                        >
-                                          <CardContent className="p-4">
-                                            <div className="flex items-center justify-between">
-                                              <div>
-                                                <p className="font-medium">
-                                                  {`${rider.firstName} ${rider.lastName}`}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">
-                                                  {rider.specialization}
-                                                </p>
+                                                ? "border-primary"
+                                                : ""
+                                            }`}
+                                            onClick={() => {
+                                              handleRiderAssignment(
+                                                service._id,
+                                                rider._id
+                                              );
+                                            }}
+                                          >
+                                            <CardContent className="p-4">
+                                              <div className="flex items-center justify-between">
+                                                <div>
+                                                  <p className="font-medium">
+                                                    {`${rider.firstName} ${rider.lastName}`}
+                                                  </p>
+                                                  <p className="text-sm text-muted-foreground">
+                                                    {rider.specialization}
+                                                  </p>
+                                                </div>
+                                                <div className="text-sm">
+                                                  {rider?.rating?.average?.toFixed(
+                                                    1
+                                                  ) || "0.0"}
+                                                  ★
+                                                </div>
                                               </div>
-                                              <div className="text-sm">
-                                                {rider?.rating?.average?.toFixed(
-                                                  1
-                                                ) || "0.0"}
-                                                ★
-                                              </div>
-                                            </div>
-                                          </CardContent>
-                                        </Card>
-                                      ))
-                                  ) : (
-                                    <p>
-                                      No rider with the specialization found
-                                    </p>
-                                  )}
-                                </div>
-                              </ScrollArea>
-                            </DialogContent>
-                          </Dialog>
+                                            </CardContent>
+                                          </Card>
+                                        ))
+                                    ) : (
+                                      <p>
+                                        No rider with the specialization found
+                                      </p>
+                                    )}
+                                  </div>
+                                </ScrollArea>
+                              </DialogContent>
+                            </Dialog>
 
-                          {service.assignedRider && (
-                            <Badge variant="outline">
-                              Currently Assigned:{" "}
-                              {riders.find(
-                                (r) => r._id === service.assignedRider
-                              )
-                                ? `${
-                                    riders.find(
-                                      (r) => r._id === service.assignedRider
-                                    ).firstName
-                                  } ${
-                                    riders.find(
-                                      (r) => r._id === service.assignedRider
-                                    ).lastName
-                                  }`
-                                : ""}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <ServiceDetailsDialog service={service} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            {service.assignedRider && (
+                              <Badge variant="outline">
+                                Currently Assigned:{" "}
+                                {riders.find(
+                                  (r) => r._id === service.assignedRider
+                                )
+                                  ? `${
+                                      riders.find(
+                                        (r) => r._id === service.assignedRider
+                                      ).firstName
+                                    } ${
+                                      riders.find(
+                                        (r) => r._id === service.assignedRider
+                                      ).lastName
+                                    }`
+                                  : ""}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <ServiceDetailsDialog service={service} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </CardContent>

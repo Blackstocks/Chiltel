@@ -114,7 +114,7 @@ const AuthPage = () => {
 
       // Auto login after successful signup
       localStorage.setItem("token", data.token);
-      window.location.href = "/dashboard";
+      window.location.href = "/auth";
     } catch (err) {
       setError(err.message);
     } finally {

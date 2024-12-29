@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Verify token with backend
-      const response = await fetch("/api/auth/verify", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/verify-email`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
