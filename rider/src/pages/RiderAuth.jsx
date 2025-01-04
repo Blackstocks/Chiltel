@@ -8,13 +8,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ChevronDown } from "lucide-react";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -126,11 +127,34 @@ const LoginForm = () => {
 		</form>
 	);
 };
+
 const SignupForm = () => {
 	const navigate = useNavigate();
 	const { signup } = useAuthActions();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [mode, setMode] = useState("normal"); // Add mode state
+
+	const specializations = [
+		{ value: "Air Conditioner", label: "Air Conditioner Service & Repair" },
+		{ value: "Water Heater", label: "Water Heater Service & Repair" },
+		{ value: "Microwave", label: "Microwave Service & Repair" },
+		{ value: "Geyser", label: "Geyser Service & Repair" },
+		{ value: "Refrigerator", label: "Refrigerator Service & Repair" },
+		{ value: "Washing Machine", label: "Washing Machine Service & Repair" },
+		{ value: "Air Cooler", label: "Air Cooler Service & Repair" },
+		{ value: "Air Purifier", label: "Air Purifier Service & Repair" },
+		{ value: "Water Purifier", label: "Water Purifier Service & Repair" },
+		{ value: "Deep Freezer", label: "Deep Freezer Service & Repair" },
+		{ value: "Visi Cooler", label: "Visi Cooler Service & Repair" },
+		{ value: "Cassette AC", label: "Cassette AC Service & Repair" },
+		{
+			value: "Water Cooler cum Purifier",
+			label: "Water Cooler cum Purifier Service & Repair",
+		},
+		{ value: "Water Dispenser", label: "Water Dispenser Service & Repair" },
+		{ value: "Display Counter", label: "Display Counter Service & Repair" },
+	];
 
 	const [formData, setFormData] = useState({
 		firstName: "",
@@ -139,8 +163,9 @@ const SignupForm = () => {
 		password: "",
 		confirmPassword: "",
 		phoneNumber: "",
-		specializations: [], // Changed to array for multiple selections
-		status: "OFFLINE", // Default value
+		specializations: [],
+		status: "OFFLINE",
+		referralCode: "", // Add referral code field
 	});
 
 	const handleChange = (e) => {
@@ -151,14 +176,23 @@ const SignupForm = () => {
 		}));
 	};
 
-	const handleSpecializationChange = (e) => {
-		const { value, checked } = e.target;
+	const handleModeChange = (value) => {
+		setMode(value);
+	};
+
+	const handleSpecializationToggle = (value) => {
 		setFormData((prev) => ({
 			...prev,
-			specializations: checked
-				? [...prev.specializations, value]
-				: prev.specializations.filter((spec) => spec !== value),
+			specializations: prev.specializations.includes(value)
+				? prev.specializations.filter((spec) => spec !== value)
+				: [...prev.specializations, value],
 		}));
+	};
+
+	const handlePayment = async () => {
+		// Add payment logic here
+		toast.success("Payment successful!");
+		handleSubmit();
 	};
 
 	const validateForm = () => {
@@ -174,30 +208,33 @@ const SignupForm = () => {
 			setError("Please select at least one specialization");
 			return false;
 		}
+		if (mode === "normal" && !formData.referralCode) {
+			setError("Please enter a referral code");
+			return false;
+		}
 		return true;
 	};
 
 	const handleSubmit = async (e) => {
-		e.preventDefault();
+		if (e) e.preventDefault();
 		if (!validateForm()) return;
 
 		setLoading(true);
 		setError("");
 
 		try {
-			// Get current location
 			const position = await getCurrentPosition();
 			const signupData = {
 				...formData,
+				mode,
 				location: {
 					type: "Point",
 					coordinates: [position.coords.longitude, position.coords.latitude],
 				},
 			};
-			delete signupData.confirmPassword; // Remove confirmPassword before sending
+			delete signupData.confirmPassword;
 
 			await signup(signupData);
-			//empty form data
 			setFormData({
 				firstName: "",
 				lastName: "",
@@ -206,6 +243,7 @@ const SignupForm = () => {
 				confirmPassword: "",
 				phoneNumber: "",
 				specializations: [],
+				referralCode: "",
 			});
 
 			toast.success("Account created successfully. Please login to continue.");
@@ -235,6 +273,29 @@ const SignupForm = () => {
 		<Card className="w-full max-w-md mx-auto">
 			<CardContent>
 				<form onSubmit={handleSubmit} className="space-y-4">
+					{/* Mode Selection */}
+					<div className="space-y-2">
+						<Label>Mode Selection</Label>
+						<div className="flex space-x-4">
+							<div className="flex items-center space-x-2">
+								<RadioGroup
+									value={mode}
+									onValueChange={handleModeChange}
+									className="flex space-x-4"
+								>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="normal" id="normal" />
+										<Label htmlFor="normal">Normal Mode</Label>
+									</div>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="commission" id="commission" />
+										<Label htmlFor="commission">Commission Mode</Label>
+									</div>
+								</RadioGroup>
+							</div>
+						</div>
+					</div>
+
 					{error && (
 						<Alert variant="destructive">
 							<AlertCircle className="h-4 w-4" />
@@ -292,41 +353,49 @@ const SignupForm = () => {
 
 					<div className="space-y-2">
 						<Label>Specializations</Label>
-						<div className="space-y-2">
-							<div className="flex items-center space-x-2">
-								<input
-									type="checkbox"
-									id="ac"
-									value="AC"
-									checked={formData.specializations.includes("AC")}
-									onChange={handleSpecializationChange}
-									className="w-4 h-4"
-								/>
-								<Label htmlFor="ac">AC Repair & Service</Label>
-							</div>
-							<div className="flex items-center space-x-2">
-								<input
-									type="checkbox"
-									id="cooler"
-									value="Cooler"
-									checked={formData.specializations.includes("Cooler")}
-									onChange={handleSpecializationChange}
-									className="w-4 h-4"
-								/>
-								<Label htmlFor="cooler">Cooler Repair & Service</Label>
-							</div>
-							<div className="flex items-center space-x-2">
-								<input
-									type="checkbox"
-									id="microwave"
-									value="Microwave"
-									checked={formData.specializations.includes("Microwave")}
-									onChange={handleSpecializationChange}
-									className="w-4 h-4"
-								/>
-								<Label htmlFor="microwave">Microwave Repair & Service</Label>
-							</div>
-						</div>
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button variant="outline" className="w-full justify-between">
+									{formData.specializations.length === 0
+										? "Select specializations..."
+										: `${formData.specializations.length} selected`}
+									<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-80">
+								<div className="grid gap-4">
+									<div className="space-y-2">
+										<h4 className="font-medium leading-none">
+											Select Specializations
+										</h4>
+										<p className="text-sm text-muted-foreground">
+											Choose your areas of expertise
+										</p>
+									</div>
+									<div className="grid gap-2">
+										{specializations.map((spec) => (
+											<div
+												key={spec.value}
+												className="flex items-center space-x-2"
+											>
+												<Checkbox
+													id={spec.value}
+													checked={formData.specializations.includes(
+														spec.value
+													)}
+													onCheckedChange={() =>
+														handleSpecializationToggle(spec.value)
+													}
+												/>
+												<Label htmlFor={spec.value} className="font-normal">
+													{spec.label}
+												</Label>
+											</div>
+										))}
+									</div>
+								</div>
+							</PopoverContent>
+						</Popover>
 					</div>
 
 					<div className="space-y-2">
@@ -353,6 +422,20 @@ const SignupForm = () => {
 						/>
 					</div>
 
+					{/* Conditional rendering based on mode */}
+					{mode === "normal" && (
+						<div className="space-y-2">
+							<Label htmlFor="referralCode">Referral Code</Label>
+							<Input
+								id="referralCode"
+								name="referralCode"
+								value={formData.referralCode}
+								onChange={handleChange}
+								required
+							/>
+						</div>
+					)}
+
 					<div className="space-y-2">
 						<Label className="flex items-center space-x-2">
 							<Input type="checkbox" className="w-4 h-4" required />
@@ -362,9 +445,20 @@ const SignupForm = () => {
 						</Label>
 					</div>
 
-					<Button type="submit" className="w-full" disabled={loading}>
-						{loading ? "Creating account..." : "Create account"}
-					</Button>
+					{mode === "commission" ? (
+						<Button
+							type="button"
+							className="w-full"
+							onClick={handlePayment}
+							disabled={loading}
+						>
+							{loading ? "Processing..." : "Pay ₹2000 & Create Account"}
+						</Button>
+					) : (
+						<Button type="submit" className="w-full" disabled={loading}>
+							{loading ? "Creating account..." : "Create account"}
+						</Button>
+					)}
 				</form>
 			</CardContent>
 		</Card>
