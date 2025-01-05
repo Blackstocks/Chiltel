@@ -34,25 +34,9 @@ const Sidebar = () => {
       href: "/orders"
     },
     {
-      title: "Customers",
-      icon: Users,
-      href: "/customers"
-    },
-    {
       title: "Store Settings",
       icon: Store,
       href: "/store"
-    },
-    {
-      title: "Notifications",
-      icon: Bell,
-      href: "/notifications",
-      badge: 3 // Optional notification count
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      href: "/settings"
     },
     {
       title: "Help & Support",
