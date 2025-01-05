@@ -30,7 +30,9 @@ import OrderSuccess from "./pages/OrderSuccess";
 const App = () => {
   return (
     <AuthProvider>
-          <ToastContainer />
+          <ToastContainer
+            position="top-center"
+          />
       <CartProvider>
         <ServiceCartProvider>
           <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">

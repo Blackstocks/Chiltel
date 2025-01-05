@@ -90,6 +90,10 @@ const Hero = () => {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  const navigateToMart = () => {
+    navigate("/collection");
+  }
+
   // Complete categories list
   const allCategories = [
     {
@@ -398,7 +402,8 @@ const Hero = () => {
             {allCategories.slice(0, 6).map((category) => (
               <div
                 key={category.name}
-                className="block p-2.5 bg-white border border-gray-100 rounded-lg shadow-sm sm:p-3 md:p-4"
+                className="block p-2.5 bg-white border border-gray-100 rounded-lg shadow-sm sm:p-3 md:p-4 hover:shadow-md hover:bg-gray-50 cursor-pointer transition duration-200 ease-in-out"
+                onClick={navigateToMart}
               >
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 sm:gap-2 md:gap-3">
