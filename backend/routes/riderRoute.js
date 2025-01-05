@@ -11,6 +11,10 @@ riderRouter.post("/login", riderController.login);
 riderRouter.post("/logout", verifyRider, riderController.logout);
 riderRouter.get("/verify-token", verifyRider, riderController.verifyToken);
 
+//payment routes
+riderRouter.post("/create-order", riderController.createOrder);
+riderRouter.post("/verify-payment", riderController.verifyPayment);
+
 // Profile routes
 riderRouter.get("/profile", verifyRider, riderController.getProfile);
 riderRouter.put("/profile", verifyRider, riderController.updateProfile);

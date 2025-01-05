@@ -25,6 +25,7 @@ import { useAuthActions } from "../hooks/useAuthActions";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const RiderAuth = () => {
 	const { state } = useAuth();
@@ -37,8 +38,10 @@ const RiderAuth = () => {
 		<div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
 			<Card className="w-full max-w-md">
 				<CardHeader className="text-center">
-					<CardTitle className="text-2xl font-bold">Rider Portal</CardTitle>
-					<CardDescription>Login or create a new rider account</CardDescription>
+					<CardTitle className="text-2xl font-bold">Partner Portal</CardTitle>
+					<CardDescription>
+						Login or create a new partner account
+					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Tabs defaultValue="login" className="w-full">
@@ -189,10 +192,50 @@ const SignupForm = () => {
 		}));
 	};
 
+	const initPay = (order, signupData) => {
+		const options = {
+			key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+			amount: order.amount,
+			currency: order.currency,
+			name: "Order Payment",
+			description: "Order Payment",
+			order_id: order.id,
+			receipt: order.receipt,
+			handler: async (response) => {
+				console.log("init pay: ", response);
+				try {
+					const { data } = await axios.post(
+						import.meta.env.VITE_BACKEND_URL + "/rider/verify-payment",
+						response
+					);
+					console.log("transaction data: ", data);
+					if (data.success) {
+						console.log("order info: ", data.message);
+						signupData.paymentId = response.razorpay_payment_id;
+						await signup(signupData);
+						toast.success(
+							"Account created successfully. Please login to continue."
+						);
+					} else {
+						toast.error("Payment failed. Please try again.");
+					}
+				} catch (error) {
+					console.log(error);
+					toast.error(error);
+				}
+			},
+		};
+		const rzp = new window.Razorpay(options);
+		rzp.open();
+	};
+
 	const handlePayment = async () => {
 		// Add payment logic here
-		toast.success("Payment successful!");
-		handleSubmit();
+		const { data } = await axios.post(
+			import.meta.env.VITE_BACKEND_URL + "/rider/create-order"
+		);
+		console.log("order data: ", data);
+		return data;
 	};
 
 	const validateForm = () => {
@@ -234,7 +277,15 @@ const SignupForm = () => {
 			};
 			delete signupData.confirmPassword;
 
-			await signup(signupData);
+			if (mode === "commission") {
+				const data = await handlePayment();
+				initPay(data, signupData);
+			} else {
+				await signup(signupData);
+				toast.success(
+					"Account created successfully. Please login to continue."
+				);
+			}
 			setFormData({
 				firstName: "",
 				lastName: "",
@@ -245,8 +296,6 @@ const SignupForm = () => {
 				specializations: [],
 				referralCode: "",
 			});
-
-			toast.success("Account created successfully. Please login to continue.");
 		} catch (err) {
 			setError(err.message || "Failed to create account");
 		} finally {
@@ -446,12 +495,7 @@ const SignupForm = () => {
 					</div>
 
 					{mode === "commission" ? (
-						<Button
-							type="button"
-							className="w-full"
-							onClick={handlePayment}
-							disabled={loading}
-						>
+						<Button type="submit" className="w-full" disabled={loading}>
 							{loading ? "Processing..." : "Pay ₹2000 & Create Account"}
 						</Button>
 					) : (

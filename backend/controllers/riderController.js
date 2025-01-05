@@ -3,6 +3,13 @@ import Rider from "../models/riderModel.js";
 import ServiceRequest from "../models/serviceRequestModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import razorpay from "razorpay";
+import crypto from "crypto";
+
+const razorpayInstance = new razorpay({
+	key_id: process.env.RAZORPAY_KEY_ID,
+	key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 const riderController = {
 	// Auth Controllers
@@ -14,9 +21,43 @@ const riderController = {
 				firstName,
 				lastName,
 				phoneNumber,
+				referralCode,
+				paymentId,
+				mode,
 				specializations,
 			} = req.body;
-			console.log(specializations);
+			console.log(req.body);
+
+			if (mode === "normal") {
+				//verify referral code
+				if (referralCode) {
+					if (referralCode !== "RIDER") {
+						return res.status(400).json({ message: "Invalid referral code" });
+					}
+				} else {
+					return res.status(400).json({ message: "Referral code is required" });
+				}
+			}
+
+			if (mode === "commission") {
+				if (!paymentId) {
+					return res.status(400).json({ message: "Payment Id is required" });
+				}
+
+				razorpayInstance.payments.fetch(paymentId, async (error, payment) => {
+					if (error) {
+						return res
+							.status(500)
+							.json({ message: "Payment verification failed" });
+					}
+					console.log(payment);
+					if (payment.status !== "captured") {
+						return res
+							.status(400)
+							.json({ message: "Payment verification failed" });
+					}
+				});
+			}
 
 			// Check if rider exists
 			let rider = await Rider.findOne({ email });
@@ -32,6 +73,7 @@ const riderController = {
 				lastName,
 				phoneNumber,
 				specializations,
+				balance: mode === "commission" ? 2000 : 0,
 				status: "OFFLINE",
 			});
 
@@ -59,6 +101,57 @@ const riderController = {
 			// 	},
 			// });
 		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async createOrder(req, res) {
+		try {
+			const AMOUNT = 2000;
+			const CURRENCY = "INR";
+			const RECEIPT = `receipt#${Math.floor(Math.random() * 1000000)}`;
+
+			const options = {
+				amount: AMOUNT * 100,
+				currency: CURRENCY,
+				receipt: RECEIPT,
+			};
+
+			razorpayInstance.orders.create(options, (error, order) => {
+				if (error) {
+					return res.status(500).json({ message: "Order creation failed" });
+				}
+
+				console.log(order);
+
+				res.json(order);
+			});
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async verifyPayment(req, res) {
+		try {
+			const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+				req.body;
+			console.log(req.body);
+
+			const generatedSignature = crypto
+				.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+				.update(razorpay_order_id + "|" + razorpay_payment_id)
+				.digest("hex");
+
+			console.log("Generated Signature:", generatedSignature);
+			console.log("Received Signature:", razorpay_signature);
+
+			if (generatedSignature !== razorpay_signature) {
+				return res.status(400).json({ message: "Payment verification failed" });
+			}
+
+			res.json({ success: true, message: "Payment verified successfully" });
+		} catch (error) {
+			console.log(error);
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
 	},

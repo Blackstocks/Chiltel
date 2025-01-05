@@ -1,5 +1,6 @@
 // Rider Schema
 import mongoose from "mongoose";
+import { productEnums } from "../constants/index.js";
 
 const riderSchema = {
 	firstName: { type: String, required: true },
@@ -10,7 +11,7 @@ const riderSchema = {
 	specializations: [
 		{
 			type: String,
-			enum: ["AC", "Cooler", "Microwave"],
+			enum: productEnums,
 			required: true,
 		},
 	],
@@ -25,13 +26,15 @@ const riderSchema = {
 		default: "PENDING",
 	},
 	services: {
-		completed: Number,
-		total: Number,
+		completed: { type: Number, default: 0 },
+		total: { type: Number, default: 0 },
 	},
 	rating: {
 		average: { type: Number, default: 0 },
 		count: { type: Number, default: 0 },
 	},
+	balance: { type: Number, default: 0 },
+
 	location: {
 		type: {
 			type: String,

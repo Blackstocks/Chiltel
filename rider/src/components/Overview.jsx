@@ -39,6 +39,7 @@ import ActiveService from "./ActiveService";
 
 const OverviewTab = () => {
 	const { profile, loading, error } = useProfile();
+
 	if (loading) {
 		return <div>Loading...</div>;
 	}
@@ -60,6 +61,20 @@ const OverviewTab = () => {
 					{/* <p className="text-xs text-gray-500">+12% from yesterday</p> */}
 				</CardContent>
 			</Card>
+
+			{profile?.balance > 0 && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-sm font-medium">Balance</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="space-y-4">
+							<div className="text-2xl font-bold">₹ {profile.balance || 0}</div>
+							<p className="text-sm text-muted-foreground">Total Balance</p>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 
 			<Card>
 				<CardHeader>
@@ -92,6 +107,7 @@ const OverviewTab = () => {
 					</div>
 				</CardContent>
 			</Card>
+
 			<Card>
 				<CardHeader>
 					<CardTitle className="text-sm font-medium">Rating</CardTitle>
