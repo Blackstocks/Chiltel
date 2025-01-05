@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "../contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const AuthPage = () => {
   const { login } = useAuth();
@@ -108,15 +109,18 @@ const AuthPage = () => {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok) {        
         throw new Error(data.message || "Signup failed");
       }
 
       // Auto login after successful signup
       localStorage.setItem("token", data.token);
+      // Show success toast message
+      toast.success("Registered successfully!");
       window.location.href = "/auth";
     } catch (err) {
       setError(err.message);
+      toast.error("Signup failed");
     } finally {
       setLoading(false);
     }

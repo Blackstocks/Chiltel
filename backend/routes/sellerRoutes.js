@@ -3,7 +3,7 @@ import express from "express";
 import {
   register,
   login,
-  verifyEmail,
+  verifyToken,
   getProfile,
   updateProfile,
   addProduct,
@@ -22,7 +22,7 @@ const router = express.Router();
 // Auth routes
 router.post("/register", register);
 router.post("/login", login);
-router.get("/verify-email/:token", verifyEmail);
+router.get("/verify-email/:token", verifyToken);
 
 // Protected routes
 router.use(protectSeller);

@@ -17,13 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import OrderDetailsDialog from "@/components/OrderDetailsDialog";
 import ServiceDetailsDialog from "@/components/ServiceDetailsDialog";
 import { toast } from "react-toastify";
@@ -42,7 +35,6 @@ const OrderManagement = ({ token }) => {
   const [orders, setOrders] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [riders, setRiders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState({
     orders: false,
     services: false,
@@ -270,9 +262,9 @@ const OrderManagement = ({ token }) => {
                     serviceRequests.map((service) => (
                       <TableRow key={service._id}>
                         <TableCell>{service._id}</TableCell>
-                        {<TableCell>{service.service?.name}</TableCell>}
-                        {<TableCell>{service.user.name}</TableCell>}
-                        
+                        <TableCell>{service.service?.name}</TableCell>
+                        <TableCell>{service.user.name}</TableCell>
+
                         <TableCell>
                           <Badge
                             className={getStatusBadgeColor(service.status)}
@@ -308,15 +300,17 @@ const OrderManagement = ({ token }) => {
                                     riders.filter(
                                       (rider) =>
                                         service.service &&
-                                        rider.specialization ===
-                                        service.service.product
+                                        rider.specializations.includes(
+                                          service.service.product
+                                        )
                                     ).length > 0 ? (
                                       riders
                                         .filter(
                                           (rider) =>
                                             service.service &&
-                                            rider.specialization ===
-                                            service.service.product
+                                            rider.specializations.includes(
+                                              service.service.product
+                                            )
                                         )
                                         .map((rider) => (
                                           <Card
@@ -341,7 +335,24 @@ const OrderManagement = ({ token }) => {
                                                     {`${rider.firstName} ${rider.lastName}`}
                                                   </p>
                                                   <p className="text-sm text-muted-foreground">
-                                                    {rider.specialization}
+                                                    <div className="flex flex-wrap gap-1">
+                                                      {rider.specializations.map(
+                                                        (spec, index) => (
+                                                          <span
+                                                            key={index}
+                                                            className={`text-xs px-2 py-0.5 rounded-full ${
+                                                              spec ===
+                                                              service.service
+                                                                .product
+                                                                ? "bg-primary/10 text-primary"
+                                                                : "bg-secondary/50 text-secondary-foreground"
+                                                            }`}
+                                                          >
+                                                            {spec}
+                                                          </span>
+                                                        )
+                                                      )}
+                                                    </div>
                                                   </p>
                                                 </div>
                                                 <div className="text-sm">

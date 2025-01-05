@@ -104,10 +104,10 @@ const addRider = async (req, res) => {
   }
 };
 
-// Get all employees
+// Get all approved riders
 const getAllRiders = async (req, res) => {
   try {
-    const riders = await Rider.find()
+    const riders = await Rider.find({ registrationStatus: 'APPROVED' })
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -265,4 +265,50 @@ const approveRider = async (req, res) => {
   }
 };
 
-export { addRider, getAllRiders, getRiderById, updateRider, deleteRider, approveRider };
+const getPendingRiders = async (req, res) => {
+  try {
+    const pendingRiders = await Rider.find({ registrationStatus: 'PENDING' });
+
+    res.status(200).json({
+      success: true,
+      data: pendingRiders
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching pending riders',
+      error: error.message
+    });
+  }
+};
+
+// Reject rider
+const rejectRider = async (req, res) => {
+  try {
+    const rider = await Rider.findById(req.params.id);
+
+    if (!rider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Rider not found'
+      });
+    }
+
+    rider.registrationStatus = 'REJECTED';
+    await rider.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Rider rejected successfully',
+      data: rider
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error rejecting rider',
+      error: error.message
+    });
+  }
+};
+
+export { addRider, getAllRiders, getRiderById, updateRider, deleteRider, approveRider, getPendingRiders, rejectRider };

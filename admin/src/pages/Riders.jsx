@@ -9,43 +9,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Search, Trash2, Loader2 } from "lucide-react";
 import { Star as StarIcon } from "lucide-react";
+import ReferralCodeDialog from "@/components/ReferralCodeDialog";
+import PendingRidersDialog from "@/components/PendingRidersTable";
 
 const RiderManagement = ({ token }) => {
   const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  const emptyRider = {
-    name: "",
-    email: "",
-    password: "",
-    phoneNumber: "",
-    specialization: "",
-    status: "OFFLINE", // Default status
-    location: {
-      type: "Point",
-      coordinates: [0, 0],
-    },
-  };
-
-  const [newRider, setNewRider] = useState(emptyRider);
-
-  const [editingRider, setEditingRider] = useState(null);
 
   // Fetch riders
   const fetchriders = async () => {
@@ -68,64 +43,6 @@ const RiderManagement = ({ token }) => {
   useEffect(() => {
     fetchriders();
   }, [token]);
-
-  // Add rider
-  const handleAddRider = async () => {
-    try {
-      setSubmitting(true);
-      const signupLink = `${import.meta.env.VITE_BACKEND_URL}/rider/signup`;
-      
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/send-email`, {
-        to: newRider.email,
-        subject: "Invitation to Join as Rider",
-        html: `
-          <h2>Welcome to Our Platform!</h2>
-          <p>You've been invited to join as a rider. Click the link below to complete your registration:</p>
-          <a href="${signupLink}">Complete Registration</a>
-        `
-      }, {
-        headers: { token }
-      });
-   
-      toast.success('Invitation sent successfully');
-      setIsAddDialogOpen(false);
-      setNewRider({ email: '' });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to send invitation');
-    } finally {
-      setSubmitting(false);
-    }
-   };
-  // Edit employee
-  const handleEditClick = (rider) => {
-    setEditingRider({ ...rider });
-    setIsEditDialogOpen(true);
-  };
-
-  const handleEditSave = async () => {
-    try {
-      setSubmitting(true);
-      const response = await axios.put(
-        `${import.meta.env.VITE_BACKEND_URL}/api/riders/${editingRider._id}`,
-        editingRider,
-        { headers: { token } }
-      );
-
-      setRiders(
-        riders.map((emp) =>
-          emp._id === editingRider._id ? response.data.data : emp
-        )
-      );
-      setIsEditDialogOpen(false);
-      setEditingRider(null);
-      toast.success("Rider updated successfully");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update rider");
-      console.error("Error:", error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   // Delete rider
   const handleDeleteRider = async (id) => {
@@ -223,6 +140,7 @@ const RiderManagement = ({ token }) => {
             Riders Management
           </CardTitle>
           <div className="flex space-x-4">
+            <ReferralCodeDialog  token={token}/>
             <div className="flex items-center border rounded-md px-2">
               <Search className="h-4 w-4 text-gray-500" />
               <Input
@@ -232,44 +150,13 @@ const RiderManagement = ({ token }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Rider
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Send Rider Invitation</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <Input
-                    placeholder="Email"
-                    type="email"
-                    value={newRider.email}
-                    onChange={(e) =>
-                      setNewRider({ ...newRider, email: e.target.value })
-                    }
-                  />
-
-                  <Button
-                    className="w-full"
-                    onClick={handleAddRider}
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Sending Invitation...
-                      </>
-                    ) : (
-                      "Send Invitation"
-                    )}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <PendingRidersDialog
+              token={token}
+              onRiderApproved={() => {
+                console.log("Rider approved");
+                fetchriders();
+              }}
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -292,8 +179,21 @@ const RiderManagement = ({ token }) => {
               <TableBody>
                 {filteredRiders.map((rider) => (
                   <TableRow key={rider._id}>
-                    <TableCell className="font-medium">{rider.firstName+" "+rider.lastName}</TableCell>
-                    <TableCell>{rider.specialization}</TableCell>
+                    <TableCell className="font-medium">
+                      {rider.firstName + " " + rider.lastName}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1 max-w-xs">
+                        {rider.specializations.map((spec, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full whitespace-nowrap"
+                          >
+                            {spec}
+                          </span>
+                        ))}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div>
                         <div>{rider.phoneNumber}</div>

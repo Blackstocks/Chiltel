@@ -31,7 +31,7 @@ export const register = async (req, res) => {
     await seller.save();
 
     const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, {
-      expiresIn: "24h",
+      expiresIn: "30d",
     });
 
     res.status(201).json({
@@ -43,6 +43,7 @@ export const register = async (req, res) => {
         name: seller.name,
         email: seller.email,
         storeName: seller.storeName,
+        phoneNumber: seller.phoneNumber,
         status: seller.status,
       },
     });
@@ -83,17 +84,19 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, {
-      expiresIn: "24h",
+      expiresIn: "30d",
     });
 
     res.json({
       success: true,
+      message: "Login successful",
       token,
       seller: {
         id: seller._id,
         name: seller.name,
         email: seller.email,
         storeName: seller.storeName,
+        phoneNumber: seller.phoneNumber,
         status: seller.status,
       },
     });
@@ -163,31 +166,27 @@ export const rejectSeller = async (req, res) => {
   }
 };
 
-export const verifyEmail = async (req, res) => {
+export const verifyToken = async (req, res) => {
   try {
-    const { token } = req.params;
-
-    const seller = await Seller.findOne({ verificationToken: token });
+    // Find seller by ID from req.seller (set by auth middleware) and exclude password
+    const seller = await Seller.findById(req.seller._id).select("-password");
+    
     if (!seller) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
-        message: "Invalid verification token",
+        message: "Seller not found"
       });
     }
 
-    seller.isEmailVerified = true;
-    seller.verificationToken = undefined;
-    await seller.save();
-
     res.json({
       success: true,
-      message: "Email verified successfully",
+      seller
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Email verification failed",
-      error: error.message,
+      message: "Token verification failed",
+      error: error.message
     });
   }
 };
