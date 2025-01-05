@@ -228,5 +228,23 @@ export const blogPosts = [
   - Smart sensing features
   
   Each technology offers unique benefits for different air quality concerns and room requirements.`
-    }
+    },{
+      id: 13,
+      title: "The Ultimate Guide to Washing Machine Maintenance",
+      category: "Washing Machine",
+      date: "March 22, 2024",
+      image: "/assets/wmser2.jpeg",
+      excerpt: "Proper maintenance of your washing machine ensures efficient operation and extends its lifespan. Discover essential tips for cleaning, troubleshooting, and preventing common issues. Keep your laundry fresh and your appliance in top condition.",
+      readTime: "6 min read",
+      fullContent: `Maintaining your washing machine is essential for optimal performance and longevity. Follow our expert tips to keep your appliance running smoothly and avoid costly repairs.
+    
+    Key Maintenance Tips:
+    1. Clean the drum and detergent dispenser regularly to prevent mold and mildew.
+    2. Inspect and clean the lint filter after every few washes.
+    3. Check and tighten water inlet hoses to avoid leaks.
+    4. Run a maintenance cycle using vinegar or a washing machine cleaner monthly.
+    5. Ensure the washing machine is leveled properly to reduce vibration.
+    
+    Professional maintenance should be done annually to address any underlying issues. Regular upkeep can prevent unexpected breakdowns, improve washing efficiency, and extend the appliance's lifespan. These simple steps will keep your washing machine in top condition, ensuring fresh laundry and a hassle-free washing experience.`
+  },
   ];

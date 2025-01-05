@@ -45,7 +45,7 @@ const KitchenAppliances = () => {
       icon: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4",
       image: "/assets/icube.jpg",
       description: "Commercial ice cube maker",
-      url: "/collection"
+      url: "/collection" 
     },
   ];
 
