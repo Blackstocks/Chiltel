@@ -315,11 +315,18 @@ const ServiceCollection = () => {
     useEffect(() => {
         let updatedCategories = [...categories1];
 
+        // if (mainCategoryFilter) {
+        //     updatedCategories = updatedCategories.filter(
+        //         (cat) => cat.mainCategory === mainCategoryFilter
+        //     );
+        // }
+
         if (mainCategoryFilter) {
             updatedCategories = updatedCategories.filter(
-                (cat) => cat.mainCategory === mainCategoryFilter
+                (cat) => mainCategoryFilter.includes(cat.mainCategory)
             );
         }
+        
 
         if (typeFilter.length > 0) {
             updatedCategories = updatedCategories.filter((cat) =>
