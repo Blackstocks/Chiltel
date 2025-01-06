@@ -96,7 +96,7 @@ const addService = async (req, res) => {
 		res.status(201).json({
 			success: true,
 			message: "Service added successfully",
-			data: service,
+			// data: service,
 		});
 	} catch (error) {
 		res.status(500).json({
