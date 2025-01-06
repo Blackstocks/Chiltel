@@ -144,7 +144,8 @@ const categories = [
 
       },
       {
-        name: "Ice Cube",
+        // name: "Ice Cube",
+        name: "Ice Maker",
         mainCategory: "Kitchen Appliance",
         type: "Cooling",
         image: "/assets/icube.jpg",
@@ -162,8 +163,116 @@ const ServiceCollection = () => {
     const [filteredCategories, setFilteredCategories] = useState([]);
     const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categories1, setCategories1] = useState([]);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchAndFormatData = async () => {
+          try {
+            // Fetch the product list from the API
+            const response = await axios.get(backendUrl + '/api/product/list');
+    
+            if (response.data.success) {
+              const products = response.data.data;
+    
+              // Extract unique categories
+              const uniqueCategories = [];
+              products.forEach((product) => {
+                let localImage = "";
+
+                // Map images based on category names
+                switch (product.category) {
+                  case "Air Conditioner":
+                    localImage = "/assets/air_conditioner.jpeg";
+                    break;
+                  case "Air Cooler":
+                    localImage = "/assets/cooler.jpg";
+                    break;
+                  case "Air Purifier":
+                    localImage = "/assets/air_puri.jpg";
+                    break;
+                  case "Water Purifier":
+                    localImage = "/assets/water_purifier.jpeg";
+                    break;
+                  case "Geyser":
+                    localImage = "/assets/geyser.jpg";
+                    break;
+                  case "Microwave":
+                    localImage = "/assets/microwave.jpeg";
+                    break;
+                  case "Refrigerator":
+                    localImage = "/assets/refrigwrator.jpeg";
+                    break;
+                  case "Washing Machine":
+                    localImage = "/assets/washing_machine.jpeg";
+                    break;
+                  case "Deep Freezer":
+                    localImage = "/assets/deep_freeze.png";
+                    break;
+                  case "Visi Cooler":
+                    localImage = "/assets/Visi _Coole.png";
+                    break;
+                  case "Cassette AC":
+                    localImage = "/assets/cas.webp";
+                    break;
+                  case "Water Cooler cum Purifier":
+                    localImage = "/assets/water_cooler.jpeg";
+                    break;
+                  case "Water Dispenser":
+                    localImage = "/assets/Water-dis.jpg";
+                    break;
+                  case "Display Counter":
+                    localImage = "/assets/display-counter.png";
+                    break;
+                  case "Water Cooler":
+                    localImage = "/assets/wcooler.jpeg";
+                    break;
+                  case "Upright Chiller":
+                    localImage = "/assets/uchiller.jpeg";
+                    break;
+                  case "Under Counter":
+                    localImage = "/assets/ucounter.jpg";
+                    break;
+                  case "Back Bar Chiller":
+                    localImage = "/assets/bbchiler.jpeg";
+                    break;
+                  case "Food Prep Chiller":
+                    localImage = "/assets/fprep.jpeg";
+                    break;
+                  case "Ice Maker":
+                    localImage = "/assets/icube.jpg";
+                    break;
+                  case "Water Heater": 
+                    localImage = "/assets/water_heater.jpeg";
+                    break;
+                  default:
+                    localImage = "/assets/default.jpeg"; // Default image
+                }
+                
+
+                if (!uniqueCategories.some((item) => item.name === product.category)) {
+                  uniqueCategories.push({
+                    name: product.category,
+                    mainCategory: product.mainCategory,
+                    type: product.type.charAt(0).toUpperCase() + product.type.slice(1),
+                    description: `Expert ${product.category.toLowerCase()} repair and maintenance services.`,
+                    image: localImage,
+                  });
+                }
+              });
+              console.log('categories: ', uniqueCategories);
+              setCategories1(uniqueCategories); // Update state with unique categories
+            } else {
+              console.error("Failed to retrieve products:", response.data.message);
+            }
+          } catch (error) {
+            console.error("Error fetching products:", error);
+          }
+        };
+    
+        fetchAndFormatData(); // Call the async function
+      }, []); // Dependency array ensures this effect runs only once
 
     const fetchServices = async () => {
         try {
@@ -204,7 +313,7 @@ const ServiceCollection = () => {
     };
 
     useEffect(() => {
-        let updatedCategories = [...categories];
+        let updatedCategories = [...categories1];
 
         if (mainCategoryFilter) {
             updatedCategories = updatedCategories.filter(
@@ -223,7 +332,7 @@ const ServiceCollection = () => {
         }
 
         setFilteredCategories(updatedCategories);
-    }, [mainCategoryFilter, typeFilter, sortType, categories]);
+    }, [mainCategoryFilter, typeFilter, sortType, categories, categories1]);
 
     return (
         <div className="container px-4 py-8 mx-auto">
