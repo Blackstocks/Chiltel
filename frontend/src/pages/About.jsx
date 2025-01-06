@@ -5,7 +5,7 @@ import NewsletterBox from "../components/NewsletterBox";
 const images = [
   "/assets/aboutus.png",
   "/assets/aboutus2.png",
-  "/assets/aboutus3.png"
+  "/assets/aboutus3.png",
 ];
 
 const About = () => {
@@ -34,7 +34,11 @@ const About = () => {
       </div>
 
       <div className="flex flex-col gap-12 my-10 md:flex-row">
-        <div className={`relative w-full md:max-w-[450px] transition-opacity duration-700 ${fade ? 'opacity-100' : 'opacity-0'}`}>
+        <div
+          className={`relative w-full md:max-w-[450px] transition-opacity duration-700 ${
+            fade ? "opacity-100" : "opacity-0"
+          }`}
+        >
           <img
             src={currentImage}
             alt="About Us"
@@ -43,10 +47,10 @@ const About = () => {
         </div>
         <div className="flex flex-col justify-center gap-6 text-gray-600 md:w-2/4">
           <p className="mb-4">
-            Chiltel India, established in 2021 by Mr. Sudarshan Kuumar Raut, is a
-            distinguished startup in the Sales and Service sector of Domestic
-            and Commercial Home Appliances Industries. Recognized as a Startup by
-            the Department of Industrial Policy and Promotion (DIIPT) of the
+            Chiltel India, established in 2021 by Mr. Sudarshan Kuumar Raut, is
+            a distinguished startup in the Sales and Service sector of Domestic
+            and Commercial Home Appliances Industries. Recognized as a Startup
+            by the Department of Industrial Policy and Promotion (DIIPT) of the
             Government of India in 2022, we have become a reputable force in the
             market.
           </p>
@@ -60,8 +64,8 @@ const About = () => {
           </p>
           <b className="text-gray-800">Our Mission</b>
           <p>
-            At Chiltel India, our vision is centered on delivering
-            premium services to customers at affordable rates, all within the
+            At Chiltel India, our vision is centered on delivering premium
+            services to customers at affordable rates, all within the
             convenience of their doorstep. Specializing in a range of products,
             including Deep Freezers, Visi-Coolers, Chest Freezers, Back Bar
             Freezers, Under Counters, Horizontal Steel Freezers & Chillers, and
@@ -77,56 +81,52 @@ const About = () => {
 
       {/* Grid container for all boxes */}
       <div className="grid grid-cols-1 gap-6 mb-20 md:grid-cols-2 lg:grid-cols-3">
-        {/* First row boxes */}
         <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
           <b className="mb-3 text-lg">Quality Assurance</b>
           <p className="text-gray-600">
-            We meticulously select and vet each product to ensure it meets our
-            stringent quality standards, providing you with the best in the market.
+            We carefully select and vet each product to meet high quality
+            standards, ensuring the best for you.
           </p>
         </div>
 
         <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
           <b className="mb-3 text-lg">Convenience</b>
           <p className="text-gray-600">
-            With our user-friendly interface and hassle-free ordering process,
-            shopping has never been easier. We ensure a seamless experience from start to finish.
+            Enjoy a seamless shopping experience with our easy-to-use interface
+            and hassle-free ordering process.
           </p>
         </div>
 
         <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
           <b className="mb-3 text-lg">Exceptional Customer Service</b>
           <p className="text-gray-600">
-            Our team of dedicated professionals is here to assist you at every step,
-            ensuring your complete satisfaction is our top priority.
+            Our dedicated team is here to assist you, ensuring your satisfaction
+            every step of the way.
           </p>
         </div>
 
-        {/* Second row boxes */}
         <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
           <b className="mb-3 text-lg">Your Trusted Partner</b>
           <p className="text-gray-600">
-            As your trusted partner for home appliance sales and services, we are committed
-            to delivering excellence in every interaction and maintaining the highest standards
-            of service quality.
+            We are committed to excellence in every interaction, delivering
+            high-quality service as your trusted partner.
           </p>
         </div>
 
         <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
           <b className="mb-3 text-lg">Authorized Expertise</b>
           <p className="text-gray-600">
-            As authorized dealers and service experts for leading brands, we bring you
-            certified quality and reliability. Our expertise ensures you receive genuine
-            products and professional service.
+            As authorized dealers and service experts, we offer certified
+            quality and professional service for leading brands.
           </p>
         </div>
 
         <div className="flex flex-col h-full p-6 transition-shadow border rounded-lg hover:shadow-lg">
           <b className="mb-3 text-lg">Comprehensive Solutions</b>
           <p className="text-gray-600">
-            We provide reliable sales and service solutions as an authorized dealer for
-            Rockwell Industries and trusted partner for Western Refrigeration and Daikin India.
-            We proudly support Haier India and other leading brands.
+            We provide trusted sales and service solutions, supporting top
+            brands like Rockwell, Western Refrigeration, Daikin, Haier, and
+            more.
           </p>
         </div>
       </div>
