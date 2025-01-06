@@ -14,7 +14,7 @@ const ServiceCollection = () => {
     { name: "Deep Freezer", mainCategory: "Retail", type: "Cooling", image: "/assets/deep_freeze.png", description: "High-quality deep freezers for your storage needs." },
     { name: "Visi Cooler", mainCategory: "Retail", type: "Cooling", image: "/assets/Visi _Coole.png", description: "Reliable visi coolers for commercial use." },
     { name: "Cassette AC", mainCategory: "Retail", type: "Cooling", image: "/assets/Cassett.jpg", description: "Efficient cooling with cassette air conditioners." },
-    { name: "Water Cooler Cum Purifier", mainCategory: "Retail", type: "Water", image: "/assets/water_cooler.jpg", description: "Dual-function water cooler and purifier." },
+    { name: "Water Cooler Cum Purifier", mainCategory: "Retail", type: "Water", image: "/assets/water_cooler.jpeg", description: "Dual-function water cooler and purifier." },
     { name: "Water Dispenser", mainCategory: "Retail", type: "Water", image: "/assets/Water-dis.jpg", description: "Convenient and portable water dispensers." },
     { name: "Display Counter", mainCategory: "Retail", type: "Display", image: "/assets/display-counter.png", description: "Attractive display counters for showcasing products." },
   ];

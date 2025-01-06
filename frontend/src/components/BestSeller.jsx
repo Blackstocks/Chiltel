@@ -154,7 +154,7 @@ const KitchenAppliances = () => {
         onClick={() => navigate('/collection')}
       >
         <img
-          src={isMobile ? "/assets/banner9.png" : "/assets/banner11.png"}
+          src={isMobile ? "/assets/2.png" : "/assets/2.png"}
           alt="Kitchen Appliances Banner"
           className="object-cover w-full transition-transform duration-500 ease-in-out max-h-80 hover:scale-105 hover:shadow-lg"
         />

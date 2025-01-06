@@ -21,7 +21,7 @@ const categories = [
     },
     {
         name: "Air Purifier",
-        mainCategory: "Kitchen Appliance",
+        mainCategory: "Domestic Appliance",
         type: "Cooling",
         image: "/assets/air_puri.jpg",
         description: "Professional air purifier services for optimal cooling performance",
@@ -86,7 +86,7 @@ const categories = [
         name: "Water Cooler Cum Purifier",
         mainCategory: "Retail Appliance",
         type: "Water",
-        image: "/assets/water_cooler.jpg",
+        image: "/assets/water_cooler.jpeg",
         description: "Dual-function water cooler and purifier.",
     },
     {
@@ -103,6 +103,54 @@ const categories = [
         image: "/assets/display-counter.png",
         description: "Attractive display counters for showcasing products.",
     },
+    {
+        name: "Water Cooler",
+        mainCategory: "Kitchen Appliance",
+        type: "Cooling",
+        image: "/assets/wcooler.jpeg",
+        description: "Commercial water cooler for professional use",
+
+      },
+      {
+        name: "Upright Chiller",
+        mainCategory: "Kitchen Appliance",
+        type: "Display",
+        image: "/assets/uchiller.jpeg",
+        description: "Professional upright chiller for commercial use",
+
+      },
+      {
+        name: "Under Counter",
+        mainCategory: "Kitchen Appliance",
+        type: "Display",
+        image: "/assets/ucounter.jpg",
+        description: "Space-saving under counter chiller",
+
+      },
+      {
+        name: "Back Bar Chiller",
+        mainCategory: "Kitchen Appliance",
+        type: "Display",
+        image: "/assets/bbchiler.jpeg",
+        description: "Efficient back bar chiller for beverages",
+
+      },
+      {
+        name: "Food Prep Chiller",
+        mainCategory: "Kitchen Appliance",
+        type: "Display",
+        image: "/assets/fprep.jpeg",
+        description: "Food preparation chiller for professional kitchens",
+
+      },
+      {
+        name: "Ice Cube",
+        mainCategory: "Kitchen Appliance",
+        type: "Cooling",
+        image: "/assets/icube.jpg",
+        description: "Commercial ice cube maker",
+
+      },
 ];
 
 const ServiceCollection = () => {

@@ -188,7 +188,7 @@ const Hero = () => {
       name: "Water Cooler Cum Purifier",
       mainCategory: "Retail",
       type: "Water",
-      image: "/assets/water_cooler.jpg",
+      image: "/assets/water_cooler.jpeg",
       description: "Dual-function water cooler and purifier.",
     },
     {

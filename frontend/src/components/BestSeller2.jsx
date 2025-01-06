@@ -29,7 +29,7 @@ const BestSeller2 = () => {
     {
       name: "Water Cooler Cum Purifier",
       icon: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4",
-      image: "/assets/water_cooler.jpg",
+      image: "/assets/water_cooler.jpeg",
       description: "Dual-function water cooler and purifier.",
       url: "/collection"
     },
@@ -155,7 +155,7 @@ const BestSeller2 = () => {
         onClick={() => navigate('/collection')}
       >
         <img
-          src={isMobile ? "/assets/banner7.png" : "/assets/banner8.png"}
+          src={isMobile ? "/assets/banner7.png" : "/assets/3.png"}
           alt="Service Banner"
           className="object-cover w-full transition-transform duration-500 ease-in-out max-h-80 hover:scale-105 hover:shadow-lg"
         />

@@ -161,7 +161,7 @@ const ServiceCategories = () => {
         onClick={() => navigate('/collection')}
       >
         <img
-          src={isMobile ? "/assets/banner.png" : "/assets/banner3.png"}
+          src={isMobile ? "/assets/banner.png" : "/assets/1.png"}
           alt="Service Banner"
           className="object-cover w-full transition-transform duration-500 ease-in-out max-h-80 hover:scale-105 hover:shadow-lg"
         />
