@@ -38,6 +38,8 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     setAcMode((prevMode) => (prevMode === "Split AC" ? "Window AC" : "Split AC"));
   };
 
+  console.log('Schedule service: ', scheduleService);
+
     const fetchStateByPincode = async (pincode) => {
     try {
       const response = await fetch(
@@ -147,6 +149,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 
     try {
       console.log("Scheduled Service:", scheduleService);
+      console.log('Some info: ', scheduleService.service.name.includes('AC'), scheduleService.categoryName!=='Installation', acMode==='Window AC');
       const time24hr = convertTo24HourFormat(selectedTime);
       const scheduledDateTime = new Date(`${selectedDay}T${time24hr}:00`).toISOString();
       // const scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
@@ -160,8 +163,9 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
         },
         scheduledFor: scheduledDateTime,
         // scheduledFor: `${selectedDate}T${selectedTime}:00`,
-        price: scheduleService.service.price,
-        remarks,
+        // price: scheduleService.service.price,
+        price: (scheduleService.categoryName!=='Installation' && acMode==='Window AC') ? scheduleService.service.price + 300 : scheduleService.service.price,
+        remarks: (scheduleService.categoryName!=='Installation' && acMode==='Window AC') ? 'Window AC service' + remarks : remarks,
       }
       await addToServiceCart(scheduleService, serviceRequest);
       onClose();
@@ -192,80 +196,86 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     }
   };
 
-  const renderServiceCard = (service, categoryName, productName) => (
-    (productName.includes("Air Conditioner")) ?  
-      (
-        (acMode === "Split AC") ? (
+  const renderServiceCard = (service, categoryName, productName) => {
+    if (productName.includes("Air Conditioner")) {
+      return (
+        <>
+          {acMode === "Split AC" && !service.name.includes("Window AC") && (
             <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
-            <div className="flex items-start justify-between">
-              <div className="flex-grow">
-                <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
-                <p className="mt-1 text-sm text-gray-600">{service.description}</p>
-                <div className="flex items-center gap-4 mt-2">
-                  <div className="flex items-center text-gray-500">
-                    <Clock className="w-4 h-4 mr-1" />
-                    <span className="text-sm">{service.duration}</span>
+              <div className="flex items-start justify-between">
+                <div className="flex-grow">
+                  <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
+                  <p className="mt-1 text-sm text-gray-600">{service.description}</p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center text-gray-500">
+                      <Clock className="w-4 h-4 mr-1" />
+                      <span className="text-sm">{service.duration}</span>
+                    </div>
+                    <div className="font-medium text-gray-900">₹{service.price}</div>
                   </div>
-                  <div className="font-medium text-gray-900">₹{service.price}</div>
                 </div>
-              </div>
-              <button
-                onClick={() => setScheduleService({ service, categoryName })}
-                className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
-              >
-                Schedule
-              </button>
-            </div>
-          </div>
-        ):(
-          <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
-          <div className="flex items-start justify-between">
-            <div className="flex-grow">
-              <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
-              <p className="mt-1 text-sm text-gray-600">{service.description}</p>
-              <div className="flex items-center gap-4 mt-2">
-                <div className="flex items-center text-gray-500">
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span className="text-sm">{service.duration}</span>
-                </div>
-                <div className="font-medium text-gray-900">₹{service.price + 300}</div>
+                <button
+                  onClick={() => setScheduleService({ service, categoryName })}
+                  className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
+                >
+                  Schedule
+                </button>
               </div>
             </div>
-            <button
-              onClick={() => setScheduleService({ service, categoryName })}
-              className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
-            >
-              Schedule
-            </button>
+          )}
+          {acMode === "Window AC" && !service.name.includes("Split AC") && (
+            <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
+              <div className="flex items-start justify-between">
+                <div className="flex-grow">
+                  <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
+                  <p className="mt-1 text-sm text-gray-600">{service.description}</p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center text-gray-500">
+                      <Clock className="w-4 h-4 mr-1" />
+                      <span className="text-sm">{service.duration}</span>
+                    </div>
+                    <div className="font-medium text-gray-900">₹{(categoryName==='Installation') ? service.price : service.price + 300}</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setScheduleService({ service, categoryName })}
+                  className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
+                >
+                  Schedule
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      );
+    }
+  
+    // Default rendering for other product names
+    return (
+      <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
+        <div className="flex items-start justify-between">
+          <div className="flex-grow">
+            <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
+            <p className="mt-1 text-sm text-gray-600">{service.description}</p>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center text-gray-500">
+                <Clock className="w-4 h-4 mr-1" />
+                <span className="text-sm">{service.duration}</span>
+              </div>
+              <div className="font-medium text-gray-900">₹{service.price}</div>
+            </div>
           </div>
+          <button
+            onClick={() => setScheduleService({ service, categoryName })}
+            className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
+          >
+            Schedule
+          </button>
         </div>
-        )
-      ):
-      (
-        <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
-          <div className="flex items-start justify-between">
-            <div className="flex-grow">
-              <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
-              <p className="mt-1 text-sm text-gray-600">{service.description}</p>
-              <div className="flex items-center gap-4 mt-2">
-                <div className="flex items-center text-gray-500">
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span className="text-sm">{service.duration}</span>
-                </div>
-                <div className="font-medium text-gray-900">₹{service.price}</div>
-              </div>
-            </div>
-            <button
-              onClick={() => setScheduleService({ service, categoryName })}
-              className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
-            >
-              Schedule
-            </button>
-          </div>
-        </div>
-      )
-    
-  );
+      </div>
+    );
+  };
+  
 
   // const renderProductServices = (productName) => {
   //   const [expandedCategory, setExpandedCategory] = useState(null);

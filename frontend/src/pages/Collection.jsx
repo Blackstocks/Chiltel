@@ -308,7 +308,7 @@ const ServiceCollection = () => {
             navigate(`/products/${categorySlug}?type=${type}`);
         } else if (type === "service") {
             console.log('category selected: ', category);
-            setSelectedCategory(categories.find((cat) => cat.name === category));
+            setSelectedCategory(categories1.find((cat) => cat.name === category));
             setIsServiceModalOpen(true);
         }
     };
