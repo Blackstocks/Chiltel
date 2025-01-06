@@ -137,7 +137,7 @@ const StoreSettings = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/seller/upload-certificate', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/upload-certificate`, {
         method: 'POST',
         body: formData
       });

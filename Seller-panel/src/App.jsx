@@ -34,7 +34,7 @@ const App = () => {
             <Route path="/support" element={<HelpAndSupport />} />
 
             {/* Redirect root to dashboard if authenticated, otherwise to login */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/auth" replace />} />
 
             {/* 404 Route */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
