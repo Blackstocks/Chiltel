@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AuthPage from "./pages/authPage";
+import AuthPage from "./pages/AuthPage";
 //import Dashboard from './pages/Dashboard';
 import SellerProducts from "./pages/Products";
 import AddProductForm from "./components/AddProductForm";
