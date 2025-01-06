@@ -11,6 +11,7 @@
 		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
-		"addProduct": "node ideas/addProductAutomation.js"
+		"addProduct": "node ideas/addProductAutomation.js",
+		"addService": "node ideas/addServiceAutomation.js"
 	}
 }

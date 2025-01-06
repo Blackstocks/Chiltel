@@ -424,6 +424,7 @@ const riderController = {
 			service.status = "COMPLETED";
 			service.workStarted = false;
 			rider.services.completed += 1;
+			rider.balance -= 200;
 			service.completedAt = new Date();
 			await service.save();
 			await rider.save();

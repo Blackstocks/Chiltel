@@ -21,18 +21,13 @@ import {
 	IndianRupee,
 	NotepadText,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import ActiveService from "./ActiveService";
@@ -65,12 +60,32 @@ const OverviewTab = () => {
 			{profile?.balance > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-sm font-medium">Balance</CardTitle>
+						<CardTitle className="text-sm font-medium">Coins</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
-							<div className="text-2xl font-bold">₹ {profile.balance || 0}</div>
-							<p className="text-sm text-muted-foreground">Total Balance</p>
+							<div className="text-2xl font-bold">
+								🪙 {profile.balance / 10 || 0}
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-6 w-6 p-0 hover:bg-gray-100 rounded-full"
+											>
+												<Info className="h-4 w-4 text-gray-500" />
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>
+												20 coins will be deducted if you complete one service
+											</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</div>
+							<p className="text-sm text-muted-foreground">Total Coins</p>
 						</div>
 					</CardContent>
 				</Card>

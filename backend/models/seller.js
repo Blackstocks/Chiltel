@@ -2,6 +2,25 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const sellerSchema = new mongoose.Schema({
+  // Authentication Details (populated after admin approval)
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,
+    required: true,
+    validate: {
+      validator: function(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      },
+      message: props => `${props.value} is not a valid email address!`
+    }
+  },
+  password: {
+    type: String,
+    select: false,
+    required: true,
+  },
+
   // Basic Details
   shopName: {
     type: String,
@@ -105,8 +124,8 @@ const sellerSchema = new mongoose.Schema({
 
   // Document Upload
   dealerCertificate: {
-    url: { type: String, required: true },
-    filename: { type: String, required: true },
+    url: { type: String},
+    filename: { type: String },
     uploadDate: { type: Date, default: Date.now }
   },
 
@@ -129,23 +148,6 @@ const sellerSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'approved', 'rejected', 'blocked'],
     default: 'pending'
-  },
-
-  // Authentication Details (populated after admin approval)
-  email: {
-    type: String,
-    unique: true,
-    sparse: true,
-    validate: {
-      validator: function(v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-      },
-      message: props => `${props.value} is not a valid email address!`
-    }
-  },
-  password: {
-    type: String,
-    select: false // Won't be returned in queries by default
   },
   
   // System Fields

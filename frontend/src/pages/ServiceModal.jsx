@@ -89,7 +89,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
             description: item.description,
           });
         });
-
+        console.log('organised services: ', organizedServices);
         setServices(organizedServices);
       } else {
         console.error("Error fetching services:", response.data.message);
@@ -211,30 +211,106 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     </div>
   );
 
-  const renderProductServices = (productName) => (
-    <div className="space-y-4">
-      {Object.entries(services[productName] || {}).map(([categoryName, categoryServices]) => (
-        <div key={categoryName} className="overflow-hidden border rounded-lg">
-          <button
-            onClick={() =>
-              setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
-            }
-            className="flex items-center justify-between w-full p-4 bg-gray-50 hover:bg-gray-100"
-          >
-            <span className="font-semibold">{categoryName}</span>
-            {expandedCategory === categoryName ? <ChevronUp /> : <ChevronDown />}
-          </button>
-          {expandedCategory === categoryName && (
-            <div className="p-4 space-y-4 bg-gray-50">
-              {categoryServices.map((service, idx) => (
-                <div key={idx}>{renderServiceCard(service, categoryName)}</div>
-              ))}
+  const renderProductServices = (productName) => {
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [acMode, setAcMode] = useState("Split AC");
+  
+    const toggleAcMode = () => {
+      setAcMode((prevMode) => (prevMode === "Split AC" ? "Window AC" : "Split AC"));
+    };
+  
+    return (
+      <div className="space-y-4">
+        {productName === "Air Conditioner" && (
+          <div className="flex items-center justify-between p-4 bg-gray-50 border rounded-lg">
+            <span className="font-semibold">Air Conditioner Services</span>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm font-medium">{acMode}</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={acMode === "Window AC"}
+                  onChange={toggleAcMode}
+                />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-gray-300 dark:peer-focus:ring-gray-500 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+              </label>
             </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+          </div>
+        )}
+  
+        {Object.entries(services[productName] || {}).map(([categoryName, categoryServices]) => (
+          <div key={categoryName} className="overflow-hidden border rounded-lg">
+            <button
+              onClick={() =>
+                setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
+              }
+              className="flex items-center justify-between w-full p-4 bg-gray-50 hover:bg-gray-100"
+            >
+              <span className="font-semibold">{categoryName}</span>
+              {expandedCategory === categoryName ? <ChevronUp /> : <ChevronDown />}
+            </button>
+            {expandedCategory === categoryName && (
+              <div className="p-4 space-y-4 bg-gray-50">
+                {categoryServices
+                  .filter((service) => {
+                    if (productName === "Air Conditioner" && categoryName === "Installation") {
+                      if (acMode === "Split AC") {
+                        return service.name === "Split AC installation";
+                      } else if (acMode === "Window AC") {
+                        return true;
+                      }
+                    }
+                    return true;
+                  })
+                  .map((service, idx) => (
+                    <div key={idx}>
+                      {renderServiceCard(
+                        {
+                          ...service,
+                          price:
+                            productName === "Air Conditioner" &&
+                            acMode === "Window AC" &&
+                            categoryName === "Installation"
+                              ? service.price + 300
+                              : service.price,
+                        },
+                        categoryName
+                      )}
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // const renderProductServices = (productName) => (
+  //   <div className="space-y-4">
+  //     {Object.entries(services[productName] || {}).map(([categoryName, categoryServices]) => (
+  //       <div key={categoryName} className="overflow-hidden border rounded-lg">
+  //         <button
+  //           onClick={() =>
+  //             setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
+  //           }
+  //           className="flex items-center justify-between w-full p-4 bg-gray-50 hover:bg-gray-100"
+  //         >
+  //           <span className="font-semibold">{categoryName}</span>
+  //           {expandedCategory === categoryName ? <ChevronUp /> : <ChevronDown />}
+  //         </button>
+  //         {expandedCategory === categoryName && (
+  //           <div className="p-4 space-y-4 bg-gray-50">
+  //             {categoryServices.map((service, idx) => (
+  //               <div key={idx}>{renderServiceCard(service, categoryName)}</div>
+  //             ))}
+  //           </div>
+  //         )}
+  //       </div>
+  //     ))}
+  //   </div>
+  // );
 
   const renderScheduleModal = () => {
     const today = new Date();
