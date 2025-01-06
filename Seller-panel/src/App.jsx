@@ -2,11 +2,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AuthPage from "./pages/authPage";
+import AuthPage from "./pages/AuthPage";
 //import Dashboard from './pages/Dashboard';
 import SellerProducts from "./pages/Products";
 import AddProductForm from "./components/AddProductForm";
 import SellerLayout from "./components/SellerLayout";
+import StoreSettings from "./pages/StoreSettings";
+import HelpAndSupport from "./pages/HelpAndSupport";
+import SellerDashboard from "./pages/Dashboard,";
 //import Orders from './pages/Orders';
 // Import other pages as needed
 
@@ -20,14 +23,15 @@ const App = () => {
             {/* Public Routes */}
 
             {/* Protected Routes */}
-            <Route
-              path="/dashboard"
-              element={<ProtectedRoute></ProtectedRoute>}
-            />
+            <Route path="/dashboard" element={<SellerDashboard />} />
 
             <Route path="/products" element={<SellerProducts />} />
 
             <Route path="/orders" element={<ProtectedRoute></ProtectedRoute>} />
+
+            <Route path="/store" element={<StoreSettings />} />
+
+            <Route path="/support" element={<HelpAndSupport />} />
 
             {/* Redirect root to dashboard if authenticated, otherwise to login */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

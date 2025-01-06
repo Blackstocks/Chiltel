@@ -1,50 +1,204 @@
-// models/Seller.js
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const sellerSchema = new mongoose.Schema({
-  name: {
+  // Basic Details
+  shopName: {
     type: String,
-    required: true,
+    required: [true, 'Firm/Shop name is required'],
+    trim: true
   },
-  email: {
+  proprietorName: {
     type: String,
-    required: true,
+    required: [true, 'Proprietor name is required'],
+    trim: true
+  },
+  aadharNumber: {
+    type: String,
+    required: [true, 'Aadhar number is required'],
     unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  storeName: {
-    type: String,
-    required: true,
+    validate: {
+      validator: function(v) {
+        return /^\d{12}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid Aadhar number! Must be 12 digits.`
+    }
   },
   phoneNumber: {
     type: String,
-    required: true,
+    required: [true, 'Contact number is required'],
+    validate: {
+      validator: function(v) {
+        return /^\d{10}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid phone number! Must be 10 digits.`
+    }
   },
-  status: {
+  
+  // Address Details
+  registeredAddress: {
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    pincode: { 
+      type: String, 
+      required: true,
+      validate: {
+        validator: function(v) {
+          return /^\d{6}$/.test(v);
+        },
+        message: props => `${props.value} is not a valid pincode! Must be 6 digits.`
+      }
+    }
+  },
+  warehouseAddress: {
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    pincode: { 
+      type: String, 
+      required: true,
+      validate: {
+        validator: function(v) {
+          return /^\d{6}$/.test(v);
+        },
+        message: props => `${props.value} is not a valid pincode! Must be 6 digits.`
+      }
+    }
+  },
+
+  // Tax and Bank Details
+  gstNumber: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'approved'
+    unique: true,
+    validate: {
+      validator: function(v) {
+        return /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid GST number!`
+    }
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  bankDetails: {
+    accountNumber: {
+      type: String,
+      validate: {
+        validator: function(v) {
+          return /^\d{9,18}$/.test(v);
+        },
+        message: props => `${props.value} is not a valid account number!`
+      }
+    },
+    ifscCode: {
+      type: String,
+      validate: {
+        validator: function(v) {
+          return /^[A-Z]{4}0[A-Z0-9]{6}$/.test(v);
+        },
+        message: props => `${props.value} is not a valid IFSC code!`
+      }
+    },
+    bankName: {
+      type: String,
+      trim: true
+    }
   },
-  verificationToken: String,
-  isEmailVerified: {
+
+  // Document Upload
+  dealerCertificate: {
+    url: { type: String, required: true },
+    filename: { type: String, required: true },
+    uploadDate: { type: Date, default: Date.now }
+  },
+
+  // Agreement
+  agreementAccepted: {
     type: Boolean,
+    required: [true, 'Must accept the agreement'],
     default: false
+  },
+
+  // Verification Status
+  verificationStatus: {
+    bankVerified: { type: Boolean, default: false },
+    otpVerified: { type: Boolean, default: false },
+    documentsValidated: { type: Boolean, default: false }
+  },
+
+  // Registration Status
+  registrationStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', 'blocked'],
+    default: 'pending'
+  },
+
+  // Authentication Details (populated after admin approval)
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,
+    validate: {
+      validator: function(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      },
+      message: props => `${props.value} is not a valid email address!`
+    }
+  },
+  password: {
+    type: String,
+    select: false // Won't be returned in queries by default
+  },
+  
+  // System Fields
+  registrationDate: {
+    type: Date,
+    default: Date.now
+  },
+  lastUpdated: {
+    type: Date,
+    default: Date.now
   }
+}, {
+  timestamps: true
 });
 
 // Hash password before saving
 sellerSchema.pre('save', async function(next) {
+  // Only hash the password if it has been modified (or is new)
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  
+  try {
+    // Generate salt and hash password
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    this.lastPasswordUpdate = new Date();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update lastUpdated timestamp
+sellerSchema.pre('save', function(next) {
+  this.lastUpdated = new Date();
   next();
 });
 
-export default mongoose.model('Seller', sellerSchema);
+// Method to compare password
+sellerSchema.methods.comparePassword = async function(candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Create indexes
+sellerSchema.index({ phoneNumber: 1 });
+sellerSchema.index({ gstNumber: 1 });
+sellerSchema.index({ 'bankDetails.accountNumber': 1 });
+sellerSchema.index({ registrationStatus: 1 });
+sellerSchema.index({ accountStatus: 1 });
+
+const Seller = mongoose.model('Seller', sellerSchema);
+
+export default Seller;

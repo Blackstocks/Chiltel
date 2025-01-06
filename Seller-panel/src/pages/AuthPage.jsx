@@ -13,6 +13,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
+import SignupForm from "@/components/SignUpForm";
 
 const AuthPage = () => {
   const { login } = useAuth();
@@ -24,18 +25,8 @@ const AuthPage = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  // Signup state
-  const [signupData, setSignupData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    storeName: "",
-    phoneNumber: "",
-  });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -72,66 +63,6 @@ const AuthPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    // Password validation
-    if (signupData.password !== signupData.confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-
-    if (signupData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: signupData.name,
-          email: signupData.email,
-          password: signupData.password,
-          storeName: signupData.storeName,
-          phoneNumber: signupData.phoneNumber,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {        
-        throw new Error(data.message || "Signup failed");
-      }
-
-      // Auto login after successful signup
-      localStorage.setItem("token", data.token);
-      // Show success toast message
-      toast.success("Registered successfully!");
-      window.location.href = "/auth";
-    } catch (err) {
-      setError(err.message);
-      toast.error("Signup failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignupDataChange = (e) => {
-    const { name, value } = e.target;
-    setSignupData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
   return (
@@ -226,130 +157,7 @@ const AuthPage = () => {
             </TabsContent>
 
             <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={signupData.name}
-                    onChange={handleSignupDataChange}
-                    required
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={signupData.email}
-                    onChange={handleSignupDataChange}
-                    required
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Input
-                    id="storeName"
-                    name="storeName"
-                    type="text"
-                    placeholder="Enter your store name"
-                    value={signupData.storeName}
-                    onChange={handleSignupDataChange}
-                    required
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Input
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    type="tel"
-                    placeholder="Enter your phone number"
-                    value={signupData.phoneNumber}
-                    onChange={handleSignupDataChange}
-                    required
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
-                      value={signupData.password}
-                      onChange={handleSignupDataChange}
-                      required
-                      className="w-full pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm your password"
-                      value={signupData.confirmPassword}
-                      onChange={handleSignupDataChange}
-                      required
-                      className="w-full pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
-                    </>
-                  ) : (
-                    "Create Account"
-                  )}
-                </Button>
-              </form>
+              <SignupForm />
             </TabsContent>
           </Tabs>
         </CardContent>
