@@ -104,7 +104,7 @@ const StoreSettings = () => {
         }
       };
 
-      const response = await fetch('/api/seller/profile', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -114,6 +114,7 @@ const StoreSettings = () => {
       });
 
       const data = await response.json();
+      console.log("changes saved data:", data);
       
       if (!response.ok) {
         throw new Error(data.message || 'Failed to update settings');
