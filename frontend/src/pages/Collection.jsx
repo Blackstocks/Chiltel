@@ -307,6 +307,7 @@ const ServiceCollection = () => {
             const categorySlug = category.toLowerCase().replace(/ /g, "-");
             navigate(`/products/${categorySlug}?type=${type}`);
         } else if (type === "service") {
+            console.log('category selected: ', category);
             setSelectedCategory(categories.find((cat) => cat.name === category));
             setIsServiceModalOpen(true);
         }
