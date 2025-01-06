@@ -137,7 +137,7 @@ const Hero = () => {
       name: "Display Counter",
       mainCategory: "Retail",
       type: "Display",
-      image: "/assets/display-counter.png",
+      image: "/assets/display-counter.jpeg",
       description: "Attractive display counters for showcasing products.",
     },
     {

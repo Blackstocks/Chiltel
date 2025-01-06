@@ -43,7 +43,7 @@ const BestSeller2 = () => {
     {
       name: "Display Counter",
       icon: "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4",
-      image: "/assets/display-counter.png",
+      image: "/assets/display-counter.jpeg",
       description: "Attractive display counters for showcasing products.",
       url: "/collection"
     },

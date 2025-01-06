@@ -37,7 +37,7 @@ const categories = [
         name: "Geyser",
         mainCategory: "Domestic Appliance",
         type: "Heating",
-        image: "/assets/geyser.jpg",
+        image: "/assets/gey.png",
         description: "Comprehensive geyser repair and installation services",
     },
     {
@@ -100,7 +100,7 @@ const categories = [
         name: "Display Counter",
         mainCategory: "Retail Appliance",
         type: "Display",
-        image: "/assets/display-counter.png",
+        image: "/assets/display-counter.jpeg",
         description: "Attractive display counters for showcasing products.",
     },
     {
