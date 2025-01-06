@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import razorpay from "razorpay";
 import crypto from "crypto";
+import ReferralCode from "../models/referralModel.js";
 
 const razorpayInstance = new razorpay({
 	key_id: process.env.RAZORPAY_KEY_ID,
@@ -31,7 +32,8 @@ const riderController = {
 			if (mode === "normal") {
 				//verify referral code
 				if (referralCode) {
-					if (referralCode !== "RIDER") {
+					const storedReferralCode = await ReferralCode.findOne({ email });
+					if (!storedReferralCode || referralCode !== storedReferralCode.code) {
 						return res.status(400).json({ message: "Invalid referral code" });
 					}
 				} else {
