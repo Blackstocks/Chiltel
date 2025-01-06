@@ -24,15 +24,15 @@ const App = () => {
             {/* Public Routes */}
 
             {/* Protected Routes */}
-            <Route path="/dashboard" element={<SellerDashboard />} />
+            <Route path="dashboard" element={<SellerDashboard />} />
 
-            <Route path="/products" element={<SellerProducts />} />
+            <Route path="products" element={<SellerProducts />} />
 
-            <Route path="/orders" element={<ProtectedRoute></ProtectedRoute>} />
+            <Route path="orders" element={<ProtectedRoute></ProtectedRoute>} />
 
-            <Route path="/store" element={<ProtectedRoute><StoreSettings /></ProtectedRoute>} />
+            <Route path="store" element={<ProtectedRoute><StoreSettings /></ProtectedRoute>} />
 
-            <Route path="/support" element={<HelpAndSupport />} />
+            <Route path="support" element={<HelpAndSupport />} />
 
             {/* Redirect root to dashboard if authenticated, otherwise to login */}
             

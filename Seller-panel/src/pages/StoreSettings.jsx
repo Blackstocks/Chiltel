@@ -323,7 +323,7 @@ const StoreSettings = () => {
                               <FileCheck className="h-5 w-5 text-green-500" />
                               <span>Certificate uploaded on {new Date(user.dealerCertificate.uploadDate).toLocaleDateString()}</span>
                             </div>
-                            <Button variant="outline" onClick={handleFileUpload}>Update Certificate</Button>
+                            <Button variant="outline">Update Certificate</Button>
                           </div>
                         ) : (
                           <div className="flex items-center justify-center border-2 border-dashed rounded-lg p-6">
