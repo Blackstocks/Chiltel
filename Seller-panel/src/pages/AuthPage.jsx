@@ -49,13 +49,14 @@ const AuthPage = () => {
       );
 
       const data = await response.json();
+      console.log("logged in data:", data);
 
       if (!response.ok) {
         throw new Error(data.message || "Authentication failed");
       }
 
       // Use the login function from context instead of directly setting localStorage
-      login(data.user, data.token);
+      login(data.seller, data.token);
 
       // Navigation will be handled automatically by protected route
     } catch (err) {

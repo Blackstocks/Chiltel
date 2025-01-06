@@ -23,7 +23,7 @@ export const protectSeller = async (req, res, next) => {
       });
     }
 
-    if (seller.status !== 'approved') {
+    if (seller.registrationStatus !== 'approved') {
       return res.status(403).json({
         success: false,
         message: 'Your account is pending approval'

@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Verify token with backend
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/verify-email`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/verify`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData);
+        setUser(userData.seller);
       } else {
         // If token is invalid, clear it
         localStorage.removeItem("token");
@@ -43,7 +43,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData, token) => {
     setUser(userData);
+    console.log(userData);
+    console.log(token);
     localStorage.setItem("token", token);
+    window.location.href = "/store";
+    console.log("Logged in");
   };
 
   const logout = () => {

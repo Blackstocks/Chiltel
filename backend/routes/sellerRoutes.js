@@ -16,21 +16,25 @@ import {
   rejectSeller
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
+import { validateSellerRegistration } from '../middleware/sellerValidation.js';
+import adminAuth from "../middleware/adminAuth.js";
 
 const router = express.Router();
 
 // Auth routes
-router.post("/register", register);
+router.post("/register", validateSellerRegistration, register);
 router.post("/login", login);
-router.get("/verify-email/:token", verifyToken);
+
+
+
+router.put('/approve/:id', adminAuth, approveSeller);
+router.put('/reject/:id', rejectSeller);
 
 // Protected routes
 router.use(protectSeller);
 router.get("/profile", getProfile);
 router.put("/profile", updateProfile);
-
-router.put('/approve-seller/:id', approveSeller);
-router.put('/reject-seller/:id', rejectSeller);
+router.get("/verify", verifyToken);
 
 router.post('/add', addProduct);
 router.get('/list', getProducts);
