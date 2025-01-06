@@ -10,7 +10,7 @@ const ServiceDetail = () => {
   const categories = [
     { id: 1, name: "Air Conditioner", mainCategory: "Appliance", type: "Cooling", image: "/assets/air_conditioner.jpeg", description: "Professional AC services including installation, repair, and maintenance", price: 2999 },
     { id: 2, name: "Water Purifier", mainCategory: "Appliance", type: "Water", image: "/assets/water_purifier.jpeg", description: "Expert water purifier installation and maintenance services", price: 1999 },
-    { id: 3, name: "Geyser", mainCategory: "Appliance", type: "Heating", image: "/assets/geyser.jpg", description: "Comprehensive geyser repair and installation services", price: 2500 },
+    { id: 3, name: "Geyser", mainCategory: "Appliance", type: "Heating", image: "/assets/gey.png", description: "Comprehensive geyser repair and installation services", price: 2500 },
     // Add more products as needed
   ];
 
