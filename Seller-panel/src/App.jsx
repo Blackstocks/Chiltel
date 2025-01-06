@@ -19,6 +19,7 @@ const App = () => {
       <AuthProvider>
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/" element={<SellerLayout />}>
             {/* Public Routes */}
 
@@ -34,7 +35,7 @@ const App = () => {
             <Route path="/support" element={<HelpAndSupport />} />
 
             {/* Redirect root to dashboard if authenticated, otherwise to login */}
-            <Route path="/" element={<Navigate to="/auth" replace />} />
+            
 
             {/* 404 Route */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
