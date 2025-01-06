@@ -428,21 +428,31 @@ const SignupForm = () => {
               Next
             </Button>
           ) : (
-            <Button
-              type="submit"
-              form="registrationForm"
-              className="flex-1"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting Registration...
-                </>
-              ) : (
-                "Submit Registration"
-              )}
-            </Button>
+            <div className="w-full space-y-4">
+              <div className="space-y-2">
+                <Label className="flex items-center space-x-2">
+                  <Input type="checkbox" className="w-4 h-4" required />
+                  <span className="text-sm text-gray-600">
+                    I agree to the Terms of Service and Privacy Policy
+                  </span>
+                </Label>
+              </div>
+              <Button
+                type="submit"
+                form="registrationForm"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting Registration...
+                  </>
+                ) : (
+                  "Submit Registration"
+                )}
+              </Button>
+            </div>
           )}
         </div>
       </div>
