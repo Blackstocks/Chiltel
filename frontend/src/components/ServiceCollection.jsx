@@ -7,7 +7,7 @@ const ServiceCollection = () => {
   const categories = [
     { name: "Air Conditioner", mainCategory: "Domestic", type: "Cooling", image: "/assets/air_conditioner.jpeg", description: "Professional AC services including installation, repair, and maintenance" },
     { name: "Water Purifier", mainCategory: "Domestic", type: "Water", image: "/assets/water_purifier.jpeg", description: "Expert water purifier installation and maintenance services" },
-    { name: "Geyser", mainCategory: "Domestic", type: "Heating", image: "/assets/geyser.jpg", description: "Comprehensive geyser repair and installation services" },
+    { name: "Geyser", mainCategory: "Domestic", type: "Heating", image: "/assets/gey.png", description: "Comprehensive geyser repair and installation services" },
     { name: "Microwave", mainCategory: "Domestic", type: "Cooking", image: "/assets/microwave.jpeg", description: "Expert microwave repair and maintenance services" },
     { name: "Refrigerator", mainCategory: "Domestic", type: "Cooling", image: "/assets/refrigwrator.jpeg", description: "Professional refrigerator repair and maintenance services" },
     { name: "Washing Machine", mainCategory: "Domestic", type: "Cleaning", image: "/assets/washing_machine.jpeg", description: "Expert washing machine repair and maintenance services" },
@@ -16,7 +16,7 @@ const ServiceCollection = () => {
     { name: "Cassette AC", mainCategory: "Retail", type: "Cooling", image: "/assets/Cassett.jpg", description: "Efficient cooling with cassette air conditioners." },
     { name: "Water Cooler Cum Purifier", mainCategory: "Retail", type: "Water", image: "/assets/water_cooler.jpeg", description: "Dual-function water cooler and purifier." },
     { name: "Water Dispenser", mainCategory: "Retail", type: "Water", image: "/assets/Water-dis.jpg", description: "Convenient and portable water dispensers." },
-    { name: "Display Counter", mainCategory: "Retail", type: "Display", image: "/assets/display-counter.png", description: "Attractive display counters for showcasing products." },
+    { name: "Display Counter", mainCategory: "Retail", type: "Display", image: "/assets/display-counter.", description: "Attractive display counters for showcasing products." },
   ];
 
   const [filteredCategories, setFilteredCategories] = useState(categories);

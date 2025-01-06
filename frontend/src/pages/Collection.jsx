@@ -196,7 +196,7 @@ const ServiceCollection = () => {
                     localImage = "/assets/water_purifier.jpeg";
                     break;
                   case "Geyser":
-                    localImage = "/assets/geyser.jpg";
+                    localImage = "/assets/gey.png";
                     break;
                   case "Microwave":
                     localImage = "/assets/microwave.jpeg";

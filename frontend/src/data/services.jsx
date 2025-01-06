@@ -26,7 +26,7 @@ export const services = [
     name: "Geyser",
     mainCategory: "Appliance",
     type: "Heating",
-    image: "/assets/geyser.jpg",
+    image: "/assets/gey.png",
     description: "Comprehensive geyser repair and installation services",
     price: 3999,
     features: ["Installation", "Repair"]
