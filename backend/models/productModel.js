@@ -6,6 +6,10 @@ const productSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	seller: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "Seller",
+	},
 	brand: {
 		type: String,
 		required: true,
@@ -75,6 +79,7 @@ const productSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now,
 	},
+
 });
 
 productSchema.pre("save", function (next) {
