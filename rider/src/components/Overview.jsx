@@ -65,12 +65,14 @@ const OverviewTab = () => {
 			{profile?.balance > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-sm font-medium">Balance</CardTitle>
+						<CardTitle className="text-sm font-medium">Coins</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
-							<div className="text-2xl font-bold">₹ {profile.balance || 0}</div>
-							<p className="text-sm text-muted-foreground">Total Balance</p>
+							<div className="text-2xl font-bold">
+								🪙 {profile.balance / 10 || 0}
+							</div>
+							<p className="text-sm text-muted-foreground">Total Coins</p>
 						</div>
 					</CardContent>
 				</Card>
