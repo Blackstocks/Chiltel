@@ -32,6 +32,11 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     state: "",
     zipCode: "",
   });
+  const [acMode, setAcMode] = useState("Split AC");
+  
+  const toggleAcMode = () => {
+    setAcMode((prevMode) => (prevMode === "Split AC" ? "Window AC" : "Split AC"));
+  };
 
     const fetchStateByPincode = async (pincode) => {
     try {
@@ -187,41 +192,160 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     }
   };
 
-  const renderServiceCard = (service, categoryName) => (
-    <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
-      <div className="flex items-start justify-between">
-        <div className="flex-grow">
-          <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
-          <p className="mt-1 text-sm text-gray-600">{service.description}</p>
-          <div className="flex items-center gap-4 mt-2">
-            <div className="flex items-center text-gray-500">
-              <Clock className="w-4 h-4 mr-1" />
-              <span className="text-sm">{service.duration}</span>
+  const renderServiceCard = (service, categoryName, productName) => (
+    (productName.includes("Air Conditioner")) ?  
+      (
+        (acMode === "Split AC") ? (
+            <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
+            <div className="flex items-start justify-between">
+              <div className="flex-grow">
+                <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
+                <p className="mt-1 text-sm text-gray-600">{service.description}</p>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="flex items-center text-gray-500">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span className="text-sm">{service.duration}</span>
+                  </div>
+                  <div className="font-medium text-gray-900">₹{service.price}</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setScheduleService({ service, categoryName })}
+                className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
+              >
+                Schedule
+              </button>
             </div>
-            <div className="font-medium text-gray-900">₹{service.price}</div>
+          </div>
+        ):(
+          <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
+          <div className="flex items-start justify-between">
+            <div className="flex-grow">
+              <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
+              <p className="mt-1 text-sm text-gray-600">{service.description}</p>
+              <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center text-gray-500">
+                  <Clock className="w-4 h-4 mr-1" />
+                  <span className="text-sm">{service.duration}</span>
+                </div>
+                <div className="font-medium text-gray-900">₹{service.price + 300}</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setScheduleService({ service, categoryName })}
+              className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
+            >
+              Schedule
+            </button>
           </div>
         </div>
-        <button
-          onClick={() => setScheduleService({ service, categoryName })}
-          className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
-        >
-          Schedule
-        </button>
-      </div>
-    </div>
+        )
+      ):
+      (
+        <div className="p-4 transition-shadow bg-white border rounded-lg hover:shadow-md">
+          <div className="flex items-start justify-between">
+            <div className="flex-grow">
+              <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
+              <p className="mt-1 text-sm text-gray-600">{service.description}</p>
+              <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center text-gray-500">
+                  <Clock className="w-4 h-4 mr-1" />
+                  <span className="text-sm">{service.duration}</span>
+                </div>
+                <div className="font-medium text-gray-900">₹{service.price}</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setScheduleService({ service, categoryName })}
+              className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
+            >
+              Schedule
+            </button>
+          </div>
+        </div>
+      )
+    
   );
 
-  const renderProductServices = (productName) => {
-    const [expandedCategory, setExpandedCategory] = useState(null);
-    const [acMode, setAcMode] = useState("Split AC");
+  // const renderProductServices = (productName) => {
+  //   const [expandedCategory, setExpandedCategory] = useState(null);
+    // const [acMode, setAcMode] = useState("Split AC");
   
-    const toggleAcMode = () => {
-      setAcMode((prevMode) => (prevMode === "Split AC" ? "Window AC" : "Split AC"));
-    };
+    // const toggleAcMode = () => {
+    //   setAcMode((prevMode) => (prevMode === "Split AC" ? "Window AC" : "Split AC"));
+    // };
   
-    return (
-      <div className="space-y-4">
-        {productName === "Air Conditioner" && (
+  //   return (
+  //     <div className="space-y-4">
+        // {productName === "Air Conditioner" && (
+        //   <div className="flex items-center justify-between p-4 bg-gray-50 border rounded-lg">
+        //     <span className="font-semibold">Air Conditioner Services</span>
+        //     <div className="flex items-center space-x-4">
+        //       <span className="text-sm font-medium">{acMode}</span>
+        //       <label className="relative inline-flex items-center cursor-pointer">
+        //         <input
+        //           type="checkbox"
+        //           className="sr-only peer"
+        //           checked={acMode === "Window AC"}
+        //           onChange={toggleAcMode}
+        //         />
+        //         <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-gray-300 dark:peer-focus:ring-gray-500 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+        //       </label>
+        //     </div>
+        //   </div>
+        // )}
+  
+  //       {Object.entries(services[productName] || {}).map(([categoryName, categoryServices]) => (
+  //         <div key={categoryName} className="overflow-hidden border rounded-lg">
+  //           <button
+  //             onClick={() =>
+  //               setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
+  //             }
+  //             className="flex items-center justify-between w-full p-4 bg-gray-50 hover:bg-gray-100"
+  //           >
+  //             <span className="font-semibold">{categoryName}</span>
+  //             {expandedCategory === categoryName ? <ChevronUp /> : <ChevronDown />}
+  //           </button>
+  //           {expandedCategory === categoryName && (
+  //             <div className="p-4 space-y-4 bg-gray-50">
+  //               {categoryServices
+  //                 .filter((service) => {
+  //                   if (productName === "Air Conditioner" && categoryName === "Installation") {
+  //                     if (acMode === "Split AC") {
+  //                       return service.name === "Split AC installation";
+  //                     } else if (acMode === "Window AC") {
+  //                       return true;
+  //                     }
+  //                   }
+  //                   return true;
+  //                 })
+  //                 .map((service, idx) => (
+  //                   <div key={idx}>
+  //                     {renderServiceCard(
+  //                       {
+  //                         ...service,
+  //                         price:
+  //                           productName === "Air Conditioner" &&
+  //                           acMode === "Window AC" &&
+  //                           categoryName === "Installation"
+  //                             ? service.price + 300
+  //                             : service.price,
+  //                       },
+  //                       categoryName
+  //                     )}
+  //                   </div>
+  //                 ))}
+  //             </div>
+  //           )}
+  //         </div>
+  //       ))}
+  //     </div>
+  //   );
+  // };
+
+  const renderProductServices = (productName) => (
+    <div className="space-y-4">
+      {productName === "Air Conditioner" && (
           <div className="flex items-center justify-between p-4 bg-gray-50 border rounded-lg">
             <span className="font-semibold">Air Conditioner Services</span>
             <div className="flex items-center space-x-4">
@@ -238,79 +362,28 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
             </div>
           </div>
         )}
-  
-        {Object.entries(services[productName] || {}).map(([categoryName, categoryServices]) => (
-          <div key={categoryName} className="overflow-hidden border rounded-lg">
-            <button
-              onClick={() =>
-                setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
-              }
-              className="flex items-center justify-between w-full p-4 bg-gray-50 hover:bg-gray-100"
-            >
-              <span className="font-semibold">{categoryName}</span>
-              {expandedCategory === categoryName ? <ChevronUp /> : <ChevronDown />}
-            </button>
-            {expandedCategory === categoryName && (
-              <div className="p-4 space-y-4 bg-gray-50">
-                {categoryServices
-                  .filter((service) => {
-                    if (productName === "Air Conditioner" && categoryName === "Installation") {
-                      if (acMode === "Split AC") {
-                        return service.name === "Split AC installation";
-                      } else if (acMode === "Window AC") {
-                        return true;
-                      }
-                    }
-                    return true;
-                  })
-                  .map((service, idx) => (
-                    <div key={idx}>
-                      {renderServiceCard(
-                        {
-                          ...service,
-                          price:
-                            productName === "Air Conditioner" &&
-                            acMode === "Window AC" &&
-                            categoryName === "Installation"
-                              ? service.price + 300
-                              : service.price,
-                        },
-                        categoryName
-                      )}
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  // const renderProductServices = (productName) => (
-  //   <div className="space-y-4">
-  //     {Object.entries(services[productName] || {}).map(([categoryName, categoryServices]) => (
-  //       <div key={categoryName} className="overflow-hidden border rounded-lg">
-  //         <button
-  //           onClick={() =>
-  //             setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
-  //           }
-  //           className="flex items-center justify-between w-full p-4 bg-gray-50 hover:bg-gray-100"
-  //         >
-  //           <span className="font-semibold">{categoryName}</span>
-  //           {expandedCategory === categoryName ? <ChevronUp /> : <ChevronDown />}
-  //         </button>
-  //         {expandedCategory === categoryName && (
-  //           <div className="p-4 space-y-4 bg-gray-50">
-  //             {categoryServices.map((service, idx) => (
-  //               <div key={idx}>{renderServiceCard(service, categoryName)}</div>
-  //             ))}
-  //           </div>
-  //         )}
-  //       </div>
-  //     ))}
-  //   </div>
-  // );
+      {Object.entries(services[productName] || {}).map(([categoryName, categoryServices]) => (
+        <div key={categoryName} className="overflow-hidden border rounded-lg">
+          <button
+            onClick={() =>
+              setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
+            }
+            className="flex items-center justify-between w-full p-4 bg-gray-50 hover:bg-gray-100"
+          >
+            <span className="font-semibold">{categoryName}</span>
+            {expandedCategory === categoryName ? <ChevronUp /> : <ChevronDown />}
+          </button>
+          {expandedCategory === categoryName && (
+            <div className="p-4 space-y-4 bg-gray-50">
+              {categoryServices.map((service, idx) => (
+                <div key={idx}>{renderServiceCard(service, categoryName, productName)}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 
   const renderScheduleModal = () => {
     const today = new Date();
