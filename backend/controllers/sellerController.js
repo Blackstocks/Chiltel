@@ -7,51 +7,64 @@ import SellerProduct from "../models/sellerProduct.js";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password, storeName, phoneNumber } = req.body;
+    const {
+      email,
+      password,
+      shopName,
+      proprietorName,
+      aadharNumber,
+      phoneNumber,
+      registeredAddress,
+      warehouseAddress,
+      agreementAccepted
+    } = req.body;
 
-    const existingSeller = await Seller.findOne({ email });
-    if (existingSeller) {
+    // Check if seller with same email exists
+    const existingEmailSeller = await Seller.findOne({ email });
+    if (existingEmailSeller) {
       return res.status(400).json({
         success: false,
-        message: "Email already registered",
+        message: 'A seller with this email already exists'
       });
     }
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
+    // Check if seller with same Aadhar number exists
+    const existingAadharSeller = await Seller.findOne({ aadharNumber });
+    if (existingAadharSeller) {
+      return res.status(400).json({
+        success: false,
+        message: 'A seller with this Aadhar number already exists'
+      });
+    }
 
-    const seller = new Seller({
-      name,
+    // Create new seller
+    const seller = await Seller.create({
       email,
       password,
-      storeName,
+      shopName,
+      proprietorName,
+      aadharNumber,
       phoneNumber,
-      verificationToken,
-    });
-
-    await seller.save();
-
-    const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
+      registeredAddress,
+      warehouseAddress,
+      agreementAccepted,
+      registrationStatus: 'pending'
     });
 
     res.status(201).json({
       success: true,
-      message: "Registration successful",
-      token,
-      seller: {
+      message: 'Registration submitted successfully. Pending admin approval.',
+      data: {
         id: seller._id,
-        name: seller.name,
         email: seller.email,
-        storeName: seller.storeName,
-        phoneNumber: seller.phoneNumber,
-        status: seller.status,
-      },
+        shopName: seller.shopName,
+        registrationStatus: seller.registrationStatus
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Registration failed",
-      error: error.message,
+      message: error.message || 'Registration failed'
     });
   }
 };
@@ -60,51 +73,70 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const seller = await Seller.findOne({ email });
+    // Find seller and explicitly select password field (since it's deselected in schema)
+    const seller = await Seller.findOne({ email }).select('+password');
     if (!seller) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid email or password"
       });
     }
 
+    // Check password
     const isPasswordValid = await bcrypt.compare(password, seller.password);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid email or password"
       });
     }
 
-    if (seller.status !== "approved") {
+    // Check registration status
+    if (seller.registrationStatus !== "approved") {
       return res.status(403).json({
         success: false,
-        message: "Your account is pending approval",
+        message: 
+          seller.registrationStatus === "pending"
+            ? "Your account is pending approval"
+            : seller.registrationStatus === "rejected"
+            ? "Your account registration was rejected"
+            : "Your account is not active"
       });
     }
 
-    const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
-    });
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: seller._id,
+        email: seller.email
+      }, 
+      process.env.JWT_SECRET, 
+      {
+        expiresIn: "30d"
+      }
+    );
 
+    // Send response
     res.json({
       success: true,
       message: "Login successful",
       token,
       seller: {
         id: seller._id,
-        name: seller.name,
         email: seller.email,
-        storeName: seller.storeName,
+        shopName: seller.shopName,
+        proprietorName: seller.proprietorName,
         phoneNumber: seller.phoneNumber,
-        status: seller.status,
-      },
+        registrationStatus: seller.registrationStatus,
+        registeredAddress: seller.registeredAddress,
+        warehouseAddress: seller.warehouseAddress
+      }
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: "Login failed",
-      error: error.message,
+      message: "Login failed. Please try again later."
     });
   }
 };
@@ -121,7 +153,7 @@ export const approveSeller = async (req, res) => {
       });
     }
 
-    seller.status = "approved";
+    seller.registrationStatus = "approved";
     await seller.save();
 
     res.status(200).json({
@@ -149,7 +181,7 @@ export const rejectSeller = async (req, res) => {
       });
     }
 
-    seller.status = "rejected";
+    seller.registrationStatus = "rejected";
     await seller.save();
 
     res.status(200).json({
@@ -209,23 +241,124 @@ export const getProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { name, storeName, phoneNumber } = req.body;
+    const {
+      // Basic Details
+      shopName,
+      proprietorName,
+      phoneNumber,
+      
+      // Addresses
+      registeredAddress,
+      warehouseAddress,
+      
+      // Optional Details
+      gstNumber,
+      bankDetails,
+    } = req.body;
 
-    const seller = await Seller.findByIdAndUpdate(
+    // Create update object
+    const updateData = {};
+
+    // Update basic details if provided
+    if (shopName) updateData.shopName = shopName;
+    if (proprietorName) updateData.proprietorName = proprietorName;
+    if (phoneNumber) updateData.phoneNumber = phoneNumber;
+    if (gstNumber) updateData.gstNumber = gstNumber;
+
+    // Handle registered address update
+    if (registeredAddress) {
+      updateData.registeredAddress = {
+        ...req.seller.registeredAddress?.toObject(),
+        ...registeredAddress
+      };
+    }
+
+    // Handle warehouse address update
+    if (warehouseAddress) {
+      updateData.warehouseAddress = {
+        ...req.seller.warehouseAddress?.toObject(),
+        ...warehouseAddress
+      };
+    }
+
+    // Handle bank details update
+    if (bankDetails) {
+      updateData.bankDetails = {
+        ...req.seller.bankDetails?.toObject(),
+        ...bankDetails
+      };
+    }
+
+    // Update timestamp
+    updateData.lastUpdated = new Date();
+
+    // Check for unique GST if being updated
+    if (gstNumber) {
+      const existingGST = await Seller.findOne({ 
+        gstNumber, 
+        _id: { $ne: req.seller.id } 
+      });
+      
+      if (existingGST) {
+        return res.status(400).json({
+          success: false,
+          message: "GST number already registered with another seller"
+        });
+      }
+    }
+
+    // Check for unique bank account if being updated
+    if (bankDetails?.accountNumber) {
+      const existingAccount = await Seller.findOne({ 
+        'bankDetails.accountNumber': bankDetails.accountNumber,
+        _id: { $ne: req.seller.id }
+      });
+      
+      if (existingAccount) {
+        return res.status(400).json({
+          success: false,
+          message: "Bank account number already registered with another seller"
+        });
+      }
+    }
+
+    const updatedSeller = await Seller.findByIdAndUpdate(
       req.seller.id,
-      { name, storeName, phoneNumber },
-      { new: true }
-    ).select("-password");
+      updateData,
+      { 
+        new: true,
+        runValidators: true 
+      }
+    ).select('-password');
+
+    if (!updatedSeller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found"
+      });
+    }
 
     res.json({
       success: true,
-      data: seller,
+      message: "Profile updated successfully",
+      data: {
+        id: updatedSeller._id,
+        shopName: updatedSeller.shopName,
+        proprietorName: updatedSeller.proprietorName,
+        phoneNumber: updatedSeller.phoneNumber,
+        registeredAddress: updatedSeller.registeredAddress,
+        warehouseAddress: updatedSeller.warehouseAddress,
+        gstNumber: updatedSeller.gstNumber,
+        bankDetails: updatedSeller.bankDetails,
+        lastUpdated: updatedSeller.lastUpdated
+      }
     });
+
   } catch (error) {
+    console.error('Profile update error:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to update profile",
-      error: error.message,
+      message: error.message || "Failed to update profile. Please try again."
     });
   }
 };

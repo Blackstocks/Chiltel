@@ -12,8 +12,10 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { useAuth } from "../contexts/AuthContext";
 
 const Sidebar = () => {
+  const { logout, user } = useAuth();
   const location = useLocation();
   const { pathname } = location;
 
@@ -89,8 +91,8 @@ const Sidebar = () => {
               <Store className="h-4 w-4 text-slate-500" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Store Name</span>
-              <span className="text-xs text-slate-500">seller@example.com</span>
+              <span className="text-sm font-medium">{user.shopName}</span>
+              <span className="text-xs text-slate-500">{user.email}</span>
             </div>
           </div>
         </div>
@@ -101,6 +103,7 @@ const Sidebar = () => {
           className="w-full justify-start px-3 py-2 text-red-500 hover:text-red-600 hover:bg-red-50"
           onClick={() => {
             // Handle logout
+            logout();
             console.log("Logout clicked");
           }}
         >
