@@ -398,7 +398,7 @@ const Footer = () => {
               />
             </a>
             <a
-              href="#"
+              href="https://www.linkedin.com/company/105363816/admin/dashboard/"
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img
