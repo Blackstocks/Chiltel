@@ -13,7 +13,8 @@ import {
   getProductById,
   getProductStats,
   approveSeller,
-  rejectSeller
+  rejectSeller,
+  getSellers,
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import { validateSellerRegistration } from '../middleware/sellerValidation.js';
@@ -28,7 +29,8 @@ router.post("/login", login);
 
 
 router.put('/approve/:id', adminAuth, approveSeller);
-router.put('/reject/:id', rejectSeller);
+router.put('/reject/:id', adminAuth, rejectSeller);
+router.get('/list', adminAuth, getSellers);
 
 // Protected routes
 router.use(protectSeller);

@@ -189,6 +189,50 @@ export const rejectSeller = async (req, res) => {
   }
 };
 
+export const getSellers = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, status } = req.query;
+
+    // Build query
+    const query = {};
+
+    // Search functionality
+    if (search) {
+      query.$or = [
+        { email: { $regex: search, $options: "i" } },
+        { shopName: { $regex: search, $options: "i" } },
+        { proprietorName: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Status filter
+    if (status && status !== "all") {
+      query.registrationStatus = status;
+    }
+
+    const sellers = await Seller.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Seller.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: sellers,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch sellers",
+      error: error.message,
+    });
+  }
+};
+
 export const verifyToken = async (req, res) => {
   try {
     // Find seller by ID from req.seller (set by auth middleware) and exclude password
@@ -213,6 +257,9 @@ export const verifyToken = async (req, res) => {
     });
   }
 };
+
+
+// controllers/sellerController.js
 
 export const getProfile = async (req, res) => {
   try {
