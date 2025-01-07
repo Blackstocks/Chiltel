@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
@@ -30,30 +29,27 @@ export const AuthProvider = ({ children }) => {
         const userData = await response.json();
         setUser(userData.seller);
       } else {
-        // If token is invalid, clear it
         localStorage.removeItem("token");
+        setUser(null);
       }
     } catch (error) {
       console.error("Auth check failed:", error);
       localStorage.removeItem("token");
+      setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const login = (userData, token) => {
+  const login = async (userData, token) => {
     setUser(userData);
-    console.log(userData);
-    console.log(token);
     localStorage.setItem("token", token);
-    window.location.href = "/store";
-    console.log("Logged in");
+    return true;
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");
-    window.location.href = "/auth";
   };
 
   const value = {
@@ -61,11 +57,16 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     loading,
+    isAuthenticated: !!user,
   };
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a proper loading spinner component
+  }
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

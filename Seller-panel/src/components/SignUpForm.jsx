@@ -1,462 +1,552 @@
-import { useState } from "react";
-import { Store, Building2, Loader2, Eye, EyeOff } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 const SignupForm = () => {
-	const [currentStep, setCurrentStep] = useState(1);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState("");
-	const [showPassword, setShowPassword] = useState(false);
-
-	// Separate states for each form section
-	const [authData, setAuthData] = useState({
-		email: "",
-		password: "",
+	const [step, setStep] = useState(1);
+	const navigate = useNavigate();
+	const [formData, setFormData] = useState({
+	  email: '',
+	  password: '',
+	  shopName: '',         // Changed from firmName to shopName
+	  proprietorName: '',
+	  aadharNumber: '',
+	  phoneNumber: '',      // Changed from contactNumber to phoneNumber
+	  registeredAddress: {
+		street: '',
+		city: '',
+		state: '',
+		pincode: ''
+	  },
+	  warehouseAddress: {
+		street: '',
+		city: '',
+		state: '',
+		pincode: ''
+	  },
+	  agreementAccepted: false  // Changed from termsAccepted to agreementAccepted
 	});
-
-	const [storeData, setStoreData] = useState({
-		shopName: "",
-		proprietorName: "",
-		aadharNumber: "",
-		phoneNumber: "",
-	});
-
-	const [registeredAddress, setRegisteredAddress] = useState({
-		street: "",
-		city: "",
-		state: "",
-		pincode: "",
-	});
-
-	const [warehouseAddress, setWarehouseAddress] = useState({
-		street: "",
-		city: "",
-		state: "",
-		pincode: "",
-	});
-
-	// Simplified change handlers
-	function handleAuthChange(event) {
-		const { name, value } = event.target;
-		console.log(name, value);
-		setAuthData((prev) => ({
-			...prev,
-			[name]: value,
-		}));
-	}
-
-	function handleStoreChange(event) {
-		const { name, value } = event.target;
-		setStoreData((prev) => ({
-			...prev,
-			[name]: value,
-		}));
-	}
-
-	function handleRegisteredAddressChange(event) {
-		const { name, value } = event.target;
-		setRegisteredAddress((prev) => ({
-			...prev,
-			[name]: value,
-		}));
-	}
-
-	function handleWarehouseAddressChange(event) {
-		const { name, value } = event.target;
-		setWarehouseAddress((prev) => ({
-			...prev,
-			[name]: value,
-		}));
-	}
-
-	const validateStep = (step) => {
-		switch (step) {
-			case 1:
-				return authData.email && authData.password;
-			case 2:
-				return Object.values(storeData).every(Boolean);
-			case 3:
-				return Object.values(registeredAddress).every(Boolean);
-			case 4:
-				return Object.values(warehouseAddress).every(Boolean);
-			default:
-				return false;
+  
+	const handleSubmit = async (stepData) => {
+	  const newFormData = { ...formData, ...stepData };
+	  setFormData(newFormData);
+  
+	  if (step < 4) {
+		setStep(step + 1);
+		return;
+	  }
+  
+	  try {
+		const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/register`, {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json',
+		  },
+		  body: JSON.stringify({
+			email: newFormData.email,
+			password: newFormData.password,
+			shopName: newFormData.shopName,
+			proprietorName: newFormData.proprietorName,
+			aadharNumber: newFormData.aadharNumber,
+			phoneNumber: newFormData.phoneNumber,
+			registeredAddress: newFormData.registeredAddress,
+			warehouseAddress: newFormData.warehouseAddress,
+			agreementAccepted: newFormData.agreementAccepted
+		  }),
+		});
+  
+		const data = await response.json();
+  
+		if (response.ok) {
+		  // Show success message
+		  toast.success(data.message);
+		  // Redirect to login page after successful registration
+		  navigate('/auth');
+		} else {
+		  // Show error message
+		  toast.error(data.message);
 		}
+	  } catch (error) {
+		console.error('Registration failed:', error);
+		toast.error('Registration failed. Please try again.');
+	  }
 	};
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setLoading(true);
-		setError("");
+  const handlePrevious = () => {
+    setStep(step - 1);
+  };
 
-		try {
-			const formData = {
-				...authData,
-				...storeData,
-				registeredAddress,
-				warehouseAddress,
-			};
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return <AuthenticationStep onSubmit={handleSubmit} />;
+      case 2:
+        return (
+          <StoreInfoStep onSubmit={handleSubmit} onBack={handlePrevious} />
+        );
+      case 3:
+        return (
+          <RegisteredAddressStep
+            onSubmit={handleSubmit}
+            onBack={handlePrevious}
+          />
+        );
+      case 4:
+        return (
+          <WarehouseAddressStep
+            onSubmit={handleSubmit}
+            onBack={handlePrevious}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
-			const response = await fetch(
-				`${import.meta.env.VITE_BACKEND_URL}/api/seller/register`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(formData),
-				}
-			);
+  return <div className="max-w-md mx-auto mt-0">{renderStep()}</div>;
+};
 
-			const data = await response.json();
+const AuthenticationStep = ({ onSubmit }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-			if (!response.ok) {
-				throw new Error(data.message || "Registration failed");
-			}
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <svg
+          className="w-6 h-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+          />
+        </svg>
+        <h2 className="text-lg font-medium">Authentication Details</h2>
+      </div>
 
-			toast.success(
-				"After verification by our admin team, you will receive an email with your login credentials.",
-				{
-					position: "top-right",
-					autoClose: 5000,
-				}
-			);
+      <div>
+        <label className="block text-sm font-medium mb-1">Email Address</label>
+        <input
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Invalid email address",
+            },
+          })}
+          type="email"
+          placeholder="seller@example.com"
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+        />
+        {errors.email && (
+          <span className="text-red-500 text-sm">{errors.email.message}</span>
+        )}
+      </div>
 
-			window.location.href = "/registration-submitted";
-		} catch (err) {
-			setError(err.message);
-			toast.error("Registration Failed: " + err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const AuthenticationSection = () => (
-		<div className="space-y-4">
-			<div className="flex items-center gap-2">
-				<Store className="h-5 w-5" />
-				<h3 className="font-semibold">Authentication Details</h3>
-			</div>
-
-			<div className="grid gap-4">
-				<div className="space-y-2">
-					<Label htmlFor="email">Email Address</Label>
-					<Input
-						id="email"
-						name="email"
-						type="email"
-						placeholder="Enter your email"
-						value={authData.email}
-						onChange={handleAuthChange}
-						required
-					/>
-				</div>
-
-				<div className="space-y-2">
-					<Label htmlFor="password">Password</Label>
-					<div className="relative">
-						<Input
-							id="password"
-							name="password"
-							type={showPassword ? "text" : "password"}
-							placeholder="Enter your password"
-							value={authData.password}
-							onChange={handleAuthChange}
-							required
-							className="pr-10"
-							autoComplete="on"
-						/>
-						<button
-							type="button"
-							onClick={() => setShowPassword(!showPassword)}
-							className="absolute right-3 top-1/2 transform -translate-y-1/2"
-						>
-							{showPassword ? (
-								<EyeOff className="h-4 w-4 text-gray-500" />
-							) : (
-								<Eye className="h-4 w-4 text-gray-500" />
-							)}
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-
-	const StoreSection = () => (
-		<div className="space-y-4">
-			<div className="flex items-center gap-2">
-				<Store className="h-5 w-5" />
-				<h3 className="font-semibold">Store Information</h3>
-			</div>
-
-			<div className="grid gap-4">
-				<div className="grid grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="shopName">Firm/Shop Name</Label>
-						<Input
-							id="shopName"
-							name="shopName"
-							placeholder="Enter shop name"
-							value={storeData.shopName}
-							onChange={handleStoreChange}
-							required
-						/>
-					</div>
-					<div className="space-y-2">
-						<Label htmlFor="proprietorName">Proprietor Name</Label>
-						<Input
-							id="proprietorName"
-							name="proprietorName"
-							placeholder="Enter proprietor name"
-							value={storeData.proprietorName}
-							onChange={handleStoreChange}
-							required
-						/>
-					</div>
-				</div>
-
-				<div className="grid grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="aadharNumber">Aadhar Card Number</Label>
-						<Input
-							id="aadharNumber"
-							name="aadharNumber"
-							placeholder="Enter Aadhar number"
-							value={storeData.aadharNumber}
-							onChange={handleStoreChange}
-							required
-							maxLength={12}
-							pattern="\d{12}"
-						/>
-					</div>
-					<div className="space-y-2">
-						<Label htmlFor="phoneNumber">Contact Number</Label>
-						<Input
-							id="phoneNumber"
-							name="phoneNumber"
-							type="tel"
-							placeholder="Enter phone number"
-							value={storeData.phoneNumber}
-							onChange={handleStoreChange}
-							required
-							maxLength={10}
-							pattern="\d{10}"
-						/>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-
-	const RegisteredAddressSection = () => (
-		<div className="space-y-4">
-			<div className="flex items-center gap-2">
-				<Building2 className="h-5 w-5" />
-				<h3 className="font-semibold">Registered Address</h3>
-			</div>
-
-			<div className="grid gap-4">
-				<div className="space-y-2">
-					<Label htmlFor="street">Street Address</Label>
-					<Input
-						id="street"
-						name="street"
-						placeholder="Enter street address"
-						value={registeredAddress.street}
-						onChange={handleRegisteredAddressChange}
-						required
-					/>
-				</div>
-
-				<div className="grid grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="city">City</Label>
-						<Input
-							id="city"
-							name="city"
-							placeholder="Enter city"
-							value={registeredAddress.city}
-							onChange={handleRegisteredAddressChange}
-							required
-						/>
-					</div>
-					<div className="space-y-2">
-						<Label htmlFor="state">State</Label>
-						<Input
-							id="state"
-							name="state"
-							placeholder="Enter state"
-							value={registeredAddress.state}
-							onChange={handleRegisteredAddressChange}
-							required
-						/>
-					</div>
-				</div>
-
-				<div className="space-y-2">
-					<Label htmlFor="pincode">Pincode</Label>
-					<Input
-						id="pincode"
-						name="pincode"
-						placeholder="Enter pincode"
-						value={registeredAddress.pincode}
-						onChange={handleRegisteredAddressChange}
-						required
-						maxLength={6}
-						pattern="\d{6}"
-					/>
-				</div>
-			</div>
-		</div>
-	);
-
-	const WarehouseAddressSection = () => (
-		<div className="space-y-4">
-			<div className="flex items-center gap-2">
-				<Store className="h-5 w-5" />
-				<h3 className="font-semibold">Warehouse Address</h3>
-			</div>
-
-			<div className="grid gap-4">
-				<div className="space-y-2">
-					<Label htmlFor="w-street">Street Address</Label>
-					<Input
-						id="w-street"
-						name="street"
-						placeholder="Enter street address"
-						value={warehouseAddress.street}
-						onChange={handleWarehouseAddressChange}
-						required
-					/>
-				</div>
-
-				<div className="grid grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="w-city">City</Label>
-						<Input
-							id="w-city"
-							name="city"
-							placeholder="Enter city"
-							value={warehouseAddress.city}
-							onChange={handleWarehouseAddressChange}
-							required
-						/>
-					</div>
-					<div className="space-y-2">
-						<Label htmlFor="w-state">State</Label>
-						<Input
-							id="w-state"
-							name="state"
-							placeholder="Enter state"
-							value={warehouseAddress.state}
-							onChange={handleWarehouseAddressChange}
-							required
-						/>
-					</div>
-				</div>
-
-				<div className="space-y-2">
-					<Label htmlFor="w-pincode">Pincode</Label>
-					<Input
-						id="w-pincode"
-						name="pincode"
-						placeholder="Enter pincode"
-						value={warehouseAddress.pincode}
-						onChange={handleWarehouseAddressChange}
-						required
-						maxLength={6}
-						pattern="\d{6}"
-					/>
-				</div>
-			</div>
-		</div>
-	);
-
-	return (
-		<div className="flex flex-col max-h-[70vh] relative">
-			<div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scroll-smooth scrollbar-thin">
-				<form id="registrationForm" onSubmit={handleSubmit}>
-					{currentStep === 1 && <AuthenticationSection />}
-					{currentStep === 2 && <StoreSection />}
-					{currentStep === 3 && <RegisteredAddressSection />}
-					{currentStep === 4 && <WarehouseAddressSection />}
-
-					{error && (
-						<Alert variant="destructive">
-							<AlertDescription>{error}</AlertDescription>
-						</Alert>
-					)}
-				</form>
-			</div>
-
-			<div className="sticky bottom-0 bg-white border-t p-4 mt-auto">
-				<div className="flex gap-4">
-					{currentStep > 1 && (
-						<Button
-							type="button"
-							onClick={() => {
-								setCurrentStep((prev) => Math.max(prev - 1, 1));
-								setError("");
-							}}
-							className="flex-1"
-							variant="outline"
-						>
-							Previous
-						</Button>
-					)}
-
-          {currentStep < 4 ? (
-            <Button
-              type="button"
-              onClick={() => {
-                if (validateStep(currentStep)) {
-                  setCurrentStep((prev) => Math.min(prev + 1, 4));
-                  setError("");
-                } else {
-                  setError(
-                    "Please fill in all required fields before proceeding."
-                  );
-                }
-              }}
-              className="flex-1"
+      <div>
+        <label className="block text-sm font-medium mb-1">Password</label>
+        <div className="relative">
+          <input
+            {...register("password", {
+              required: "Password is required",
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters",
+              },
+            })}
+            type="password"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          <button
+            type="button"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2"
+            onClick={() => {
+              const input = document.querySelector('input[type="password"]');
+              input.type = input.type === "password" ? "text" : "password";
+            }}
+          >
+            <svg
+              className="w-5 h-5 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              Next
-            </Button>
-          ) : (
-            <div className="w-full space-y-4">
-              <div className="space-y-2">
-                <Label className="flex items-center space-x-2">
-                  <Input type="checkbox" className="w-4 h-4" required />
-                  <span className="text-sm text-gray-600">
-                    I agree to the Terms of Service and Privacy Policy
-                  </span>
-                </Label>
-              </div>
-              <Button
-                type="submit"
-                form="registrationForm"
-                className="w-full"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting Registration...
-                  </>
-                ) : (
-                  "Submit Registration"
-                )}
-              </Button>
-            </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
+            </svg>
+          </button>
+        </div>
+        {errors.password && (
+          <span className="text-red-500 text-sm">
+            {errors.password.message}
+          </span>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        className="w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2"
+      >
+        Next
+      </button>
+    </form>
+  );
+};
+
+const StoreInfoStep = ({ onSubmit, onBack }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <h2 className="text-lg font-medium">Store Information</h2>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Firm/Shop Name</label>
+          <input
+            {...register('shopName', { required: 'Shop name is required' })}
+            placeholder="Enter shop name"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          {errors.shopName && <span className="text-red-500 text-sm">{errors.shopName.message}</span>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Proprietor Name</label>
+          <input
+            {...register('proprietorName', { required: 'Proprietor name is required' })}
+            placeholder="Enter proprietor name"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          {errors.proprietorName && <span className="text-red-500 text-sm">{errors.proprietorName.message}</span>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Aadhar Card Number</label>
+          <input
+            {...register('aadharNumber', { 
+              required: 'Aadhar number is required',
+              pattern: {
+                value: /^\d{12}$/,
+                message: 'Invalid Aadhar number'
+              }
+            })}
+            placeholder="Enter Aadhar number"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          {errors.aadharNumber && <span className="text-red-500 text-sm">{errors.aadharNumber.message}</span>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Contact Number</label>
+          <input
+            {...register('phoneNumber', { 
+              required: 'Contact number is required',
+              pattern: {
+                value: /^\d{10}$/,
+                message: 'Invalid contact number'
+              }
+            })}
+            placeholder="Enter phone number"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          {errors.phoneNumber && <span className="text-red-500 text-sm">{errors.phoneNumber.message}</span>}
+        </div>
+      </div>
+
+      <div className="flex justify-between mt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-4 py-2 text-black bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2"
+        >
+          Next
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const RegisteredAddressStep = ({ onSubmit, onBack }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        <h2 className="text-lg font-medium">Registered Address</h2>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Street Address</label>
+        <input
+          {...register("registeredAddress.street", {
+            required: "Street address is required",
+          })}
+          placeholder="Enter street address"
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+        />
+        {errors.registeredAddress?.street && (
+          <span className="text-red-500 text-sm">
+            {errors.registeredAddress.street.message}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">City</label>
+          <input
+            {...register("registeredAddress.city", {
+              required: "City is required",
+            })}
+            placeholder="Enter city"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          {errors.registeredAddress?.city && (
+            <span className="text-red-500 text-sm">
+              {errors.registeredAddress.city.message}
+            </span>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">State</label>
+          <input
+            {...register("registeredAddress.state", {
+              required: "State is required",
+            })}
+            placeholder="Enter state"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          {errors.registeredAddress?.state && (
+            <span className="text-red-500 text-sm">
+              {errors.registeredAddress.state.message}
+            </span>
           )}
         </div>
       </div>
-    </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Pincode</label>
+        <input
+          {...register("registeredAddress.pincode", {
+            required: "Pincode is required",
+            pattern: {
+              value: /^\d{6}$/,
+              message: "Invalid pincode",
+            },
+          })}
+          placeholder="Enter pincode"
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+        />
+        {errors.registeredAddress?.pincode && (
+          <span className="text-red-500 text-sm">
+            {errors.registeredAddress.pincode.message}
+          </span>
+        )}
+      </div>
+
+      <div className="flex justify-between mt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-4 py-2 text-black bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2"
+        >
+          Next
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const WarehouseAddressStep = ({ onSubmit, onBack }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+          />
+        </svg>
+        <h2 className="text-lg font-medium">Warehouse Address</h2>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Street Address</label>
+        <input
+          {...register("warehouseAddress.street", {
+            required: "Street address is required",
+          })}
+          placeholder="Enter street address"
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+        />
+        {errors.warehouseAddress?.street && (
+          <span className="text-red-500 text-sm">
+            {errors.warehouseAddress.street.message}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">City</label>
+          <input
+            {...register("warehouseAddress.city", {
+              required: "City is required",
+            })}
+            placeholder="Enter city"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          {errors.warehouseAddress?.city && (
+            <span className="text-red-500 text-sm">
+              {errors.warehouseAddress.city.message}
+            </span>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">State</label>
+          <input
+            {...register("warehouseAddress.state", {
+              required: "State is required",
+            })}
+            placeholder="Enter state"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+          />
+          {errors.warehouseAddress?.state && (
+            <span className="text-red-500 text-sm">
+              {errors.warehouseAddress.state.message}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Pincode</label>
+        <input
+          {...register("warehouseAddress.pincode", {
+            required: "Pincode is required",
+            pattern: {
+              value: /^\d{6}$/,
+              message: "Invalid pincode",
+            },
+          })}
+          placeholder="Enter pincode"
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-1"
+        />
+        {errors.warehouseAddress?.pincode && (
+          <span className="text-red-500 text-sm">
+            {errors.warehouseAddress.pincode.message}
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 mt-4">
+        <input
+          type="checkbox"
+          {...register('agreementAccepted', { required: 'You must accept the terms' })}
+          className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
+        />
+        <label className="text-sm text-gray-600">
+          I agree to the Terms of Service and Privacy Policy
+        </label>
+      </div>
+      {errors.agreementAccepted && 
+        <span className="text-red-500 text-sm block">{errors.agreementAccepted.message}</span>}
+
+      <div className="flex justify-between mt-6">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-4 py-2 text-black bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2"
+        >
+          Submit Registration
+        </button>
+      </div>
+    </form>
   );
 };
 

@@ -14,9 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
 import SignupForm from "@/components/SignUpForm";
+import { useNavigate } from 'react-router-dom';
 
 const AuthPage = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [formType, setFormType] = useState("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,6 +31,7 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
+    
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -56,7 +59,8 @@ const AuthPage = () => {
       }
 
       // Use the login function from context instead of directly setting localStorage
-      login(data.seller, data.token);
+      await login(data.seller, data.token);
+      navigate('/store');
 
       // Navigation will be handled automatically by protected route
     } catch (err) {

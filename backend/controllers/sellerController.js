@@ -121,16 +121,7 @@ export const login = async (req, res) => {
       success: true,
       message: "Login successful",
       token,
-      seller: {
-        id: seller._id,
-        email: seller.email,
-        shopName: seller.shopName,
-        proprietorName: seller.proprietorName,
-        phoneNumber: seller.phoneNumber,
-        registrationStatus: seller.registrationStatus,
-        registeredAddress: seller.registeredAddress,
-        warehouseAddress: seller.warehouseAddress
-      }
+      seller,
     });
   } catch (error) {
     console.error('Login error:', error);

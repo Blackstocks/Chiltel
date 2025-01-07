@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useAuth } from '../contexts/AuthContext';
+import { toast } from "react-toastify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,36 +14,61 @@ import {
   FileCheck,
   Settings
 } from "lucide-react";
-import { useState } from "react";
-import { useAuth } from '../contexts/AuthContext';
-import { toast } from "react-toastify";
 
 const StoreSettings = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    shopName: user.shopName,
-    proprietorName: user.proprietorName,
-    aadharNumber: user.aadharNumber,
-    phoneNumber: user.phoneNumber,
-    registeredAddress: `${user.registeredAddress.street}, ${user.registeredAddress.city}, ${user.registeredAddress.state} - ${user.registeredAddress.pincode}`,
-    warehouseAddress: `${user.warehouseAddress.street}, ${user.warehouseAddress.city}, ${user.warehouseAddress.state} - ${user.warehouseAddress.pincode}`,
-    gstNumber: user.gstNumber,
+    shopName: user?.shopName || '',
+    proprietorName: user?.proprietorName || '',
+    phoneNumber: user?.phoneNumber || '',
+    registeredAddress: {
+      street: user?.registeredAddress?.street || '',
+      city: user?.registeredAddress?.city || '',
+      state: user?.registeredAddress?.state || '',
+      pincode: user?.registeredAddress?.pincode || ''
+    },
+    warehouseAddress: {
+      street: user?.warehouseAddress?.street || '',
+      city: user?.warehouseAddress?.city || '',
+      state: user?.warehouseAddress?.state || '',
+      pincode: user?.warehouseAddress?.pincode || ''
+    },
+    gstNumber: user?.gstNumber || '',
     bankDetails: {
-      accountNumber: user.bankDetails.accountNumber,
-      ifscCode: user.bankDetails.ifscCode,
-      bankName: user.bankDetails.bankName
+      accountNumber: user?.bankDetails?.accountNumber || '',
+      ifscCode: user?.bankDetails?.ifscCode || '',
+      bankName: user?.bankDetails?.bankName || ''
     }
   });
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     if (id.startsWith('bank')) {
+      const field = id.replace('bank', '').toLowerCase();
       setFormData(prev => ({
         ...prev,
         bankDetails: {
           ...prev.bankDetails,
-          [id.replace('bank', '').toLowerCase()]: value
+          [field]: value
+        }
+      }));
+    } else if (id.startsWith('reg')) {
+      const field = id.replace('reg', '').toLowerCase();
+      setFormData(prev => ({
+        ...prev,
+        registeredAddress: {
+          ...prev.registeredAddress,
+          [field]: value
+        }
+      }));
+    } else if (id.startsWith('warehouse')) {
+      const field = id.replace('warehouse', '').toLowerCase();
+      setFormData(prev => ({
+        ...prev,
+        warehouseAddress: {
+          ...prev.warehouseAddress,
+          [field]: value
         }
       }));
     } else {
@@ -51,57 +79,18 @@ const StoreSettings = () => {
     }
   };
 
-  const handleCancel = () => {
-    setFormData({
-      shopName: user.shopName,
-      proprietorName: user.proprietorName,
-      aadharNumber: user.aadharNumber,
-      phoneNumber: user.phoneNumber,
-      registeredAddress: `${user.registeredAddress.street}, ${user.registeredAddress.city}, ${user.registeredAddress.state} - ${user.registeredAddress.pincode}`,
-      warehouseAddress: `${user.warehouseAddress.street}, ${user.warehouseAddress.city}, ${user.warehouseAddress.state} - ${user.warehouseAddress.pincode}`,
-      gstNumber: user.gstNumber,
-      bankDetails: {
-        accountNumber: user.bankDetails.accountNumber,
-        ifscCode: user.bankDetails.ifscCode,
-        bankName: user.bankDetails.bankName
-      }
-    });
-    toast.info('Changes discarded');
-  };
-
   const handleSave = async () => {
     try {
       setLoading(true);
-      
-      // Split addresses into components
-      const [regStreet, regCity, regStatePin] = formData.registeredAddress.split(', ');
-      const [regState, regPincode] = regStatePin.split(' - ');
-      
-      const [whStreet, whCity, whStatePin] = formData.warehouseAddress.split(', ');
-      const [whState, whPincode] = whStatePin.split(' - ');
 
       const updateData = {
         shopName: formData.shopName,
         proprietorName: formData.proprietorName,
         phoneNumber: formData.phoneNumber,
+        registeredAddress: formData.registeredAddress,
+        warehouseAddress: formData.warehouseAddress,
         gstNumber: formData.gstNumber,
-        registeredAddress: {
-          street: regStreet,
-          city: regCity,
-          state: regState,
-          pincode: regPincode
-        },
-        warehouseAddress: {
-          street: whStreet,
-          city: whCity,
-          state: whState,
-          pincode: whPincode
-        },
-        bankDetails: {
-          accountNumber: formData.bankDetails.accountNumber,
-          ifscCode: formData.bankDetails.ifscCode,
-          bankName: formData.bankDetails.bankName
-        }
+        bankDetails: formData.bankDetails
       };
 
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/profile`, {
@@ -114,8 +103,7 @@ const StoreSettings = () => {
       });
 
       const data = await response.json();
-      console.log("changes saved data:", data);
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to update settings');
       }
@@ -128,176 +116,227 @@ const StoreSettings = () => {
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('certificate', file);
-
-    try {
-      setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/seller/upload-certificate`, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) throw new Error('Failed to upload certificate');
-
-      toast.success('Certificate uploaded successfully');
-    } catch (error) {
-      toast.error('Failed to upload certificate. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  const handleCancel = () => {
+    setFormData({
+      shopName: user?.shopName || '',
+      proprietorName: user?.proprietorName || '',
+      phoneNumber: user?.phoneNumber || '',
+      registeredAddress: {
+        street: user?.registeredAddress?.street || '',
+        city: user?.registeredAddress?.city || '',
+        state: user?.registeredAddress?.state || '',
+        pincode: user?.registeredAddress?.pincode || ''
+      },
+      warehouseAddress: {
+        street: user?.warehouseAddress?.street || '',
+        city: user?.warehouseAddress?.city || '',
+        state: user?.warehouseAddress?.state || '',
+        pincode: user?.warehouseAddress?.pincode || ''
+      },
+      gstNumber: user?.gstNumber || '',
+      bankDetails: {
+        accountNumber: user?.bankDetails?.accountNumber || '',
+        ifscCode: user?.bankDetails?.ifscCode || '',
+        bankName: user?.bankDetails?.bankName || ''
+      }
+    });
+    toast.info('Changes discarded');
   };
 
   return (
     <div className="container mx-auto p-6">
-      <Card>
-        <CardHeader>
+      <Card className="h-full">
+        <CardHeader className="py-4">
           <div className="flex items-center gap-2">
-            <Settings className="h-6 w-6" />
-            <CardTitle>Store Settings</CardTitle>
+            <Settings className="h-5 w-5" />
+            <CardTitle className="text-lg">Store Settings</CardTitle>
           </div>
-          <CardDescription>
+          <CardDescription className="text-sm">
             Manage your store details, bank information, and documents
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 h-[calc(100%-100px)] overflow-auto">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
               <TabsTrigger value="basic">Basic Details</TabsTrigger>
               <TabsTrigger value="bank">Bank & Tax</TabsTrigger>
               <TabsTrigger value="documents">Documents</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="basic">
-              <div className="grid gap-6">
-                <div className="flex items-center gap-2">
-                  <Store className="h-5 w-5" />
-                  <h3 className="font-semibold">Store Information</h3>
-                </div>
-                
-                <div className="grid gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firmName">Firm/Shop Name</Label>
-                      <Input 
-                        id="firmName" 
-                        defaultValue={user.shopName} 
-                        placeholder="Enter firm name" 
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="proprietorName">Proprietor Name</Label>
-                      <Input 
-                        id="proprietorName" 
-                        defaultValue={user.proprietorName}
-                        placeholder="Enter proprietor name" 
-                        onChange={handleChange}
-                      />
-                    </div>
+            <TabsContent value="basic" className="mt-0">
+              <div className="grid gap-4">
+                {/* Store Information */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Store className="h-4 w-4" />
+                    <h3 className="font-semibold text-sm">Store Information</h3>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid md:grid-cols-2 gap-3">
                     <div>
-                      <Label htmlFor="aadhar">Aadhar Card Number</Label>
+                      <Label htmlFor="shopName" className="text-xs">Shop Name</Label>
                       <Input 
-                        id="aadhar" 
-                        defaultValue={user.aadharNumber}
-                        placeholder="Enter Aadhar number" 
+                        id="shopName" 
+                        value={formData.shopName}
                         onChange={handleChange}
+                        placeholder="Enter shop name"
+                        className="h-8 text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Contact Number</Label>
+                      <Label htmlFor="proprietorName" className="text-xs">Proprietor Name</Label>
                       <Input 
-                        id="phone" 
-                        type="tel" 
-                        defaultValue={user.phoneNumber}
-                        placeholder="Enter phone number" 
+                        id="proprietorName" 
+                        value={formData.proprietorName}
                         onChange={handleChange}
+                        placeholder="Enter proprietor name"
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phoneNumber" className="text-xs">Contact Number</Label>
+                      <Input 
+                        id="phoneNumber" 
+                        type="tel" 
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        placeholder="Enter phone number"
+                        className="h-8 text-sm"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Building2 className="h-5 w-5" />
-                    <h3 className="font-semibold">Address Details</h3>
+                {/* Address Information */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Building2 className="h-4 w-4" />
+                    <h3 className="font-semibold text-sm">Addresses</h3>
                   </div>
                   
-                  <div className="grid gap-4">
-                    <div>
-                      <Label htmlFor="regAddress">Registered Address</Label>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {/* Registered Address */}
+                    <div className="space-y-2">
+                      <Label className="text-xs">Registered Address</Label>
                       <Input 
-                        id="regAddress" 
-                        defaultValue={`${user.registeredAddress.street}, ${user.registeredAddress.city}, ${user.registeredAddress.state} - ${user.registeredAddress.pincode}`}
-                        placeholder="Enter registered address" 
+                        id="regStreet" 
+                        value={formData.registeredAddress.street}
                         onChange={handleChange}
+                        placeholder="Street"
+                        className="h-8 text-sm"
                       />
+                      <div className="grid grid-cols-3 gap-2">
+                        <Input 
+                          id="regCity" 
+                          value={formData.registeredAddress.city}
+                          onChange={handleChange}
+                          placeholder="City"
+                          className="h-8 text-sm"
+                        />
+                        <Input 
+                          id="regState" 
+                          value={formData.registeredAddress.state}
+                          onChange={handleChange}
+                          placeholder="State"
+                          className="h-8 text-sm"
+                        />
+                        <Input 
+                          id="regPincode" 
+                          value={formData.registeredAddress.pincode}
+                          onChange={handleChange}
+                          placeholder="Pincode"
+                          className="h-8 text-sm"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="warehouse">Warehouse Address</Label>
+
+                    {/* Warehouse Address */}
+                    <div className="space-y-2">
+                      <Label className="text-xs">Warehouse Address</Label>
                       <Input 
-                        id="warehouse" 
-                        defaultValue={`${user.warehouseAddress.street}, ${user.warehouseAddress.city}, ${user.warehouseAddress.state} - ${user.warehouseAddress.pincode}`}
-                        placeholder="Enter warehouse address" 
+                        id="warehouseStreet" 
+                        value={formData.warehouseAddress.street}
                         onChange={handleChange}
+                        placeholder="Street"
+                        className="h-8 text-sm"
                       />
+                      <div className="grid grid-cols-3 gap-2">
+                        <Input 
+                          id="warehouseCity" 
+                          value={formData.warehouseAddress.city}
+                          onChange={handleChange}
+                          placeholder="City"
+                          className="h-8 text-sm"
+                        />
+                        <Input 
+                          id="warehouseState" 
+                          value={formData.warehouseAddress.state}
+                          onChange={handleChange}
+                          placeholder="State"
+                          className="h-8 text-sm"
+                        />
+                        <Input 
+                          id="warehousePincode" 
+                          value={formData.warehouseAddress.pincode}
+                          onChange={handleChange}
+                          placeholder="Pincode"
+                          className="h-8 text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="bank">
-              <div className="grid gap-6">
-                <div className="flex items-center gap-2">
-                  <Receipt className="h-5 w-5" />
-                  <h3 className="font-semibold">Bank & Tax Information</h3>
+            <TabsContent value="bank" className="mt-0">
+              <div className="grid gap-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Receipt className="h-4 w-4" />
+                  <h3 className="font-semibold text-sm">Bank & Tax Details</h3>
                 </div>
                 
-                <div className="grid gap-4">
+                <div className="grid gap-3">
                   <div>
-                    <Label htmlFor="gst">GST Number</Label>
+                    <Label htmlFor="gstNumber" className="text-xs">GST Number</Label>
                     <Input 
-                      id="gst" 
-                      defaultValue={user.gstNumber}
-                      placeholder="Enter GST number" 
+                      id="gstNumber" 
+                      value={formData.gstNumber}
                       onChange={handleChange}
+                      placeholder="Enter GST number"
+                      className="h-8 text-sm"
                     />
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid md:grid-cols-3 gap-3">
                     <div>
-                      <Label htmlFor="accountNo">Bank Account Number</Label>
+                      <Label htmlFor="bankAccountNumber" className="text-xs">Account Number</Label>
                       <Input 
-                        id="accountNo" 
-                        defaultValue={user.bankDetails.accountNumber}
-                        placeholder="Enter account number" 
+                        id="bankAccountNumber" 
+                        value={formData.bankDetails.accountNumber}
                         onChange={handleChange}
+                        placeholder="Enter account number"
+                        className="h-8 text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="ifsc">IFSC Code</Label>
+                      <Label htmlFor="bankIfscCode" className="text-xs">IFSC Code</Label>
                       <Input 
-                        id="ifsc" 
-                        defaultValue={user.bankDetails.ifscCode}
-                        placeholder="Enter IFSC code" 
+                        id="bankIfscCode" 
+                        value={formData.bankDetails.ifscCode}
                         onChange={handleChange}
+                        placeholder="Enter IFSC code"
+                        className="h-8 text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="bankName">Bank Name</Label>
+                      <Label htmlFor="bankBankName" className="text-xs">Bank Name</Label>
                       <Input 
-                        id="bankName" 
-                        defaultValue={user.bankDetails.bankName}
-                        placeholder="Enter bank name" 
+                        id="bankBankName" 
+                        value={formData.bankDetails.bankName}
                         onChange={handleChange}
+                        placeholder="Enter bank name"
+                        className="h-8 text-sm"
                       />
                     </div>
                   </div>
@@ -305,50 +344,58 @@ const StoreSettings = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="documents">
-              <div className="grid gap-6">
-                <div className="flex items-center gap-2">
-                  <FileCheck className="h-5 w-5" />
-                  <h3 className="font-semibold">Required Documents</h3>
+            <TabsContent value="documents" className="mt-0">
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <FileCheck className="h-4 w-4" />
+                  <h3 className="font-semibold text-sm">Required Documents</h3>
                 </div>
                 
-                <div className="grid gap-6">
-                  <div>
-                    <Label>Distributor/Dealer Certificate</Label>
-                    <Card className="mt-2">
-                      <CardContent className="p-4">
-                        {user.dealerCertificate ? (
-                          <div className="flex items-center justify-between p-4">
-                            <div className="flex items-center gap-2">
-                              <FileCheck className="h-5 w-5 text-green-500" />
-                              <span>Certificate uploaded on {new Date(user.dealerCertificate.uploadDate).toLocaleDateString()}</span>
-                            </div>
-                            <Button variant="outline">Update Certificate</Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center border-2 border-dashed rounded-lg p-6">
-                            <div className="text-center">
-                              <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                              <p className="text-sm text-gray-600">
-                                Drag and drop your certificate here or click to browse
-                              </p>
-                              <Button variant="outline" className="mt-4">
-                                Upload Certificate
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
+                <Card className="mt-2">
+                  <CardContent className="p-4">
+                    {user.dealerCertificate ? (
+                      <div className="flex items-center justify-between p-2">
+                        <div className="flex items-center gap-2">
+                          <FileCheck className="h-4 w-4 text-green-500" />
+                          <span className="text-sm">Certificate uploaded on {new Date(user.dealerCertificate.uploadDate).toLocaleDateString()}</span>
+                        </div>
+                        <Button variant="outline" size="sm">Update</Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center border-2 border-dashed rounded-lg p-4">
+                        <div className="text-center">
+                          <Upload className="h-6 w-6 mx-auto mb-2 text-gray-400" />
+                          <p className="text-xs text-gray-600">
+                            Drag and drop certificate or click to browse
+                          </p>
+                          <Button variant="outline" size="sm" className="mt-2">
+                            Upload Certificate
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
           </Tabs>
 
-          <div className="flex justify-end mt-8 gap-4">
-            <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-            <Button onClick={handleSave}>Save Changes</Button>
+          <div className="flex justify-end gap-3 mt-4 sticky bottom-0 bg-white py-2">
+            <Button 
+              variant="outline" 
+              onClick={handleCancel} 
+              disabled={loading}
+              size="sm"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSave}
+              disabled={loading}
+              size="sm"
+            >
+              {loading ? 'Saving...' : 'Save Changes'}
+            </Button>
           </div>
         </CardContent>
       </Card>
