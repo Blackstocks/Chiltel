@@ -406,7 +406,7 @@ const Sellers = ({ token }) => {
       <Card className="w-full">
         <CardHeader className="py-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-semibold">Sellers</CardTitle>
+            <CardTitle className="text-xl font-semibold">Sellers Management</CardTitle>
             <div className="flex items-center gap-3">
               {/* Search */}
               <div className="relative">

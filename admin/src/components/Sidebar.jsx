@@ -1,66 +1,74 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  LayoutDashboard, 
-  Package, 
-  Wrench, 
-  ShoppingCart, 
+import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard,
+  Package,
+  Wrench,
+  ShoppingCart,
   Users,
-  ChevronRight
+  ChevronRight,
+  LogOut,
 } from "lucide-react";
 
-const Sidebar = () => {
+const Sidebar = ({ setToken }) => {
+  const navigate = useNavigate();
+
   const navItems = [
     {
       title: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      href: "/dashboard"
+      href: "/dashboard",
     },
     {
       title: "Products",
       icon: <Package className="h-5 w-5" />,
-      href: "/products"
+      href: "/products",
     },
     {
       title: "Services",
       icon: <Wrench className="h-5 w-5" />,
-      href: "/services"
+      href: "/services",
     },
     {
       title: "Orders",
       icon: <ShoppingCart className="h-5 w-5" />,
-      href: "/orders"
+      href: "/orders",
     },
     {
-      title: "Riders",
+      title: "Service Parterns",
       icon: <Users className="h-5 w-5" />,
-      href: "/riders"
+      href: "/riders",
     },
     {
       title: "Sellers",
       icon: <Users className="h-5 w-5" />,
-      href: "/sellers"
-    }
+      href: "/sellers",
+    },
   ];
 
   return (
-    <div className="relative min-h-screen w-64 border-r bg-background">
-      <ScrollArea className="h-full w-full">
+    <div className=" h-screen w-64 border-r bg-background flex flex-col">
+      <ScrollArea className="flex-1">
         <div className="space-y-4 py-4">
           <div className="px-3 py-2">
-            <h2 className="mb-2 px-4 text-lg font-semibold">
-              Admin Portal
-            </h2>
+            <div className="flex items-center px-3 py-4">
+              <span className="text-xl font-bold">Chiltel Admin</span>
+            </div>
             <div className="space-y-1">
               {navItems.map((item) => (
                 <NavLink
                   key={item.href}
                   to={item.href}
-                  className={({ isActive }) => cn(
-                    "flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
-                    isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-                  )}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
+                      isActive
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground"
+                    )
+                  }
                 >
                   <div className="flex items-center gap-3">
                     {item.icon}
@@ -73,6 +81,17 @@ const Sidebar = () => {
           </div>
         </div>
       </ScrollArea>
+      {/* Logout Button */}
+      <div className="p-4 border-t">
+        <Button
+          variant="ghost"
+          className="w-full justify-start px-3 py-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+          onClick={() => setToken("")}
+        >
+          <LogOut className="h-5 w-5 mr-2" />
+          Logout
+        </Button>
+      </div>
     </div>
   );
 };
