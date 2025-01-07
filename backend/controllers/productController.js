@@ -310,12 +310,16 @@ const listProducts = async (req, res) => {
 	try {
 		// Fetch all products from the database
 		const products = await Product.find();
+		// Filter products by requestedStatus
+		const filteredProducts = products.filter(
+			(product) => product.requestedStatus === "approved" || product.requestedStatus === undefined
+		);
 
 		// Send success response
 		res.status(200).json({
 			success: true,
 			message: "Products retrieved successfully!",
-			data: products,
+			data: filteredProducts,
 		});
 	} catch (error) {
 		console.error("Error retrieving products:", error.message);

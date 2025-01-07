@@ -1,9 +1,15 @@
 // controllers/sellerController.js
 import Seller from "../models/seller.js";
+import Product from '../models/productModel.js';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import SellerProduct from "../models/sellerProduct.js";
+import { validateProduct } from '../utils/validateSellerProduct.js';
+import { uploadToCloudinary } from '../utils/claudinary.js';
+import fs from 'fs';
+
+
 
 export const register = async (req, res) => {
   try {
@@ -401,236 +407,443 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+export const uploadDocuments = async (req, res) => {
+  try {
+    // Check if file exists in the request
+    console.log(req.body);
+    console.log(req.file);
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded',
+      });
+    }
+
+    // Fetch seller from the database
+    const seller = await Seller.findById(req.seller._id); // Pass sellerId in the request body
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found',
+      });
+    }
+
+    // Upload file to Cloudinary
+    const result = await uploadToCloudinary(req.file.path);
+
+    // Update seller document details
+    /*seller.dealerCertificate = {
+      url: result.secure_url,
+      filename: req.file.originalname,
+      uploadDate: new Date(),
+      cloudinaryId: result.public_id,
+    };*/
+
+   // await seller.save();
+
+   console.log(result);
+
+    // Remove local file after upload
+    fs.unlinkSync(req.file.path);
+
+    res.status(200).json({
+      success: true,
+      message: 'Document uploaded successfully',
+      data: seller.dealerCertificate,
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload document',
+      error: error.message,
+    });
+  }
+};
+
+export const deleteDocument = async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.seller.id);
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found"
+      });
+    }
+
+    if (!seller.dealerCertificate) {
+      return res.status(404).json({
+        success: false,
+        message: "No document found"
+      });
+    }
+
+    // Delete from Cloudinary
+    await cloudinary.uploader.destroy(seller.dealerCertificate.cloudinaryId);
+
+    // Remove document details from seller
+    seller.dealerCertificate = undefined;
+    await seller.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Document deleted successfully"
+    });
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete document",
+      error: error.message
+    });
+  }
+};
+
+
 // controllers/productController.js
+
 export const addProduct = async (req, res) => {
   try {
+    const sellerId = req.seller.id; // Assuming we set this in auth middleware
+    
+    // Combine request body with seller information
     const productData = {
       ...req.body,
-      sellerId: req.seller.id,
-      approvalStatus: "pending",
+      seller: sellerId,
+      requestedStatus: 'pending'
     };
 
-    const product = new SellerProduct(productData);
+    // Validate the product data
+    const validationError = validateProduct(productData);
+    if (validationError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validationError
+      });
+    }
+
+    // Create new product
+    const product = new Product(productData);
     await product.save();
 
     res.status(201).json({
       success: true,
-      message: "Product submitted for approval",
-      data: product,
+      message: 'Product submitted successfully',
+      data: product
     });
+
   } catch (error) {
+    console.error('Error in addProduct:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to add product",
-      error: error.message,
+      message: 'Error submitting product',
+      error: error.message
     });
   }
 };
 
-export const getProducts = async (req, res) => {
+export const getSellerProducts = async (req, res) => {
   try {
+    const sellerId = req.seller.id;
+
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Search and filter parameters
     const {
-      page = 1,
-      limit = 10,
       search,
+      mainCategory,
+      type,
       category,
-      availability,
-      priceRange,
+      requestedStatus,
+      minPrice,
+      maxPrice,
+      inStock,
+      sortBy,
+      sortOrder = 'desc'
     } = req.query;
 
     // Build query
-    const query = { sellerId: req.seller.id };
+    const query = { seller: sellerId };
 
-    // Search functionality
+    // Search functionality (search in name, brand, model)
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { brand: { $regex: search, $options: "i" } },
-        { model: { $regex: search, $options: "i" } },
+        { name: { $regex: search, $options: 'i' } },
+        { brand: { $regex: search, $options: 'i' } },
+        { model: { $regex: search, $options: 'i' } }
       ];
     }
 
-    // Category filter
-    if (category && category !== "all") {
-      query.category = category;
-    }
-
-    // Availability filter
-    if (availability && availability !== "all") {
-      query.availability = availability === "inStock";
-    }
+    // Category filters
+    if (mainCategory) query.mainCategory = mainCategory;
+    if (type) query.type = type;
+    if (category) query.category = category;
+    if (requestedStatus) query.requestedStatus = requestedStatus;
 
     // Price range filter
-    if (priceRange && priceRange !== "all") {
-      if (priceRange === "30000+") {
-        query.price = { $gte: 30000 };
-      } else {
-        const [min, max] = priceRange.split("-").map(Number);
-        query.price = { $gte: min, $lte: max };
-      }
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      query.price = {};
+      if (minPrice !== undefined) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice !== undefined) query.price.$lte = parseFloat(maxPrice);
     }
 
-    const products = await SellerProduct.find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    const total = await SellerProduct.countDocuments(query);
-
-    res.json({
-      success: true,
-      data: products,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      total,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch products",
-      error: error.message,
-    });
-  }
-};
-
-export const updateProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const product = await SellerProduct.findOne({
-      _id: id,
-      sellerId: req.seller.id,
-    });
-
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
+    // Stock filter
+    if (inStock === 'true') {
+      query.inStock = { $gt: 0 };
+    } else if (inStock === 'false') {
+      query.inStock = 0;
     }
 
-    if (product.approvalStatus === "approved") {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot edit approved products",
-      });
+    // Sorting
+    let sortOptions = { createdAt: -1 }; // default sort
+    if (sortBy) {
+      sortOptions = {
+        [sortBy]: sortOrder === 'asc' ? 1 : -1
+      };
     }
 
-    const updatedProduct = await SellerProduct.findByIdAndUpdate(
-      id,
+    // Execute query with pagination
+    const products = await Product.find(query)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit);
+
+    // Get total count for pagination
+    const total = await Product.countDocuments(query);
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    // Get unique values for filters
+    const aggregateFilters = await Product.aggregate([
+      { $match: { seller: sellerId } },
       {
-        ...req.body,
-        approvalStatus: "pending",
-        updatedAt: Date.now(),
-      },
-      { new: true }
-    );
+        $group: {
+          _id: null,
+          mainCategories: { $addToSet: '$mainCategory' },
+          types: { $addToSet: '$type' },
+          categories: { $addToSet: '$category' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' }
+        }
+      }
+    ]);
 
-    res.json({
+    const filters = aggregateFilters[0] || {};
+
+    res.status(200).json({
       success: true,
-      message: "Product updated and submitted for approval",
-      data: updatedProduct,
+      data: {
+        products,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalItems: total,
+          hasNextPage,
+          hasPrevPage,
+          limit
+        },
+        filters: {
+          mainCategories: filters.mainCategories || [],
+          types: filters.types || [],
+          categories: filters.categories || [],
+          priceRange: {
+            min: filters.minPrice || 0,
+            max: filters.maxPrice || 0
+          }
+        }
+      }
     });
+
   } catch (error) {
+    console.error('Error in getSellerProducts:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to update product",
-      error: error.message,
+      message: 'Error fetching products',
+      error: error.message
     });
   }
 };
 
 export const deleteProduct = async (req, res) => {
   try {
-    const { id } = req.params;
-    const product = await SellerProduct.findOneAndDelete({
-      _id: id,
-      sellerId: req.seller.id,
+    const { productId } = req.params;
+    const sellerId = req.seller.id;
+
+    const product = await Product.findOne({
+      _id: productId,
+      seller: sellerId
     });
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: "Product not found",
+        message: 'Product not found'
       });
     }
 
-    res.json({
+    // Check if product can be deleted (e.g., not already approved)
+    if (product.requestedStatus === 'approved') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete approved product'
+      });
+    }
+
+    await Product.deleteOne({ _id: productId });
+
+    res.status(200).json({
       success: true,
-      message: "Product deleted successfully",
+      message: 'Product deleted successfully'
     });
+
   } catch (error) {
+    console.error('Error in deleteProduct:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to delete product",
-      error: error.message,
+      message: 'Error deleting product',
+      error: error.message
     });
   }
 };
 
-export const getProductById = async (req, res) => {
+export const editProduct = async (req, res) => {
   try {
-    const { id } = req.params;
-    const product = await SellerProduct.findOne({
-      _id: id,
-      sellerId: req.seller.id,
+    const { productId } = req.params;
+    const sellerId = req.seller.id;
+    const updateData = req.body;
+
+    // Find the product and ensure it belongs to the seller
+    const product = await Product.findOne({
+      _id: productId,
+      seller: sellerId
     });
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: "Product not found",
+        message: 'Product not found or you do not have permission to edit it'
       });
     }
 
-    res.json({
-      success: true,
-      data: product,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch product",
-      error: error.message,
-    });
-  }
-};
+    // Check if product is already approved
+    if (product.requestedStatus === 'approved') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot edit approved product. Please contact admin for changes.'
+      });
+    }
 
-export const getProductStats = async (req, res) => {
-  try {
-    const stats = await SellerProduct.aggregate([
-      { $match: { sellerId: req.seller._id } },
-      {
-        $group: {
-          _id: "$approvalStatus",
-          count: { $sum: 1 },
-          totalValue: { $sum: "$price" },
-        },
+    // Remove fields that shouldn't be updated
+    delete updateData.seller;
+    delete updateData.requestedStatus;
+    delete updateData.rating;
+    delete updateData.reviews;
+    delete updateData.createdAt;
+
+    // Validate the updated data
+    const validationError = validateProduct({
+      ...product.toObject(),
+      ...updateData
+    });
+
+    if (validationError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validationError
+      });
+    }
+
+    // If changing price or discount, validate the values
+    if (updateData.price && updateData.price <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Price must be greater than 0'
+      });
+    }
+
+    if (updateData.discount && (updateData.discount < 0 || updateData.discount > 1)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Discount must be between 0 and 1'
+      });
+    }
+
+    // Handle specifications update
+    if (updateData.specifications) {
+      if (typeof updateData.specifications !== 'object') {
+        return res.status(400).json({
+          success: false,
+          message: 'Specifications must be an object'
+        });
+      }
+    }
+
+    // Handle arrays (features, imageUrls)
+    if (updateData.features && !Array.isArray(updateData.features)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Features must be an array'
+      });
+    }
+
+    if (updateData.imageUrls && !Array.isArray(updateData.imageUrls)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Image URLs must be an array'
+      });
+    }
+
+    // Update the product
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      { 
+        $set: updateData,
+        requestedStatus: 'pending' // Reset to pending since product was modified
       },
-    ]);
+      { 
+        new: true, // Return the updated document
+        runValidators: true // Run model validations
+      }
+    );
 
-    const formattedStats = {
-      total: 0,
-      pending: 0,
-      approved: 0,
-      rejected: 0,
-      totalValue: 0,
-    };
-
-    stats.forEach((stat) => {
-      formattedStats[stat._id] = stat.count;
-      formattedStats.total += stat.count;
-      formattedStats.totalValue += stat.totalValue;
-    });
-
-    res.json({
+    res.status(200).json({
       success: true,
-      data: formattedStats,
+      message: 'Product updated successfully. Waiting for admin approval.',
+      data: updatedProduct
     });
+
   } catch (error) {
+    console.error('Error in editProduct:', error);
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: Object.values(error.errors).map(err => err.message)
+      });
+    }
+
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid product ID format'
+      });
+    }
+
     res.status(500).json({
       success: false,
-      message: "Failed to fetch product statistics",
-      error: error.message,
+      message: 'Error updating product',
+      error: error.message
     });
   }
 };

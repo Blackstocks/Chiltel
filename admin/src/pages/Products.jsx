@@ -1,4 +1,4 @@
-import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +28,8 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Star } from "lucide-react";
 import AddProductForm from "@/components/AddProductForm";
 import axios from "axios";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import PendingProductsTable from "@/components/PendingProductsTable";
 
 const ProductsPage = ({ token }) => {
   // Add pagination state
@@ -40,10 +41,12 @@ const ProductsPage = ({ token }) => {
 
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null);
-   
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isPendingProductsDialogOpen, setiIsPendingProductsDialogOpen] =
+    useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [filters, setFilters] = useState({
     category: "all",
@@ -52,7 +55,6 @@ const ProductsPage = ({ token }) => {
   });
 
   const [products, setProducts] = useState([]);
-
 
   const categories = ["all", ...new Set(products.map((p) => p.category))];
 
@@ -73,9 +75,12 @@ const ProductsPage = ({ token }) => {
   // Fetch Products from Backend
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/product/list`, {
-        headers: { token },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/product/list`,
+        {
+          headers: { token },
+        }
+      );
       setProducts(response.data.data);
       console.log(response.data.data);
       //setFilteredProducts(response.data.data); // Initialize filtered products
@@ -86,7 +91,6 @@ const ProductsPage = ({ token }) => {
       setLoading(false);
     }
   };
-
 
   const handleAddProduct = async (newProduct) => {
     await fetchProducts();
@@ -109,20 +113,29 @@ const ProductsPage = ({ token }) => {
 
   const handleDeleteProduct = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/product/remove/${id}`, {
-        headers: { token }
-      });
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/product/remove/${id}`,
+        {
+          headers: { token },
+        }
+      );
       setProducts(products.filter((product) => product.id !== id));
       toast.success("Product deleted successfully");
-      fetchProducts(); 
+      fetchProducts();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to delete product");
     }
-   };
+  };
 
   // Update filtered products with pagination
   const filteredProducts = products?.filter((product) => {
-    if (!product?.name || !product?.category || !product?.brand || !product?.model) return false;
+    if (
+      !product?.name ||
+      !product?.category ||
+      !product?.brand ||
+      !product?.model
+    )
+      return false;
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -212,6 +225,25 @@ const ProductsPage = ({ token }) => {
                 />
               </DialogContent>
             </Dialog>
+            <Dialog
+              open={isPendingProductsDialogOpen}
+              onOpenChange={setiIsPendingProductsDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button variant="outline" className="relative">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  Pending Products
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="min-w-[80vw] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Pending Products</DialogTitle>
+                </DialogHeader>
+                <PendingProductsTable
+                  onClose={() => isPendingProductsDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
 
@@ -292,20 +324,28 @@ const ProductsPage = ({ token }) => {
                   <TableCell>
                     <div>
                       <div className="font-medium">{product.brand}</div>
-                      <div className="text-sm text-gray-500">{product.model}</div>
+                      <div className="text-sm text-gray-500">
+                        {product.model}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">{product.category}</div>
-                      <div className="text-sm text-gray-500">{product.type}</div>
+                      <div className="text-sm text-gray-500">
+                        {product.type}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">₹{(product.price*(1-product.discount)).toFixed(2)}</div>
+                      <div className="font-medium">
+                        ₹{(product.price * (1 - product.discount)).toFixed(2)}
+                      </div>
                       {product.discount > 0 && (
-                        <div className="text-sm text-green-600">-{(product.discount*100).toFixed(2)}% off</div>
+                        <div className="text-sm text-green-600">
+                          -{(product.discount * 100).toFixed(2)}% off
+                        </div>
                       )}
                     </div>
                   </TableCell>
@@ -313,10 +353,14 @@ const ProductsPage = ({ token }) => {
                     <div className="flex items-center">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
                       <span>{product.rating}</span>
-                      <span className="text-sm text-gray-500 ml-1">({product.reviews})</span>
+                      <span className="text-sm text-gray-500 ml-1">
+                        ({product.reviews})
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{product.inStock}</TableCell>
+                  <TableCell className="font-medium">
+                    {product.inStock}
+                  </TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${
@@ -370,9 +414,9 @@ const ProductsPage = ({ token }) => {
                 </SelectContent>
               </Select>
               <span className="text-sm text-gray-500">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to{' '}
-                {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of{' '}
-                {filteredProducts.length} items
+                Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                {Math.min(currentPage * itemsPerPage, filteredProducts.length)}{" "}
+                of {filteredProducts.length} items
               </span>
             </div>
 
@@ -394,12 +438,15 @@ const ProductsPage = ({ token }) => {
                   if (
                     pageNumber === 1 ||
                     pageNumber === totalPages ||
-                    (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                    (pageNumber >= currentPage - 1 &&
+                      pageNumber <= currentPage + 1)
                   ) {
                     return (
                       <Button
                         key={pageNumber}
-                        variant={currentPage === pageNumber ? "default" : "outline"}
+                        variant={
+                          currentPage === pageNumber ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => handlePageChange(pageNumber)}
                         className="w-8 h-8 p-0"
