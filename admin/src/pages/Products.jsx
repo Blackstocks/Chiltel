@@ -241,6 +241,7 @@ const ProductsPage = ({ token }) => {
                 </DialogHeader>
                 <PendingProductsTable
                   onClose={() => isPendingProductsDialogOpen(false)}
+                  token={token}
                 />
               </DialogContent>
             </Dialog>

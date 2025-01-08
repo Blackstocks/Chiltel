@@ -8,6 +8,7 @@ import StoreSettings from "./pages/StoreSettings";
 import HelpAndSupport from "./pages/HelpAndSupport";
 import SellerDashboard from "./pages/Dashboard";
 import { ToastContainer, toast } from "react-toastify";
+import OrdersPage from "./pages/Orders";
 import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
@@ -31,6 +32,7 @@ const App = () => {
             <Route path="/products" element={<SellerProducts />} />
             <Route path="/store" element={<StoreSettings />} />
             <Route path="/support" element={<HelpAndSupport />} />
+            <Route path="/orders" element={<OrdersPage />} />
           </Route>
 
           {/* Redirects */}

@@ -1,5 +1,6 @@
 // controllers/sellerController.js
 import Seller from "../models/seller.js";
+import Order from "../models/orderModel.js";
 import Product from '../models/productModel.js';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -667,6 +668,46 @@ export const getSellerProducts = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching products',
+      error: error.message
+    });
+  }
+};
+
+export const getSellerOrders = async (req, res) => {
+  try {
+    const sellerId = req.seller.id;
+
+    // Find products by seller
+    const products = await Product.find({ seller: sellerId }).select('_id');
+    const productIds = products.map(product => product._id);
+
+    // Find orders containing these products
+    const orders = await Order.find({ 'products.product': { $in: productIds } });
+    // Populate userId in orders
+    await Order.populate(orders, {
+      path: 'userId',
+      select: 'name email'
+    });
+    // Populate products.product with name
+    await Order.populate(orders, {
+      path: 'products.product',
+      select: 'name'
+    });
+
+    console.log("sellerId", sellerId);
+    console.log("products", products);
+    console.log("productIds", productIds);
+    console.log("orders", orders);
+
+    res.status(200).json({
+      success: true,
+      data: orders
+    });
+  } catch (error) {
+    console.error('Error in getSellerOrders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching orders',
       error: error.message
     });
   }

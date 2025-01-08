@@ -626,7 +626,7 @@ const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
           ) : initialData ? (
             "Update Product"
           ) : (
-            "Add Product"
+            "Request Add Product"
           )}
         </Button>
       </div>

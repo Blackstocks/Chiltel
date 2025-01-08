@@ -15,6 +15,7 @@ import {
   deleteDocument,
   getSellerProducts,
   editProduct,
+  getSellerOrders,
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import { validateSellerRegistration } from "../middleware/sellerValidation.js";
@@ -41,6 +42,7 @@ router.delete("/delete-document", deleteDocument);
 
 router.post("/addProduct", addProduct);
 router.get("/getSellerProducts", getSellerProducts);
+router.get("/getSellerOrders", getSellerOrders);
 router.delete("/deleteSellerProduct/:id", deleteProduct);
 router.put("/editSellerProducts/:id", editProduct);
 
