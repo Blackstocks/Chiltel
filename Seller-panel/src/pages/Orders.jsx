@@ -16,12 +16,12 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-  } from "@/components/ui/card";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -236,88 +236,88 @@ const OrdersPage = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <CircleDollarSign className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-        <div>
-          <CardTitle>Orders</CardTitle>
-          <CardDescription>Manage and track all orders</CardDescription>
-        </div>
+          <div>
+            <CardTitle>Orders</CardTitle>
+            <CardDescription>Manage and track all orders</CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order._id}>
-                  <TableCell>#{order._id.slice(-8)}</TableCell>
-                  <TableCell className="capitalize">
-                    {order.products.map((product, index) => (
-                      <div key={index}>
-                        <div className="font-medium">
-                          {product.product.name}
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <CircleDollarSign className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders.map((order) => (
+                    <TableRow key={order._id}>
+                      <TableCell>#{order._id.slice(-8)}</TableCell>
+                      <TableCell className="capitalize">
+                        {order.products.map((product, index) => (
+                          <div key={index}>
+                            <div className="font-medium">
+                              {product.product.name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {product.product._id}
+                            </div>
+                          </div>
+                        ))}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{order.userId.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {order.userId.email}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {product.product._id}
-                        </div>
-                      </div>
-                    ))}
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{order.userId.name}</div>
-                      <div className="text-sm text-gray-500">
-                        {order.userId.email}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>₹{order.totalAmount.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedOrder(order);
-                        setIsDetailsOpen(true);
-                      }}
-                    >
-                      <Info className="h-4 w-4 mr-2" />
-                      Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                      </TableCell>
+                      <TableCell>
+                        ₹{order.totalAmount.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(order.status)}>
+                          {order.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setIsDetailsOpen(true);
+                          }}
+                        >
+                          <Info className="h-4 w-4 mr-2" />
+                          Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
 
         <OrderDetailsSheet
