@@ -17,6 +17,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import OrderDetailsDialog from "@/components/OrderDetailsDialog";
 import ServiceDetailsDialog from "@/components/ServiceDetailsDialog";
 import { toast } from "react-toastify";
@@ -30,6 +32,38 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Search } from "lucide-react";
+
+const ITEMS_PER_PAGE = 6;
+
+const ORDER_STATUSES = ["PENDING", "ORDERED", "DELIVERED", "CANCELLED"];
+const SERVICE_STATUSES = ["CREATED", "ASSIGNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
+
+const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+  return (
+    <div className="flex items-center justify-center space-x-2 mt-4">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage <= 1}
+      >
+        Previous
+      </Button>
+      <span className="text-sm">
+        Page {currentPage} of {totalPages}
+      </span>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage >= totalPages}
+      >
+        Next
+      </Button>
+    </div>
+  );
+};
 
 const OrderManagement = ({ token }) => {
   const [orders, setOrders] = useState([]);
@@ -40,6 +74,53 @@ const OrderManagement = ({ token }) => {
     services: false,
     riders: false,
   });
+
+  // Pagination states
+  const [orderPage, setOrderPage] = useState(1);
+  const [servicePage, setServicePage] = useState(1);
+
+   // Search and filter states
+   const [orderSearch, setOrderSearch] = useState("");
+   const [serviceSearch, setServiceSearch] = useState("");
+   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+   const [serviceStatusFilter, setServiceStatusFilter] = useState("all");
+ 
+   // Reset pagination when search/filters change
+   useEffect(() => {
+     setOrderPage(1);
+   }, [orderSearch, orderStatusFilter]);
+ 
+   useEffect(() => {
+     setServicePage(1);
+   }, [serviceSearch, serviceStatusFilter]);
+ 
+   // Filter functions
+   const filterOrders = (orders) => {
+     return orders.filter(order => {
+       const matchesSearch = 
+         order.userId.name.toLowerCase().includes(orderSearch.toLowerCase()) ||
+         order._id.toLowerCase().includes(orderSearch.toLowerCase());
+       
+       const matchesStatus = 
+         orderStatusFilter === "all" || order.status === orderStatusFilter;
+ 
+       return matchesSearch && matchesStatus;
+     });
+   };
+ 
+   const filterServices = (services) => {
+     return services.filter(service => {
+       const matchesSearch = 
+         service.user.name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+         service._id.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+         (service.service?.name || "").toLowerCase().includes(serviceSearch.toLowerCase());
+       
+       const matchesStatus = 
+         serviceStatusFilter === "all" || service.status === serviceStatusFilter;
+ 
+       return matchesSearch && matchesStatus;
+     });
+   };
 
   // Fetch orders
   const fetchOrders = async () => {
@@ -167,6 +248,20 @@ const OrderManagement = ({ token }) => {
     }
   };
 
+  // Get paginated and filtered data
+  const getPaginatedData = (data, page) => {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return data.slice(startIndex, endIndex);
+  };
+
+  const filteredOrders = filterOrders(orders);
+  const filteredServices = filterServices(serviceRequests);
+  const currentOrders = getPaginatedData(filteredOrders, orderPage);
+  const currentServices = getPaginatedData(filteredServices, servicePage);
+  
+  const getTotalPages = (data) => Math.ceil(data.length / ITEMS_PER_PAGE);
+
   useEffect(() => {
     fetchOrders();
     fetchServiceRequests();
@@ -197,9 +292,35 @@ const OrderManagement = ({ token }) => {
 
         <TabsContent value="orders">
           <Card>
-            <CardHeader>
-              <CardTitle>Product Orders</CardTitle>
-              <CardDescription>Manage all product orders</CardDescription>
+          <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Product Orders</CardTitle>
+                  <CardDescription>Manage all product orders</CardDescription>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex items-center border rounded-md px-2">
+                    <Search className="h-4 w-4 text-gray-500" />
+                    <Input
+                      placeholder="Search orders..."
+                      value={orderSearch}
+                      onChange={(e) => setOrderSearch(e.target.value)}
+                      className="border-0 focus:ring-0"
+                    />
+                  </div>
+                  <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      {ORDER_STATUSES.map(status => (
+                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
@@ -214,7 +335,7 @@ const OrderManagement = ({ token }) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.map((order) => (
+                  {currentOrders.map((order) => (
                     <TableRow key={order._id}>
                       <TableCell>{order._id}</TableCell>
                       <TableCell>{order.userId.name}</TableCell>
@@ -234,15 +355,46 @@ const OrderManagement = ({ token }) => {
                   ))}
                 </TableBody>
               </Table>
+              <Pagination
+                currentPage={orderPage}
+                totalPages={getTotalPages(orders)}
+                onPageChange={setOrderPage}
+              />
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="services">
           <Card>
-            <CardHeader>
-              <CardTitle>Service Requests</CardTitle>
-              <CardDescription>Manage all service requests</CardDescription>
+          <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Service Requests</CardTitle>
+                  <CardDescription>Manage all service requests</CardDescription>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex items-center border rounded-md px-2">
+                    <Search className="h-4 w-4 text-gray-500" />
+                    <Input
+                      placeholder="Search services..."
+                      value={serviceSearch}
+                      onChange={(e) => setServiceSearch(e.target.value)}
+                      className="border-0 focus:ring-0"
+                    />
+                  </div>
+                  <Select value={serviceStatusFilter} onValueChange={setServiceStatusFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      {SERVICE_STATUSES.map(status => (
+                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
@@ -258,8 +410,8 @@ const OrderManagement = ({ token }) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {Array.isArray(serviceRequests) &&
-                    serviceRequests.map((service) => (
+                  {Array.isArray(currentServices) &&
+                    currentServices.map((service) => (
                       <TableRow key={service._id}>
                         <TableCell>{service._id}</TableCell>
                         <TableCell>{service.service?.name}</TableCell>
@@ -402,6 +554,11 @@ const OrderManagement = ({ token }) => {
                     ))}
                 </TableBody>
               </Table>
+              <Pagination
+                currentPage={servicePage}
+                totalPages={getTotalPages(serviceRequests)}
+                onPageChange={setServicePage}
+              />
             </CardContent>
           </Card>
         </TabsContent>

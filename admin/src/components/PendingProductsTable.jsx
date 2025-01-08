@@ -549,7 +549,7 @@ const PendingProductsTable = ({ token }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {products.map((product) => (
+          {products?.map((product) => (
             <TableRow key={product._id}>
               <TableCell className="font-medium">{product.name}</TableCell>
               <TableCell>
@@ -582,6 +582,7 @@ const PendingProductsTable = ({ token }) => {
               <TableCell className="space-x-2">
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => handleAction(product, "rejected")}
                   className="bg-red-50 hover:bg-red-100 text-red-600"
                 >
@@ -589,6 +590,7 @@ const PendingProductsTable = ({ token }) => {
                 </Button>
                 <Button
                   onClick={() => handleAction(product, "approved")}
+                  size="sm"
                   className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   Approve

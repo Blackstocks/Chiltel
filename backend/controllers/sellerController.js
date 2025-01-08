@@ -694,11 +694,6 @@ export const getSellerOrders = async (req, res) => {
       select: 'name'
     });
 
-    console.log("sellerId", sellerId);
-    console.log("products", products);
-    console.log("productIds", productIds);
-    console.log("orders", orders);
-
     res.status(200).json({
       success: true,
       data: orders

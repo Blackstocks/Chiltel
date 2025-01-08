@@ -34,6 +34,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
 
+const ITEMS_PER_PAGE = 6;
+
 // Product types and categories based on schema
 const PRODUCT_TYPES = [
   "Air Conditioner",
@@ -55,6 +57,32 @@ const PRODUCT_TYPES = [
 
 const CATEGORIES = ["Installation", "Service", "Repair"];
 
+const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+  return (
+    <div className="flex items-center justify-center space-x-2 mt-4">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage <= 1}
+      >
+        Previous
+      </Button>
+      <div className="flex items-center gap-1">
+        <span className="text-sm">Page {currentPage} of {totalPages}</span>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage >= totalPages}
+      >
+        Next
+      </Button>
+    </div>
+  );
+};
+
 const ServicesManagement = ({ token }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -62,6 +90,7 @@ const ServicesManagement = ({ token }) => {
   const [editingService, setEditingService] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [services, setServices] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [newService, setNewService] = useState({
     name: "",
@@ -324,6 +353,15 @@ const ServicesManagement = ({ token }) => {
     return matchesSearch && matchesProduct && matchesCategory && matchesAvailability;
   });
 
+  const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedServices = filteredServices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Reset to first page when filters or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters]);
+
   return (
     <div className="p-6">
       <Card className="w-full">
@@ -426,14 +464,14 @@ const ServicesManagement = ({ token }) => {
                     Loading services...
                   </TableCell>
                 </TableRow>
-              ) : filteredServices.length === 0 ? (
+              ) : paginatedServices.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-4">
                     No services found
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredServices.map((service) => (
+                paginatedServices.map((service) => (
                   <TableRow key={service._id}>
                     <TableCell className="font-medium">{service.name}</TableCell>
                     <TableCell>{service.product}</TableCell>
@@ -480,6 +518,14 @@ const ServicesManagement = ({ token }) => {
               )}
             </TableBody>
           </Table>
+          {/* Pagination Controls */}
+          {!isLoading && filteredServices.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </CardContent>
       </Card>
 

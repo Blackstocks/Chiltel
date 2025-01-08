@@ -1,4 +1,3 @@
-import { Plus, Search, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,11 +24,12 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Star } from "lucide-react";
 import AddProductForm from "@/components/AddProductForm";
 import axios from "axios";
 import { toast } from "react-toastify";
 import PendingProductsTable from "@/components/PendingProductsTable";
+import { Plus, Search, ChevronLeft, ChevronRight, AlertCircle, Eye, Pencil, Trash2, Star } from "lucide-react";
+import ProductDetailDialog from "@/components/ProductDetailDialog";
 
 const ProductsPage = ({ token }) => {
   // Add pagination state
@@ -55,6 +55,15 @@ const ProductsPage = ({ token }) => {
   });
 
   const [products, setProducts] = useState([]);
+
+  // Add new state for product details sheet
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const handleViewDetails = (product) => {
+    setSelectedProduct(product);
+    setIsDetailsOpen(true);
+  };
 
   const categories = ["all", ...new Set(products.map((p) => p.category))];
 
@@ -306,8 +315,7 @@ const ProductsPage = ({ token }) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Main Category</TableHead>
+                <TableHead>Name/Main Category</TableHead>
                 <TableHead>Brand/Model</TableHead>
                 <TableHead>Category/Type</TableHead>
                 <TableHead>price</TableHead>
@@ -320,8 +328,14 @@ const ProductsPage = ({ token }) => {
             <TableBody>
               {paginatedProducts.map((product) => (
                 <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.mainCategory}</TableCell>
+                  <TableCell className="font-medium">
+                  <div>
+                      <div className="font-medium">{product.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {product.mainCategory}
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">{product.brand}</div>
@@ -378,6 +392,13 @@ const ProductsPage = ({ token }) => {
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => handleViewDetails(product)}
+                      >
+                        <Eye className="h-4 w-4 text-blue-500" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleEditClick(product)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -391,6 +412,7 @@ const ProductsPage = ({ token }) => {
                       </Button>
                     </div>
                   </TableCell>
+
                 </TableRow>
               ))}
             </TableBody>
@@ -481,6 +503,16 @@ const ProductsPage = ({ token }) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Product Details Sheet */}
+      <ProductDetailDialog
+        product={selectedProduct}
+        open={isDetailsOpen}
+        onClose={() => {
+          setIsDetailsOpen(false);
+          setSelectedProduct(null);
+        }}
+      />
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
