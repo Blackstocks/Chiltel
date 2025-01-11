@@ -11,18 +11,18 @@ import {
   approveSeller,
   rejectSeller,
   getSellers,
-  uploadDocuments,
-  deleteDocument,
   getSellerProducts,
   editProduct,
   getSellerOrders,
+  uploadDocument
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import { validateSellerRegistration } from "../middleware/sellerValidation.js";
-import upload from "../middleware/sellerDocUpload.js";
 import adminAuth from "../middleware/adminAuth.js";
+import multer from "multer";
 
 const router = express.Router();
+const upload = multer({ dest: "uploads/" });
 
 // Auth routes
 router.post("/register", validateSellerRegistration, register);
@@ -32,13 +32,15 @@ router.put("/approve/:id", adminAuth, approveSeller);
 router.put("/reject/:id", adminAuth, rejectSeller);
 router.get("/list", adminAuth, getSellers);
 
+
+
 // Protected routes
 router.use(protectSeller);
 router.get("/profile", getProfile);
 router.put("/profile", updateProfile);
 router.get("/verify", verifyToken);
-router.post("/upload-document", upload.single("document"), uploadDocuments);
-router.delete("/delete-document", deleteDocument);
+router.post("/upload-document", upload.single("document"), uploadDocument);
+
 
 router.post("/addProduct", addProduct);
 router.get("/getSellerProducts", getSellerProducts);

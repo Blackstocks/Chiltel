@@ -55,55 +55,60 @@ const StoreSettings = () => {
     const file = event.target.files[0];
     if (!file) return;
 
+    console.log("File to be uploaded:", file);
+
     // Validate file type
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Please upload a PDF, JPEG, or PNG file");
-      return;
+        toast.error("Please upload a PDF, JPEG, or PNG file");
+        return;
     }
 
-    // Validate file size (5MB limit)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    // Validate file size (20MB limit)
+    const maxSize = 20 * 1024 * 1024; // 20MB in bytes
     if (file.size > maxSize) {
-      toast.error("File size must be less than 5MB");
-      return;
+        toast.error("File size must be less than 20MB");
+        return;
     }
 
     setIsUploading(true);
     const uploadFormData = new FormData();
-
     uploadFormData.append("document", file);
 
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/seller/upload-document`,
-        {
-          method: "POST",
-          body: uploadFormData,
-          // Include your auth headers here
-          headers: {
-            // Don't set Content-Type header, let browser set it with boundary
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Upload failed");
-      }
-
-      toast.success("Certificate uploaded successfully");
-      //onUploadSuccess(data.data);
-      console.log(data.data);
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message || "Failed to upload certificate");
-    } finally {
-      setIsUploading(false);
+    // Log FormData contents
+    console.log("FormData contents:");
+    for (const [key, value] of uploadFormData.entries()) {
+        console.log(`${key}:`, value);
     }
-  };
+
+    try {
+        const response = await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/seller/upload-document`,
+            {
+                method: "POST",
+                body: uploadFormData,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Upload failed");
+        }
+
+        toast.success("Certificate uploaded successfully");
+        console.log("Uploaded file data from server:", data.data);
+    } catch (error) {
+        console.error(error);
+        toast.error(error.message || "Failed to upload certificate");
+    } finally {
+        setIsUploading(false);
+    }
+};
+
 
   const handleDragOver = (e) => {
     e.preventDefault();

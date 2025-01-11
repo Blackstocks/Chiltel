@@ -4,11 +4,10 @@ import Order from "../models/orderModel.js";
 import Product from '../models/productModel.js';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import crypto from "crypto";
-import SellerProduct from "../models/sellerProduct.js";
 import { validateProduct } from '../utils/validateSellerProduct.js';
-import { uploadToCloudinary } from '../utils/claudinary.js';
-import fs from 'fs';
+import bucket from "../config/firebaseConfig.js";
+import fs from "fs";
+
 
 
 
@@ -408,97 +407,40 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-export const uploadDocuments = async (req, res) => {
-  try {
-    // Check if file exists in the request
-    console.log(req.body);
-    console.log(req.file);
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'No file uploaded',
-      });
+export const uploadDocument = async (req, res) => {
+    try {
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        console.log("File received:", file);
+
+        // Define the destination in Firebase Storage
+        const firebaseFileName = `uploads/${file.originalname}`;
+
+        // Upload file to Firebase Storage
+        await bucket.upload(file.path, {
+            destination: firebaseFileName,
+            metadata: {
+                contentType: file.mimetype,
+            },
+        });
+
+        // Get the public URL
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${firebaseFileName}`;
+
+        // Cleanup temporary file
+        fs.unlinkSync(file.path);
+
+        console.log("File uploaded to Firebase:", publicUrl);
+
+        res.status(200).json({ message: "File uploaded successfully", url: publicUrl });
+    } catch (error) {
+        console.error("Error uploading file:", error);
+        res.status(500).json({ message: "Failed to upload document", error: error.message });
     }
-
-    // Fetch seller from the database
-    const seller = await Seller.findById(req.seller._id); // Pass sellerId in the request body
-    if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: 'Seller not found',
-      });
-    }
-
-    // Upload file to Cloudinary
-    const result = await uploadToCloudinary(req.file.path);
-
-    // Update seller document details
-    /*seller.dealerCertificate = {
-      url: result.secure_url,
-      filename: req.file.originalname,
-      uploadDate: new Date(),
-      cloudinaryId: result.public_id,
-    };*/
-
-   // await seller.save();
-
-   console.log(result);
-
-    // Remove local file after upload
-    fs.unlinkSync(req.file.path);
-
-    res.status(200).json({
-      success: true,
-      message: 'Document uploaded successfully',
-      data: seller.dealerCertificate,
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to upload document',
-      error: error.message,
-    });
-  }
-};
-
-export const deleteDocument = async (req, res) => {
-  try {
-    const seller = await Seller.findById(req.seller.id);
-    if (!seller) {
-      return res.status(404).json({
-        success: false,
-        message: "Seller not found"
-      });
-    }
-
-    if (!seller.dealerCertificate) {
-      return res.status(404).json({
-        success: false,
-        message: "No document found"
-      });
-    }
-
-    // Delete from Cloudinary
-    await cloudinary.uploader.destroy(seller.dealerCertificate.cloudinaryId);
-
-    // Remove document details from seller
-    seller.dealerCertificate = undefined;
-    await seller.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Document deleted successfully"
-    });
-
-  } catch (error) {
-    console.error('Delete error:', error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete document",
-      error: error.message
-    });
-  }
 };
 
 
