@@ -17,8 +17,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import OrderDetailsDialog from "@/components/OrderDetailsDialog";
 import ServiceDetailsDialog from "@/components/ServiceDetailsDialog";
 import { toast } from "react-toastify";
@@ -37,7 +44,13 @@ import { Search } from "lucide-react";
 const ITEMS_PER_PAGE = 6;
 
 const ORDER_STATUSES = ["PENDING", "ORDERED", "DELIVERED", "CANCELLED"];
-const SERVICE_STATUSES = ["CREATED", "ASSIGNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
+const SERVICE_STATUSES = [
+  "CREATED",
+  "ASSIGNED",
+  "IN_PROGRESS",
+  "COMPLETED",
+  "CANCELLED",
+];
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
@@ -79,48 +92,88 @@ const OrderManagement = ({ token }) => {
   const [orderPage, setOrderPage] = useState(1);
   const [servicePage, setServicePage] = useState(1);
 
-   // Search and filter states
-   const [orderSearch, setOrderSearch] = useState("");
-   const [serviceSearch, setServiceSearch] = useState("");
-   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
-   const [serviceStatusFilter, setServiceStatusFilter] = useState("all");
- 
-   // Reset pagination when search/filters change
-   useEffect(() => {
-     setOrderPage(1);
-   }, [orderSearch, orderStatusFilter]);
- 
-   useEffect(() => {
-     setServicePage(1);
-   }, [serviceSearch, serviceStatusFilter]);
- 
-   // Filter functions
-   const filterOrders = (orders) => {
-     return orders.filter(order => {
-       const matchesSearch = 
-         order.userId.name.toLowerCase().includes(orderSearch.toLowerCase()) ||
-         order._id.toLowerCase().includes(orderSearch.toLowerCase());
-       
-       const matchesStatus = 
-         orderStatusFilter === "all" || order.status === orderStatusFilter;
- 
-       return matchesSearch && matchesStatus;
-     });
-   };
- 
-   const filterServices = (services) => {
-     return services.filter(service => {
-       const matchesSearch = 
-         service.user.name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
-         service._id.toLowerCase().includes(serviceSearch.toLowerCase()) ||
-         (service.service?.name || "").toLowerCase().includes(serviceSearch.toLowerCase());
-       
-       const matchesStatus = 
-         serviceStatusFilter === "all" || service.status === serviceStatusFilter;
- 
-       return matchesSearch && matchesStatus;
-     });
-   };
+  // Search and filter states
+  const [orderSearch, setOrderSearch] = useState("");
+  const [filterOrderDate, setFilterOrderDate] = useState("");
+  const [serviceSearch, setServiceSearch] = useState("");
+  //Add these new state variables after the existing state declarations
+  const [filterRequestedDate, setFilterRequestedDate] = useState("");
+  const [filterScheduledDate, setFilterScheduledDate] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [serviceStatusFilter, setServiceStatusFilter] = useState("all");
+
+  // Reset pagination when search/filters change
+  useEffect(() => {
+    setOrderPage(1);
+  }, [orderSearch, orderStatusFilter, filterOrderDate]);
+
+  useEffect(() => {
+    setServicePage(1);
+  }, [
+    serviceSearch,
+    serviceStatusFilter,
+    filterRequestedDate,
+    filterScheduledDate,
+  ]);
+
+  // Filter functions
+  const filterOrders = (orders) => {
+    return orders.filter((order) => {
+      const matchesSearch =
+        order.userId.name.toLowerCase().includes(orderSearch.toLowerCase()) ||
+        order._id.toLowerCase().includes(orderSearch.toLowerCase());
+
+      const matchesStatus =
+        orderStatusFilter === "all" || order.status === orderStatusFilter;
+
+      // Add single date filtering logic
+      const orderDate = new Date(order.createdAt).toLocaleDateString();
+      const selectedDate = filterOrderDate
+        ? new Date(filterOrderDate).toLocaleDateString()
+        : null;
+
+      const matchesDate = !selectedDate || orderDate === selectedDate;
+
+      return matchesSearch && matchesStatus && matchesDate;
+    });
+  };
+
+  const filterServices = (services) => {
+    return services.filter((service) => {
+      const matchesSearch =
+        service.user.name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+        service._id.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+        (service.service?.name || "")
+          .toLowerCase()
+          .includes(serviceSearch.toLowerCase());
+
+      const matchesStatus =
+        serviceStatusFilter === "all" || service.status === serviceStatusFilter;
+
+      // Add date filtering logic
+      const requestedDate = new Date(service.createdAt).toLocaleDateString();
+      const scheduledDate = new Date(service.scheduledFor).toLocaleDateString();
+
+      const selectedRequestedDate = filterRequestedDate
+        ? new Date(filterRequestedDate).toLocaleDateString()
+        : null;
+      const selectedScheduledDate = filterScheduledDate
+        ? new Date(filterScheduledDate).toLocaleDateString()
+        : null;
+
+      const matchesRequestedDate =
+        !selectedRequestedDate || requestedDate === selectedRequestedDate;
+      const matchesScheduledDate =
+        !selectedScheduledDate || scheduledDate === selectedScheduledDate;
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesRequestedDate &&
+        matchesScheduledDate
+      );
+    });
+  };
 
   // Fetch orders
   const fetchOrders = async () => {
@@ -259,7 +312,7 @@ const OrderManagement = ({ token }) => {
   const filteredServices = filterServices(serviceRequests);
   const currentOrders = getPaginatedData(filteredOrders, orderPage);
   const currentServices = getPaginatedData(filteredServices, servicePage);
-  
+
   const getTotalPages = (data) => Math.ceil(data.length / ITEMS_PER_PAGE);
 
   useEffect(() => {
@@ -292,7 +345,7 @@ const OrderManagement = ({ token }) => {
 
         <TabsContent value="orders">
           <Card>
-          <CardHeader>
+            <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle>Product Orders</CardTitle>
@@ -308,14 +361,30 @@ const OrderManagement = ({ token }) => {
                       className="border-0 focus:ring-0"
                     />
                   </div>
-                  <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="date"
+                      value={filterOrderDate}
+                      onChange={(e) => setFilterOrderDate(e.target.value)}
+                      className="w-40"
+                      placeholder="Filter by date"
+                    />
+                  </div>
+
+                  <Select
+                    value={orderStatusFilter}
+                    onValueChange={setOrderStatusFilter}
+                  >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Statuses</SelectItem>
-                      {ORDER_STATUSES.map(status => (
-                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      {ORDER_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -330,7 +399,7 @@ const OrderManagement = ({ token }) => {
                     <TableHead>Customer</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>Order Date</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -338,7 +407,12 @@ const OrderManagement = ({ token }) => {
                   {currentOrders.map((order) => (
                     <TableRow key={order._id}>
                       <TableCell>{order._id}</TableCell>
-                      <TableCell>{order.userId.name}</TableCell>
+                      <TableCell>
+                        <div className="font-medium">{order.userId.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {order.userId.email}
+                        </div>
+                      </TableCell>
                       <TableCell>₹{order.totalAmount}</TableCell>
                       <TableCell>
                         <Badge className={getStatusBadgeColor(order.status)}>
@@ -366,13 +440,13 @@ const OrderManagement = ({ token }) => {
 
         <TabsContent value="services">
           <Card>
-          <CardHeader>
+            <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle>Service Requests</CardTitle>
                   <CardDescription>Manage all service requests</CardDescription>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex items-end justify-between gap-4">
                   <div className="flex items-center border rounded-md px-2">
                     <Search className="h-4 w-4 text-gray-500" />
                     <Input
@@ -382,14 +456,45 @@ const OrderManagement = ({ token }) => {
                       className="border-0 focus:ring-0"
                     />
                   </div>
-                  <Select value={serviceStatusFilter} onValueChange={setServiceStatusFilter}>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-500">
+                        Requested On
+                      </span>
+                      <Input
+                        type="date"
+                        value={filterRequestedDate}
+                        onChange={(e) => setFilterRequestedDate(e.target.value)}
+                        className="w-40"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-500">
+                        Scheduled For
+                      </span>
+                      <Input
+                        type="date"
+                        value={filterScheduledDate}
+                        onChange={(e) => setFilterScheduledDate(e.target.value)}
+                        className="w-40"
+                      />
+                    </div>
+                  </div>
+
+                  <Select
+                    value={serviceStatusFilter}
+                    onValueChange={setServiceStatusFilter}
+                  >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Statuses</SelectItem>
-                      {SERVICE_STATUSES.map(status => (
-                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      {SERVICE_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -400,10 +505,10 @@ const OrderManagement = ({ token }) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Request ID</TableHead>
-                    <TableHead>Service</TableHead>
+                    <TableHead>Service/Request ID</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Requested On</TableHead>
                     <TableHead>Scheduled For</TableHead>
                     <TableHead>Assign Rider</TableHead>
                     <TableHead>Actions</TableHead>
@@ -413,16 +518,33 @@ const OrderManagement = ({ token }) => {
                   {Array.isArray(currentServices) &&
                     currentServices.map((service) => (
                       <TableRow key={service._id}>
-                        <TableCell>{service._id}</TableCell>
-                        <TableCell>{service.service?.name}</TableCell>
-                        <TableCell>{service.user.name}</TableCell>
-
+                        <TableCell>
+                          <div className="font-medium">
+                            {service.service?.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {service._id}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {service.user.name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {service.user.email}
+                            </div>
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <Badge
                             className={getStatusBadgeColor(service.status)}
                           >
                             {service.status}
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(service.createdAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
                           {new Date(service.scheduledFor).toLocaleDateString()}

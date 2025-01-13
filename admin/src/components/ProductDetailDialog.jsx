@@ -51,6 +51,7 @@ const ProductDetailDialog = ({ product, open, onClose }) => {
             <SheetTitle>Product Details</SheetTitle>
             <SheetDescription>
               Complete information about the product
+              {product._id && ` - ${product._id}`}
             </SheetDescription>
           </SheetHeader>
 
