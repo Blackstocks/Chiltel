@@ -26,8 +26,11 @@ import { CartProvider } from "./context/CartContext";
 import { ServiceCartProvider } from "./context/ServiceCartContext";
 import BuyNow from "./pages/BuyNow";
 import OrderSuccess from "./pages/OrderSuccess";
+// import * as serviceWorkerRegistration from './lib/pwa/RegisterServiceWorker';
+import RegisterServiceWorker from "./lib/pwa/RegisterServiceWorker";
 
 const App = () => {
+  RegisterServiceWorker();
   return (
     <AuthProvider>
           <ToastContainer
