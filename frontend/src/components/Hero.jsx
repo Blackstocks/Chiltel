@@ -92,7 +92,7 @@ const Hero = () => {
 
   const navigateToMart = () => {
     navigate("/collection");
-  }
+  };
 
   // Complete categories list
   const allCategories = [
@@ -426,19 +426,24 @@ const Hero = () => {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-2 pt-2 sm:gap-3 md:gap-4 lg:gap-6 sm:pt-4">
             {stats.map(({ end, text, color, icon }) => (
-              <div key={text} className="flex items-start gap-1.5 sm:gap-1.5 md:gap-2">
-                <div className={`p-1.5 sm:p-1.5 md:p-2 rounded-lg bg-${color}-50`}>
-                  <svg 
-                    className={`w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-6 lg:h-6 text-${color}-600`} 
-                    fill="none" 
-                    stroke="currentColor" 
+              <div
+                key={text}
+                className="flex items-start gap-1.5 sm:gap-1.5 md:gap-2"
+              >
+                <div
+                  className={`p-1.5 sm:p-1.5 md:p-2 rounded-lg bg-${color}-50`}
+                >
+                  <svg
+                    className={`w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-6 lg:h-6 text-${color}-600`}
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d={icon} 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={icon}
                     />
                   </svg>
                 </div>
@@ -447,9 +452,13 @@ const Hero = () => {
                     <span className="text-base font-bold text-gray-900 sm:text-lg md:text-xl lg:text-2xl">
                       <AnimatedCounter end={end} duration={1500} />
                     </span>
-                    <span className="text-base font-bold text-gray-900 sm:text-base md:text-lg lg:text-xl">+</span>
+                    <span className="text-base font-bold text-gray-900 sm:text-base md:text-lg lg:text-xl">
+                      +
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-600 sm:text-sm md:text-base">{text}</span>
+                  <span className="text-xs text-gray-600 sm:text-sm md:text-base">
+                    {text}
+                  </span>
                 </div>
               </div>
             ))}
@@ -459,10 +468,17 @@ const Hero = () => {
         {/* Right Column - Image */}
         <div className="relative order-1 w-full lg:order-2">
           <div className="w-full h-56 overflow-hidden rounded-lg sm:h-64 md:h-80 lg:h-full">
+            {/* Preload the main image */}
+            {/* <link rel="preload" as="image" src="/assets/home.png" /> */}
+
+            {/* Use the WebP format and include lazy loading */}
             <img
-              src="/assets/home.png"
+              src="/assets/home.png" // WebP format for smaller file size
               alt="Home Appliance Professional"
+              loading="lazy" // Lazy loading for performance
               className="object-cover w-full h-full lg:object-contain"
+              width="800" // Add dimensions for better performance
+              height="600"
             />
           </div>
         </div>
