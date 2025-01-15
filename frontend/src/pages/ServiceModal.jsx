@@ -427,7 +427,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
         <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
           <h2 className="text-lg font-bold">Schedule Service</h2>
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto p-6">
             {/* Day Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Select Day</label>
