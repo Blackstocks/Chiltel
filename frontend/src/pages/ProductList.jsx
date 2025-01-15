@@ -142,8 +142,8 @@ const ProductList = () => {
       result = result.filter((item) => {
         return filters.priceRange.some(
           (range) =>
-            parseInt(item.price*item.discount) >= range.min &&
-            parseInt(item.price*item.discount) <= range.max
+            parseInt(item.price*(1-item.discount)) >= range.min &&
+            parseInt(item.price*(1-item.discount)) <= range.max
         );
       });
     }
