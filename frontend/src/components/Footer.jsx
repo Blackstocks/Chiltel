@@ -388,7 +388,7 @@ const Footer = () => {
               />
             </a>
             <a
-              href="#"
+              href="https://www.instagram.com/chiltelindiapvtltd/?next=%2F"
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img
@@ -398,7 +398,7 @@ const Footer = () => {
               />
             </a>
             <a
-              href="https://www.linkedin.com/company/105363816/admin/dashboard/"
+              href="https://www.linkedin.com/company/105363816"
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
             >
               <img
