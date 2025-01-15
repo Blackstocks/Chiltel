@@ -480,7 +480,7 @@ const Footer = () => {
 
             <li>
               <a
-                href="#"
+                href="https://seller.chiltel.com/"
                 className="flex items-center text-gray-600 hover:text-black"
               >
                 <span className="mr-2">👤</span> Register as Seller
@@ -488,7 +488,7 @@ const Footer = () => {
             </li>
             <li>
               <a
-                href="https://chiltel-rider.vercel.app"
+                href="https://partner.chiltel.com/"
                 className="flex items-center text-gray-600 hover:text-black"
               >
                 <span className="mr-2">👥</span> Register as Service Partner
