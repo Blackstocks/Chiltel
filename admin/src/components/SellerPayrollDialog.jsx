@@ -18,7 +18,6 @@ const SellerPayrollDialog = ({ seller, isOpen, onClose, onSave }) => {
   const adminCommission = (totalAmount * (commission / 100)).toFixed(2);
   const sellerEarnings = (totalAmount - adminCommission).toFixed(2);
 
-  console.log("seller: ", seller);
 
   const handleSave = async () => { 
     try {

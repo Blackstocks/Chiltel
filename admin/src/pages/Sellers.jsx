@@ -95,6 +95,10 @@ const SellerDetails = ({ seller, onClose }) => {
                     {getStatusBadge(seller.registrationStatus)}
                   </div>
                 </div>
+                <div>
+                  <label className="text-gray-500">Commission Rate</label>
+                  <p className="font-medium">{seller.commissionRate || 0}%</p>
+                </div>
               </div>
             </div>
 
@@ -297,14 +301,15 @@ const Sellers = ({ token }) => {
   };
 
   const handlePayrollUpdate = async (commission) => {
-    // Update the local state
+    // Update the local state immediately
     setSellers(
       sellers.map((s) =>
         s._id === selectedSellerForPayroll._id
-          ? { ...s, payroll: { ...s.payroll, commission } }
+          ? { ...s, commissionRate: commission } // Update commissionRate instead of payroll.commission
           : s
       )
     );
+    //await fetchSellers(); // Fetch fresh data from the server
   };
 
   const fetchSellers = async () => {

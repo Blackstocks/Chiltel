@@ -242,10 +242,7 @@ export const getSellers = async (req, res) => {
 export const updateCommission = async (req, res) => {
   try {
     const { commissionRate } = req.body;
-    const { sellerId } = req.params.id;
-
-    console.log("Updating commission rate:", commissionRate);
-    console.log("Seller ID:", sellerId);
+    const sellerId = req.params.id;
 
     // Validate commission rate
     if (commissionRate < 0 || commissionRate > 100) {
