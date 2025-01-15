@@ -151,7 +151,7 @@ const ProductList = () => {
     if (filters.rating) {
       result = result.filter((item) => item.rating >= filters.rating);
     }
-
+    console.log('filtered items: ', result);
     setFilteredItems(result);
   }, [filters, loading]);
 
@@ -325,7 +325,7 @@ const ProductList = () => {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
               {filteredItems.map((item) => (
                 <div
-                  key={item.id}
+                  key={item._id}
                   className="flex flex-col transition-shadow bg-white border rounded-lg shadow-sm hover:shadow-md"
                 >
                   {/* Image Section */}
@@ -371,7 +371,7 @@ const ProductList = () => {
                     </div>
 
                     {/* Specifications */}
-                    <div className="mb-2">
+                    {/* <div className="mb-2">
                       <div className="grid grid-cols-2 gap-2">
                         {Object.entries(item.specifications).map(
                           ([key, value], index) => (
@@ -386,7 +386,62 @@ const ProductList = () => {
                           )
                         )}
                       </div>
+                    </div> */}
+                    <div className="mb-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(item.specifications).map(([key, value], index) => (
+                          <div key={index}>
+                            {typeof value === "object" && !Array.isArray(value) ? (
+                              // Handle nested objects
+                              <div>
+                                <span className="text-gray-600 capitalize">
+                                  {key.replace(/([A-Z])/g, " $1").trim()}:
+                                </span>
+                                <div className="ml-4">
+                                  {Object.entries(value).map(([nestedKey, nestedValue], nestedIndex) => (
+                                    <div key={nestedIndex}>
+                                      <span className="text-gray-600 capitalize">
+                                        {nestedKey.replace(/([A-Z])/g, " $1").trim()}:
+                                      </span>
+                                      <span className="ml-1 font-medium break-words">
+                                        {typeof nestedValue === "object" && !Array.isArray(nestedValue) ? (
+                                          // Handle further nested objects
+                                          <div className="ml-4">
+                                            {Object.entries(nestedValue).map(
+                                              ([deepKey, deepValue], deepIndex) => (
+                                                <div key={deepIndex}>
+                                                  <span className="text-gray-600 capitalize">
+                                                    {deepKey.replace(/([A-Z])/g, " $1").trim()}:
+                                                  </span>
+                                                  <span className="ml-1 font-medium break-words">
+                                                    {deepValue}
+                                                  </span>
+                                                </div>
+                                              )
+                                            )}
+                                          </div>
+                                        ) : (
+                                          nestedValue
+                                        )}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              // Handle flat key-value pairs
+                              <>
+                                <span className="text-gray-600 capitalize">
+                                  {key.replace(/([A-Z])/g, " $1").trim()}:
+                                </span>
+                                <span className="ml-1 font-medium break-words">{value}</span>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
+
 
                     {/* Features */}
                     <div className="mb-2">

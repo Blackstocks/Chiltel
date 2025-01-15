@@ -164,12 +164,14 @@ const ServiceCollection = () => {
     const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [categories1, setCategories1] = useState([]);
+    const [productsLoading, setProductsLoading] = useState(false);
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchAndFormatData = async () => {
           try {
+            setProductsLoading(true);
             // Fetch the product list from the API
             const response = await axios.get(backendUrl + '/api/product/list');
     
@@ -268,6 +270,8 @@ const ServiceCollection = () => {
             }
           } catch (error) {
             console.error("Error fetching products:", error);
+          }finally{
+            setProductsLoading(false);
           }
         };
     
@@ -342,6 +346,24 @@ const ServiceCollection = () => {
         setFilteredCategories(updatedCategories);
     }, [mainCategoryFilter, typeFilter, sortType, categories, categories1]);
 
+    // if (productsLoading) {
+    //     return (
+            // <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            // {Array.from({ length: 8 }).map((_, index) => (
+            //     <div
+            //     key={index}
+            //     className="p-4 bg-white rounded shadow animate-pulse flex flex-col space-y-4"
+            //     >
+            //     <div className="h-40 bg-gray-300 rounded"></div>
+            //     <div className="h-5 bg-gray-300 rounded"></div>
+            //     <div className="h-5 bg-gray-300 rounded w-2/3"></div>
+            //     </div>
+            // ))}
+            // </div>
+    //     );
+    //     }
+
+
     return (
         <div className="container px-4 py-8 mx-auto">
             <header className="flex flex-col items-center justify-between pb-4 mb-8 border-b">
@@ -359,6 +381,20 @@ const ServiceCollection = () => {
                 </div> */}
             </header>
 
+            {productsLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {Array.from({ length: 8 }).map((_, index) => (
+                        <div
+                        key={index}
+                        className="p-4 bg-white rounded shadow animate-pulse flex flex-col space-y-4"
+                        >
+                        <div className="h-40 bg-gray-300 rounded"></div>
+                        <div className="h-5 bg-gray-300 rounded"></div>
+                        <div className="h-5 bg-gray-300 rounded w-2/3"></div>
+                        </div>
+                    ))}
+                </div>
+            ):(
             <div className="flex flex-col md:flex-row">
                 <aside
                     className={`md:w-1/4 md:pr-4 ${
@@ -473,6 +509,7 @@ const ServiceCollection = () => {
                     )}
                 </main>
             </div>
+            )}
 
             <ServiceModal
                 isOpen={isServiceModalOpen}
