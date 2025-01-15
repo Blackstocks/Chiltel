@@ -49,13 +49,13 @@ const ServiceCategories = () => {
     },
   ];
 
+
   const totalItems = categories.length;
   const duplicatedCategories = [...categories, ...categories];
   const [visibleItems, setVisibleItems] = useState(4);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // Update screen size state on resize
   useEffect(() => {
     const handleResize = () => {
       setVisibleItems(window.innerWidth < 640 ? 1 : 4);
@@ -68,7 +68,6 @@ const ServiceCategories = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto-advance carousel
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % totalItems);
@@ -77,19 +76,18 @@ const ServiceCategories = () => {
     return () => clearInterval(timer);
   }, [totalItems]);
 
-  // Handle navigation to purchase page
   const handlePurchase = (url) => {
     navigate(url);
   };
 
   return (
-    <div className="container max-w-full mx-auto overflow-hidden">
-      <div className="py-8 text-3xl text-center">
+    <div className="container mx-auto overflow-hidden">
+      <div className="py-8 text-center">
         <h2 className="text-3xl">
           <span className="text-gray-500">DOMESTIC</span>{" "}
           <span className="text-gray-900">APPLIANCES</span>
         </h2>
-        <p className="w-3/4 m-auto text-xs text-gray-600 sm:text-sm md:text-base">
+        <p className="max-w-lg mx-auto text-sm text-gray-600">
           Discover our latest and most popular services tailored to meet your needs.
         </p>
       </div>
@@ -103,11 +101,11 @@ const ServiceCategories = () => {
         {duplicatedCategories.map((category, index) => (
           <div
             key={index}
-            className="flex-shrink-0 w-full p-2 sm:w-1/4"
+            className={`flex-shrink-0 p-2 ${isMobile ? "w-full" : "sm:w-1/4"}`}
           >
             <div className="overflow-hidden bg-white rounded-lg shadow-md hover:shadow-lg">
               <div 
-                className="relative pb-[60%] overflow-hidden group cursor-pointer"
+                className="relative group cursor-pointer pb-[60%]"
                 onClick={() => handlePurchase(category.url)}
               >
                 <img
@@ -144,7 +142,7 @@ const ServiceCategories = () => {
                 <div className="flex justify-center mt-4">
                   <button 
                     onClick={() => handlePurchase(category.url)}
-                    className="w-1/2 px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
                   >
                     Service Now
                   </button>
@@ -155,13 +153,12 @@ const ServiceCategories = () => {
         ))}
       </div>
 
-      {/* Banner Section */}
       <div 
         className="flex justify-center my-8 cursor-pointer"
         onClick={() => navigate('/collection')}
       >
         <img
-          src={isMobile ? "/assets/banner.png" : "/assets/1.png"}
+          src={isMobile ? "/assets/banner.webp" : "/assets/1.webp"}
           alt="Service Banner"
           className="object-cover w-full transition-transform duration-500 ease-in-out max-h-80 hover:scale-105 hover:shadow-lg"
         />

@@ -100,7 +100,7 @@ const Hero = () => {
       name: "Air Conditioner",
       mainCategory: "Appliance",
       type: "Cooling",
-      image: "/assets/air_conditioner.jpeg",
+      image: "/assets/air_conditioner.webp",
       description:
         "Professional Split AC services including installation, repair, and maintenance",
     },
@@ -108,7 +108,7 @@ const Hero = () => {
       name: "Air Cooler",
       mainCategory: "Appliance",
       type: "Cooling",
-      image: "/assets/cooler.jpg",
+      image: "/assets/cooler.webp",
       description:
         "Professional air cooler services for optimal cooling performance",
     },
@@ -116,14 +116,14 @@ const Hero = () => {
       name: "Refrigerator",
       mainCategory: "Appliance",
       type: "Cooling",
-      image: "/assets/refrigwrator.jpeg",
+      image: "/assets/refrigwrator.webp",
       description: "Professional refrigerator repair and maintenance services",
     },
     {
       name: "Deep Freezer",
       mainCategory: "Retail",
       type: "Cooling",
-      image: "/assets/deep_freeze.png",
+      image: "/assets/deep_freeze.webp",
       description: "High-quality deep freezers for your storage needs.",
     },
     {
@@ -469,11 +469,11 @@ const Hero = () => {
         <div className="relative order-1 w-full lg:order-2">
           <div className="w-full h-56 overflow-hidden rounded-lg sm:h-64 md:h-80 lg:h-full">
             {/* Preload the main image */}
-            {/* <link rel="preload" as="image" src="/assets/home.png" /> */}
+            <link rel="preload" as="image" src="/assets/home.webp" />
 
             {/* Use the WebP format and include lazy loading */}
             <img
-              src="/assets/home.png" // WebP format for smaller file size
+              src="/assets/home.webp" // WebP format for smaller file size
               alt="Home Appliance Professional"
               loading="lazy" // Lazy loading for performance
               className="object-cover w-full h-full lg:object-contain"
