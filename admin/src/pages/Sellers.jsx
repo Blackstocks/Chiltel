@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "use-debounce";
 import {
-    Building2,
-    FileCheck, 
-    Store, 
-    Mail, 
-    Phone, 
-    MapPin, 
-    CheckCircle2,
-    XCircle,
-    Clock,
-    Receipt,
-    Search,
-    Filter,
-    User,
+  Building2,
+  FileCheck,
+  Store,
+  Mail,
+  Phone,
+  MapPin,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Receipt,
+  Search,
+  Filter,
+  User,
+  Pencil,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -56,6 +57,7 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import SellerPayrollDialog from "@/components/SellerPayrollDialog";
 
 const SellerDetails = ({ seller, onClose }) => {
   if (!seller) return null;
@@ -256,22 +258,22 @@ const SellerDetails = ({ seller, onClose }) => {
 };
 
 const getStatusBadge = (status) => {
-    const statusConfig = {
-      pending: { color: "bg-yellow-100 text-yellow-700", icon: Clock },
-      approved: { color: "bg-green-100 text-green-700", icon: CheckCircle2 },
-      rejected: { color: "bg-red-100 text-red-700", icon: XCircle },
-    };
-
-    const config = statusConfig[status] || statusConfig.pending;
-    const Icon = config.icon;
-
-    return (
-      <Badge className={`${config.color} px-2 py-1 rounded-full`}>
-        <Icon className="h-3 w-3" />
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
+  const statusConfig = {
+    pending: { color: "bg-yellow-100 text-yellow-700", icon: Clock },
+    approved: { color: "bg-green-100 text-green-700", icon: CheckCircle2 },
+    rejected: { color: "bg-red-100 text-red-700", icon: XCircle },
   };
+
+  const config = statusConfig[status] || statusConfig.pending;
+  const Icon = config.icon;
+
+  return (
+    <Badge className={`${config.color} px-2 py-1 rounded-full`}>
+      <Icon className="h-3 w-3" />
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </Badge>
+  );
+};
 
 const Sellers = ({ token }) => {
   const [sellers, setSellers] = useState([]);
@@ -285,12 +287,32 @@ const Sellers = ({ token }) => {
   const [actionType, setActionType] = useState(null); // 'approve' or 'reject'
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
+  const [isPayrollDialogOpen, setIsPayrollDialogOpen] = useState(false);
+  const [selectedSellerForPayroll, setSelectedSellerForPayroll] =
+    useState(null);
+
+  const handleOpenPayrollDialog = (seller) => {
+    setSelectedSellerForPayroll(seller);
+    setIsPayrollDialogOpen(true);
+  };
+
+  const handlePayrollUpdate = async (commission) => {
+    // Update the local state
+    setSellers(
+      sellers.map((s) =>
+        s._id === selectedSellerForPayroll._id
+          ? { ...s, payroll: { ...s.payroll, commission } }
+          : s
+      )
+    );
+  };
+
   const fetchSellers = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage,
-        limit: 10,
+        limit: 6,
         ...(debouncedSearch && { search: debouncedSearch }),
         ...(status !== "all" && { status }),
       });
@@ -399,14 +421,14 @@ const Sellers = ({ token }) => {
     fetchSellers();
   }, [debouncedSearch, status, currentPage]);
 
-  
-
   return (
     <div className="p-6">
       <Card className="w-full">
         <CardHeader className="py-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-semibold">Sellers Management</CardTitle>
+            <CardTitle className="text-xl font-semibold">
+              Sellers Management
+            </CardTitle>
             <div className="flex items-center gap-3">
               {/* Search */}
               <div className="relative">
@@ -447,6 +469,7 @@ const Sellers = ({ token }) => {
                   <TableHead>Contact Info</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Payroll</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -494,6 +517,23 @@ const Sellers = ({ token }) => {
                     <TableCell>
                       {getStatusBadge(seller.registrationStatus)}
                     </TableCell>
+
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">
+                          {seller?.commissionRate || 0}% Commission
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleOpenPayrollDialog(seller)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+
                     <TableCell>{renderActionButtons(seller)}</TableCell>
                   </TableRow>
                 ))}
@@ -579,6 +619,17 @@ const Sellers = ({ token }) => {
       <SellerDetails
         seller={selectedSeller}
         onClose={() => setSelectedSeller(null)}
+      />
+
+      {/* Payroll Dialog */}
+      <SellerPayrollDialog
+        seller={selectedSellerForPayroll}
+        isOpen={isPayrollDialogOpen}
+        onClose={() => {
+          setIsPayrollDialogOpen(false);
+          setSelectedSellerForPayroll(null);
+        }}
+        onSave={handlePayrollUpdate}
       />
     </div>
   );

@@ -40,6 +40,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search } from "lucide-react";
+import RiderAssignmentCell from "../components/RiderAssignmentCell";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -76,6 +77,20 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       </Button>
     </div>
   );
+};
+
+{
+  /* Add this helper function outside your component */
+}
+const calculateTotalAmount = (service) => {
+  // Base service price
+  const basePrice = service.service?.price || 0;
+
+  // Sum of additional work prices
+  const additionalWorkTotal =
+    service.addedWorks?.reduce((sum, work) => sum + (work.price || 0), 0) || 0;
+
+  return basePrice + additionalWorkTotal;
 };
 
 const OrderManagement = ({ token }) => {
@@ -507,6 +522,7 @@ const OrderManagement = ({ token }) => {
                   <TableRow>
                     <TableHead>Service/Request ID</TableHead>
                     <TableHead>Customer</TableHead>
+                    <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Requested On</TableHead>
                     <TableHead>Scheduled For</TableHead>
@@ -536,6 +552,27 @@ const OrderManagement = ({ token }) => {
                             </div>
                           </div>
                         </TableCell>
+
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="font-medium">
+                              ₹{calculateTotalAmount(service)}
+                            </div>
+                            {service.addedWorks &&
+                              service.addedWorks.length > 0 && (
+                                <div className="text-xs text-gray-500">
+                                  Base: ₹{service.service?.price || 0}
+                                  <br />
+                                  Additional: ₹
+                                  {service.addedWorks.reduce(
+                                    (sum, work) => sum + (work.price || 0),
+                                    0
+                                  )}
+                                </div>
+                              )}
+                          </div>
+                        </TableCell>
+
                         <TableCell>
                           <Badge
                             className={getStatusBadgeColor(service.status)}
@@ -550,7 +587,7 @@ const OrderManagement = ({ token }) => {
                           {new Date(service.scheduledFor).toLocaleDateString()}
                         </TableCell>
 
-                        <TableCell>
+                        {/*<TableCell>
                           <div className="space-y-2">
                             <Dialog>
                               <DialogTrigger asChild>
@@ -668,7 +705,16 @@ const OrderManagement = ({ token }) => {
                               </Badge>
                             )}
                           </div>
+                        </TableCell>*/}
+
+                        <TableCell>
+                          <RiderAssignmentCell
+                            service={service}
+                            riders={riders}
+                            handleRiderAssignment={handleRiderAssignment}
+                          />
                         </TableCell>
+
                         <TableCell>
                           <ServiceDetailsDialog service={service} />
                         </TableCell>

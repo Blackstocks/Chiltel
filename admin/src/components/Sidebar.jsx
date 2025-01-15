@@ -46,6 +46,11 @@ const Sidebar = ({ setToken }) => {
       icon: <Users className="h-5 w-5" />,
       href: "/sellers",
     },
+    {
+      title: "Support Tickets",
+      icon: <Users className="h-5 w-5" />,
+      href: "/supportTickets",
+    },
   ];
 
   return (

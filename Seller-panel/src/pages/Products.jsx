@@ -6,6 +6,14 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { FileDown, Download, Printer, FileSpreadsheet } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -41,15 +49,280 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Loader2,
-  Search,
-  Edit,
-  Trash2,
-  Plus,
-  FilterX,
-} from "lucide-react";
+import { Loader2, Search, Edit, Trash2, Plus, FilterX } from "lucide-react";
 import AddProductForm from "@/components/AddProductForm";
+
+// Add these utility functions outside your component
+const exportToCSV = async (products, exportType = "filtered") => {
+  try {
+    // Define fields to export
+    const fields = [
+      { key: "name", label: "Product Name" },
+      { key: "mainCategory", label: "Main Category" },
+      { key: "brand", label: "Brand" },
+      { key: "model", label: "Model" },
+      { key: "category", label: "Category" },
+      { key: "type", label: "Type" },
+      { key: "price", label: "Price" },
+      { key: "discount", label: "Discount" },
+      { key: "inStock", label: "Stock" },
+      { key: "requestedStatus", label: "Status" },
+    ];
+
+    // Create CSV header
+    const header = fields.map((field) => field.label).join(",") + "\n";
+
+    // Create CSV rows
+    const rows = products
+      .map((product) => {
+        return fields
+          .map((field) => {
+            let value = product[field.key];
+
+            // Handle special cases
+            if (field.key === "price") {
+              value = (product.price * (1 - product.discount)).toFixed(2);
+            } else if (field.key === "discount") {
+              value = `${(product.discount * 100).toFixed(2)}%`;
+            } else if (field.key === "requestedStatus") {
+              value = value.charAt(0).toUpperCase() + value.slice(1);
+            }
+
+            // Handle values containing commas
+            if (typeof value === "string" && value.includes(",")) {
+              value = `"${value}"`;
+            }
+
+            return value;
+          })
+          .join(",");
+      })
+      .join("\n");
+
+    // Combine header and rows
+    const csv = header + rows;
+
+    // Create and download file
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `products_${exportType}_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Error exporting CSV:", error);
+    throw error;
+  }
+};
+
+
+
+// Updated printProducts function with loading indicator
+const printProducts = async (products, printAll = false) => {
+  try {
+    let productsToprint = products;
+
+    if (printAll) {
+      // Show loading indicator in print window
+      const loadingWindow = window.open("", "_blank");
+      loadingWindow.document.write(`
+        <html>
+          <head>
+            <title>Loading Products...</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+              .loader { 
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #3498db;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+                margin: 20px auto;
+              }
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            </style>
+          </head>
+          <body>
+            <h2>Loading all products...</h2>
+            <div class="loader"></div>
+            <p>Please wait while we prepare your document...</p>
+          </body>
+        </html>
+      `);
+
+      // Fetch all products
+      productsToprint = await fetchAllProducts();
+      loadingWindow.close();
+    }
+
+    const printWindow = window.open("", "_blank");
+    const content = `
+      <html>
+        <head>
+          <title>Products List</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              padding: 20px; 
+              max-width: 1200px; 
+              margin: 0 auto; 
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-top: 20px;
+              page-break-inside: auto;
+            }
+            tr { 
+              page-break-inside: avoid; 
+              page-break-after: auto;
+            }
+            th, td { 
+              border: 1px solid #ddd; 
+              padding: 8px; 
+              text-align: left; 
+            }
+            th { 
+              background-color: #f5f5f5; 
+              font-weight: bold;
+            }
+            .status { 
+              padding: 4px 8px; 
+              border-radius: 4px; 
+              display: inline-block;
+            }
+            .status-pending { background-color: #fff7ed; color: #9a3412; }
+            .status-approved { background-color: #f0fdf4; color: #166534; }
+            .status-rejected { background-color: #fef2f2; color: #991b1b; }
+            .header { 
+              display: flex; 
+              justify-content: space-between; 
+              align-items: center;
+              margin-bottom: 20px;
+              padding-bottom: 20px;
+              border-bottom: 2px solid #eee;
+            }
+            .product-image {
+              width: 50px;
+              height: 50px;
+              object-fit: cover;
+              border-radius: 4px;
+            }
+            .price-cell {
+              white-space: nowrap;
+            }
+            .discount {
+              color: #16a34a;
+              font-size: 0.875rem;
+            }
+            @media print {
+              body { -webkit-print-color-adjust: exact; }
+              thead { display: table-header-group; }
+              tfoot { display: table-footer-group; }
+              button { display: none; }
+              .no-break { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h1 style="margin: 0;">Products List</h1>
+              <p style="color: #666; margin: 5px 0;">
+                ${printAll ? "All Products" : "Current Page Products"} - 
+                Generated on ${new Date().toLocaleString()}
+              </p>
+            </div>
+            <div style="text-align: right;">
+              <p>Total Products: ${productsToprint.length}</p>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Brand/Model</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${productsToprint
+                .map(
+                  (product) => `
+                <tr class="no-break">
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <img src="${product.thumbnail}" alt="${
+                    product.name
+                  }" class="product-image"/>
+                      <span>${product.name}</span>
+                    </div>
+                  </td>
+                  <td>${product.mainCategory}</td>
+                  <td>
+                    <div>${product.brand}</div>
+                    <div style="color: #666; font-size: 0.875rem;">${
+                      product.model
+                    }</div>
+                  </td>
+                  <td class="price-cell">
+                    ₹${(product.price * (1 - product.discount)).toFixed(2)}
+                    ${
+                      product.discount > 0
+                        ? `<div class="discount">-${(
+                            product.discount * 100
+                          ).toFixed(2)}% off</div>`
+                        : ""
+                    }
+                  </td>
+                  <td>${product.inStock}</td>
+                  <td>
+                    <span class="status status-${product.requestedStatus.toLowerCase()}">
+                      ${
+                        product.requestedStatus.charAt(0).toUpperCase() +
+                        product.requestedStatus.slice(1)
+                      }
+                    </span>
+                  </td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+          
+          <div style="margin-top: 20px; text-align: center;">
+            <button onclick="window.print()" style="padding: 10px 20px; margin: 20px;">
+              Print Document
+            </button>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(content);
+    printWindow.document.close();
+  } catch (error) {
+    console.error("Error printing products:", error);
+    alert("Failed to prepare print document. Please try again.");
+  }
+};
+
+
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -183,6 +456,55 @@ const Products = () => {
                 Manage and track your product listings
               </CardDescription>
             </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <FileDown className="h-4 w-4" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              {/* Replace the existing DropdownMenuContent with this updated version */}
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => exportToCSV(products, "current_page")}
+                  className="flex items-center"
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Export Current Page
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    try {
+                      const allProducts = await fetchAllProducts();
+                      await exportToCSV(allProducts, "all");
+                    } catch (error) {
+                      console.error("Export failed:", error);
+                    }
+                  }}
+                  className="flex items-center"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export All Products
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => printProducts(products, false)}
+                  className="flex items-center"
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print Current Page
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => printProducts(products, true)}
+                  className="flex items-center"
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print All Products
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="flex items-center">

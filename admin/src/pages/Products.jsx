@@ -5,6 +5,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Download, FileDown, Printer } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -28,7 +35,17 @@ import AddProductForm from "@/components/AddProductForm";
 import axios from "axios";
 import { toast } from "react-toastify";
 import PendingProductsTable from "@/components/PendingProductsTable";
-import { Plus, Search, ChevronLeft, ChevronRight, AlertCircle, Eye, Pencil, Trash2, Star } from "lucide-react";
+import {
+  Plus,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Eye,
+  Pencil,
+  Trash2,
+  Star,
+} from "lucide-react";
 import ProductDetailDialog from "@/components/ProductDetailDialog";
 
 const ProductsPage = ({ token }) => {
@@ -200,6 +217,107 @@ const ProductsPage = ({ token }) => {
     setCurrentPage(1);
   }, [filteredProducts.length, itemsPerPage]);
 
+  // Add this utility function outside the component
+  const exportToCSV = (products, fileType) => {
+    // Define the fields to include in the CSV
+    const fields = [
+      "name",
+      "mainCategory",
+      "brand",
+      "model",
+      "category",
+      "type",
+      "price",
+      "discount",
+      "rating",
+      "reviews",
+      "inStock",
+      "availability",
+    ];
+
+    // Create CSV header
+    const header = fields.join(",") + "\n";
+
+    // Create CSV rows
+    const rows = products
+      .map((product) => {
+        return fields
+          .map((field) => {
+            let value = product[field];
+
+            // Handle special cases
+            if (field === "price") {
+              value = (product.price * (1 - product.discount)).toFixed(2);
+            } else if (field === "availability") {
+              value = product.availability ? "In Stock" : "Out of Stock";
+            } else if (typeof value === "string" && value.includes(",")) {
+              // Escape strings containing commas
+              value = `"${value}"`;
+            }
+
+            return value;
+          })
+          .join(",");
+      })
+      .join("\n");
+
+    // Combine header and rows
+    const csv = header + rows;
+
+    // Create blob and download
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `products_export_${new Date().toISOString().split("T")[0]}.${fileType}`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Add this utility function for printing
+  const printProducts = (products) => {
+    // Create a printable version of the data
+    const printContent = products
+      .map(
+        (product) => `
+    Name: ${product.name}
+    Category: ${product.mainCategory}
+    Brand/Model: ${product.brand} / ${product.model}
+    Price: ₹${(product.price * (1 - product.discount)).toFixed(2)}
+    Status: ${product.availability ? "In Stock" : "Out of Stock"}
+    Rating: ${product.rating} (${product.reviews} reviews)
+    ----------------------------------------
+  `
+      )
+      .join("\n");
+
+    // Create a new window for printing
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Products List</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+          pre { white-space: pre-wrap; }
+        </style>
+      </head>
+      <body>
+        <h1>Products List</h1>
+        <pre>${printContent}</pre>
+      </body>
+    </html>
+  `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   return (
     <div className="p-6">
       <Card className="w-full">
@@ -208,6 +326,24 @@ const ProductsPage = ({ token }) => {
             Products Management
           </CardTitle>
           <div className="flex space-x-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center">
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Export Data
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => exportToCSV(products, "csv")}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export as CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => printProducts(products)}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print List
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="flex items-center border rounded-md px-2">
               <Search className="h-4 w-4 text-gray-500" />
               <Input
@@ -329,7 +465,7 @@ const ProductsPage = ({ token }) => {
               {paginatedProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">
-                  <div>
+                    <div>
                       <div className="font-medium">{product.name}</div>
                       <div className="text-sm text-gray-500">
                         {product.mainCategory}
@@ -412,7 +548,6 @@ const ProductsPage = ({ token }) => {
                       </Button>
                     </div>
                   </TableCell>
-
                 </TableRow>
               ))}
             </TableBody>

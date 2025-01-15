@@ -53,6 +53,10 @@ const PRODUCT_TYPES = [
 	"Water Cooler cum Purifier",
 	"Water Dispenser",
 	"Display Counter",
+	"Back Bar Chiller",
+	"Upright Chiller",
+	"Food Prep Chiller",
+	"Ice Maker",
 ];
 
 const CATEGORIES = ["Installation", "Service", "Repair"];

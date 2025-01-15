@@ -14,7 +14,8 @@ import {
   getSellerProducts,
   editProduct,
   getSellerOrders,
-  uploadDocument
+  uploadDocument,
+  updateCommission,
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import { validateSellerRegistration } from "../middleware/sellerValidation.js";
@@ -31,6 +32,7 @@ router.post("/login", login);
 router.put("/approve/:id", adminAuth, approveSeller);
 router.put("/reject/:id", adminAuth, rejectSeller);
 router.get("/list", adminAuth, getSellers);
+router.put("/update-commision/:id", adminAuth, updateCommission);
 
 
 

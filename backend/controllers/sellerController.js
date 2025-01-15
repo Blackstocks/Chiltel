@@ -239,6 +239,50 @@ export const getSellers = async (req, res) => {
   }
 };
 
+export const updateCommission = async (req, res) => {
+  try {
+    const { commissionRate } = req.body;
+    const { sellerId } = req.params.id;
+
+    console.log("Updating commission rate:", commissionRate);
+    console.log("Seller ID:", sellerId);
+
+    // Validate commission rate
+    if (commissionRate < 0 || commissionRate > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Commission rate must be between 0 and 100"
+      });
+    }
+
+    // Find seller by ID
+    const seller = await Seller.findById(sellerId);
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found"
+      });
+    }
+
+    // Update commission rate
+    seller.commissionRate = commissionRate;
+    await seller.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Commission rate updated successfully",
+      data: seller
+    });
+  } catch (error) {
+    console.error("Error updating commission rate:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update commission rate",
+      error: error.message
+    });
+  }
+};
+
 export const verifyToken = async (req, res) => {
   try {
     // Find seller by ID from req.seller (set by auth middleware) and exclude password

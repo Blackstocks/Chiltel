@@ -11,6 +11,7 @@ import RiderManagement from './pages/Riders';
 import ServicesManagement from './pages/Services';
 import OrderManagement from './pages/Orders';
 import Sellers from './pages/Sellers';
+import SellerSupportTickets from './pages/SellerSupportTicket';
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 export const currency = '$';
@@ -44,6 +45,7 @@ const App = () => {
                   <Route path="/riders" element={<RiderManagement token={token} />} />
                   <Route path="/orders" element={<OrderManagement token={token} />} />
                   <Route path="/sellers" element={<Sellers token={token} />} />
+                  <Route path="/supportTickets" element={<SellerSupportTickets />} />
                 </Routes>
               </div>
             </main>
