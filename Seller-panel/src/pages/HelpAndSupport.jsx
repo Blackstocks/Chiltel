@@ -1,9 +1,16 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { toast } from "react-toastify";
 import {
   Accordion,
   AccordionContent,
@@ -25,18 +32,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  HelpCircle,
-  MailOpen,
-  MessageSquare,
-  Phone,
-  Search,
-  TicketCheck
-} from 'lucide-react';
+import { HelpCircle, Search, TicketCheck, Phone, MailOpen, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import axios from "axios";
 
 const HelpAndSupport = () => {
-  const [activeTab, setActiveTab] = useState('faq');
+  const [activeTab, setActiveTab] = useState("faq");
+  const [ticketData, setTicketData] = useState([]);
+  const [newTicket, setNewTicket] = useState({
+    subject: "",
+    description: "",
+    category: "",
+    priority: "low",
+  });
+  const [loading, setLoading] = useState(false);
 
   // Sample FAQ data
   const faqData = [
@@ -58,31 +67,76 @@ const HelpAndSupport = () => {
     }
   ];
 
-  // Sample ticket data
-  const ticketData = [
-    {
-      id: "TCK-001",
-      subject: "Payment Delay",
-      status: "open",
-      created: "2024-01-05",
-      lastUpdate: "2024-01-06"
-    },
-    {
-      id: "TCK-002",
-      subject: "Product Upload Issue",
-      status: "closed",
-      created: "2024-01-03",
-      lastUpdate: "2024-01-05"
+
+  // Fetch tickets on component mount
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const fetchTickets = async () => {
+    try {
+      const token = localStorage.getItem("token"); // Adjust based on where you store the token
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/tickets/mytickets`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("tickets: ",data);
+      const latestTickets = data.data; // Get only the latest 5 tickets
+      setTicketData(latestTickets);
+      toast.success("Tickets fetched successfully!"); // Optional success message
+    } catch (error) {
+      console.error("Error fetching tickets:", error.message);
+      toast.error("Failed to fetch tickets.");
     }
-  ];
+  };
+
+  const createTicket = async () => {
+    if (!newTicket.subject || !newTicket.description || !newTicket.category) {
+      toast.warn("Please fill in all required fields.");
+      return;
+    }
+    //newTicket.priority = "low"; // Set default priority
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token"); // Adjust based on your token storage
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/tickets/create`,
+        newTicket,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      //console.log("created ticket: ",data);
+      toast.success(data.message);
+      fetchTickets(); // Refresh the ticket list after creation
+      setNewTicket({
+        subject: "",
+        description: "",
+        category: "",
+        priority: "low",
+      });
+    } catch (error) {
+      //console.error("Error creating ticket:", error.message);
+      toast.error("Failed to create ticket. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusBadge = (status) => {
     const styles = {
       open: "bg-green-100 text-green-800 hover:bg-green-100",
       pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-      closed: "bg-gray-100 text-gray-800 hover:bg-gray-100"
+      closed: "bg-gray-100 text-gray-800 hover:bg-gray-100",
     };
-    
+
     return (
       <Badge className={styles[status]}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -99,7 +153,8 @@ const HelpAndSupport = () => {
             <CardTitle>Help & Support</CardTitle>
           </div>
           <CardDescription>
-            Get help with your store, create support tickets, and find answers to common questions
+            Get help with your store, create support tickets, and find answers
+            to common questions
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -160,18 +215,31 @@ const HelpAndSupport = () => {
 
           {/* Create Ticket Form */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Create Support Ticket</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Create Support Ticket
+            </h3>
             <Card>
               <CardContent className="p-6">
                 <div className="grid gap-4">
                   <div>
                     <Label htmlFor="subject">Subject</Label>
-                    <Input id="subject" placeholder="Brief description of your issue" />
+                    <Input
+                      id="subject"
+                      placeholder="Brief description of your issue"
+                      value={newTicket.subject}
+                      onChange={(e) =>
+                        setNewTicket({ ...newTicket, subject: e.target.value })
+                      }
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select>
+                    <Select
+                      onValueChange={(value) =>
+                        setNewTicket({ ...newTicket, category: value })
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -179,7 +247,9 @@ const HelpAndSupport = () => {
                         <SelectItem value="orders">Orders</SelectItem>
                         <SelectItem value="payments">Payments</SelectItem>
                         <SelectItem value="products">Products</SelectItem>
-                        <SelectItem value="technical">Technical Issue</SelectItem>
+                        <SelectItem value="technical">
+                          Technical Issue
+                        </SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
@@ -191,13 +261,20 @@ const HelpAndSupport = () => {
                       id="description"
                       placeholder="Provide detailed information about your issue"
                       className="h-32"
+                      value={newTicket.description}
+                      onChange={(e) =>
+                        setNewTicket({
+                          ...newTicket,
+                          description: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
                   <div className="flex justify-end">
-                    <Button>
+                    <Button onClick={createTicket} disabled={loading}>
                       <TicketCheck className="mr-2 h-4 w-4" />
-                      Submit Ticket
+                      {loading ? "Submitting..." : "Submit Ticket"}
                     </Button>
                   </div>
                 </div>
@@ -219,15 +296,32 @@ const HelpAndSupport = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {ticketData.map((ticket) => (
-                  <TableRow key={ticket.id}>
-                    <TableCell className="font-medium">{ticket.id}</TableCell>
-                    <TableCell>{ticket.subject}</TableCell>
-                    <TableCell>{getStatusBadge(ticket.status)}</TableCell>
-                    <TableCell>{ticket.created}</TableCell>
-                    <TableCell>{ticket.lastUpdate}</TableCell>
+                {ticketData.length ? (
+                  ticketData.map((ticket) => (
+                    <TableRow key={ticket._id}>
+                      <TableCell className="font-medium">
+                        {ticket._id}
+                      </TableCell>
+                      <TableCell>{ticket.subject}</TableCell>
+                      <TableCell>{getStatusBadge(ticket.status)}</TableCell>
+                      <TableCell>
+                        {new Date(ticket.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(ticket.updatedAt).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center text-gray-500"
+                    >
+                      No tickets available
+                    </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>

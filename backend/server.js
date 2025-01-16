@@ -16,6 +16,7 @@ import dashboardRouter from "./routes/dashboardRoute.js";
 import riderRouter from "./routes/riderRoute.js";
 import sellerRoutes from './routes/sellerRoutes.js';
 import referralRouter from "./routes/referralCodeRoute.js";
+import ticketRoutes from './routes/ticketRoute.js';
 
 // App Config
 const app = express();
@@ -42,6 +43,7 @@ app.use("/api/rider", riderRouter);
 app.use('/api/seller', sellerRoutes);
 
 app.use("/api/referralCode", adminAuth, referralRouter);
+app.use('/api/tickets', ticketRoutes);
 
 app.get("/", (req, res) => {
 	res.send("API Working");
