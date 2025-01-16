@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
+import ExportButtons from '../components/ServiceExportButton';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -372,6 +373,7 @@ const ServicesManagement = ({ token }) => {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">Services Management</CardTitle>
           <div className="flex space-x-4">
+            <ExportButtons data={filteredServices}/>
             <div className="flex items-center border rounded-md px-2">
               <Search className="h-4 w-4 text-gray-500" />
               <Input

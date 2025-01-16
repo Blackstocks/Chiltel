@@ -84,10 +84,10 @@ const HelpAndSupport = () => {
           },
         }
       );
-      console.log("tickets: ",data);
-      const latestTickets = data.data; // Get only the latest 5 tickets
+      //console.log("tickets: ",data);
+      const latestTickets = data.data.slice(0, 5); // Get only the latest 5 tickets
       setTicketData(latestTickets);
-      toast.success("Tickets fetched successfully!"); // Optional success message
+      //toast.success("Tickets fetched successfully!"); // Optional success message
     } catch (error) {
       console.error("Error fetching tickets:", error.message);
       toast.error("Failed to fetch tickets.");

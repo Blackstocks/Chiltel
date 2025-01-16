@@ -16,6 +16,7 @@ import { Search, Trash2, Loader2 } from "lucide-react";
 import { Star as StarIcon } from "lucide-react";
 import ReferralCodeDialog from "@/components/ReferralCodeDialog";
 import PendingRidersDialog from "@/components/PendingRidersTable";
+import ExportButtons from "../components/RiderExportButton";
 
 const RiderManagement = ({ token }) => {
   const [riders, setRiders] = useState([]);
@@ -140,6 +141,7 @@ const RiderManagement = ({ token }) => {
             Riders Management
           </CardTitle>
           <div className="flex space-x-4">
+            <ExportButtons data={filteredRiders} type="riders"/>
             <ReferralCodeDialog  token={token}/>
             <div className="flex items-center border rounded-md px-2">
               <Search className="h-4 w-4 text-gray-500" />

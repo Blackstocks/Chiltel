@@ -41,6 +41,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search } from "lucide-react";
 import RiderAssignmentCell from "../components/RiderAssignmentCell";
+import ExportButtons from "../components/OrderExportButtons";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -367,6 +368,7 @@ const OrderManagement = ({ token }) => {
                   <CardDescription>Manage all product orders</CardDescription>
                 </div>
                 <div className="flex gap-4">
+                  <ExportButtons data={currentOrders} type="orders" />
                   <div className="flex items-center border rounded-md px-2">
                     <Search className="h-4 w-4 text-gray-500" />
                     <Input
@@ -462,6 +464,7 @@ const OrderManagement = ({ token }) => {
                   <CardDescription>Manage all service requests</CardDescription>
                 </div>
                 <div className="flex items-end justify-between gap-4">
+                  <ExportButtons data={currentServices} type="services" />
                   <div className="flex items-center border rounded-md px-2">
                     <Search className="h-4 w-4 text-gray-500" />
                     <Input

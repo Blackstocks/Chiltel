@@ -58,6 +58,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SellerPayrollDialog from "@/components/SellerPayrollDialog";
+import ExportButtons from "../components/SellerExportButton";
 
 const SellerDetails = ({ seller, onClose }) => {
   if (!seller) return null;
@@ -435,6 +436,7 @@ const Sellers = ({ token }) => {
               Sellers Management
             </CardTitle>
             <div className="flex items-center gap-3">
+              <ExportButtons data={sellers}/>
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
