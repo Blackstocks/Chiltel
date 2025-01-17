@@ -17,7 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreVertical, User, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -35,13 +42,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search } from "lucide-react";
 import RiderAssignmentCell from "../components/RiderAssignmentCell";
 import ExportButtons from "../components/OrderExportButtons";
+import RiderLocationTracker from "../components/RiderLocationTracker";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -119,6 +124,17 @@ const OrderManagement = ({ token }) => {
   const [filterScheduledDate, setFilterScheduledDate] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [serviceStatusFilter, setServiceStatusFilter] = useState("all");
+
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+
+  const handleViewProfile = () => {
+    setIsProfileOpen(true);
+  };
+
+  const handleTrackLocation = () => {
+    setIsLocationOpen(true);
+  };
 
   // Reset pagination when search/filters change
   useEffect(() => {
@@ -364,15 +380,23 @@ const OrderManagement = ({ token }) => {
         <TabsContent value="orders">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+                {/* Title Section */}
                 <div>
                   <CardTitle>Product Orders</CardTitle>
                   <CardDescription>Manage all product orders</CardDescription>
                 </div>
-                <div className="flex gap-4">
-                  <ExportButtons data={currentOrders} type="orders" />
-                  <div className="flex items-center border rounded-md px-2">
-                    <Search className="h-4 w-4 text-gray-500" />
+
+                {/* Filters Section */}
+                <div className="flex flex-col space-y-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:space-y-0">
+                  {/* Export Button */}
+                  <div className="w-full sm:w-auto">
+                    <ExportButtons data={currentOrders} type="orders" />
+                  </div>
+
+                  {/* Search Input */}
+                  <div className="flex items-center border rounded-md px-2 w-full sm:w-auto sm:min-w-[200px]">
+                    <Search className="h-4 w-4 text-gray-500 flex-shrink-0" />
                     <Input
                       placeholder="Search orders..."
                       value={orderSearch}
@@ -381,32 +405,36 @@ const OrderManagement = ({ token }) => {
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  {/* Date Filter */}
+                  <div className="w-full sm:w-auto">
                     <Input
                       type="date"
                       value={filterOrderDate}
                       onChange={(e) => setFilterOrderDate(e.target.value)}
-                      className="w-40"
+                      className="w-full sm:w-40"
                       placeholder="Filter by date"
                     />
                   </div>
 
-                  <Select
-                    value={orderStatusFilter}
-                    onValueChange={setOrderStatusFilter}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      {ORDER_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {/* Status Filter */}
+                  <div className="w-full sm:w-auto">
+                    <Select
+                      value={orderStatusFilter}
+                      onValueChange={setOrderStatusFilter}
+                    >
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        {ORDER_STATUSES.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -468,15 +496,23 @@ const OrderManagement = ({ token }) => {
         <TabsContent value="services">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
+              <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+                {/* Title Section */}
+                <div className="mb-4 lg:mb-0">
                   <CardTitle>Service Requests</CardTitle>
                   <CardDescription>Manage all service requests</CardDescription>
                 </div>
-                <div className="flex items-end justify-between gap-4">
-                  <ExportButtons data={currentServices} type="services" />
-                  <div className="flex items-center border rounded-md px-2">
-                    <Search className="h-4 w-4 text-gray-500" />
+
+                {/* Filters Section */}
+                <div className="flex flex-col space-y-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-3 sm:space-y-0">
+                  {/* Export Button */}
+                  <div className="w-full sm:w-auto">
+                    <ExportButtons data={currentServices} type="services" />
+                  </div>
+
+                  {/* Search Input */}
+                  <div className="flex items-center border rounded-md px-2 w-full sm:w-auto sm:min-w-[200px]">
+                    <Search className="h-4 w-4 text-gray-500 flex-shrink-0" />
                     <Input
                       placeholder="Search services..."
                       value={serviceSearch}
@@ -485,7 +521,8 @@ const OrderManagement = ({ token }) => {
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  {/* Date Filters */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full sm:w-auto">
                     <div className="flex flex-col">
                       <span className="text-xs text-gray-500">
                         Requested On
@@ -494,7 +531,7 @@ const OrderManagement = ({ token }) => {
                         type="date"
                         value={filterRequestedDate}
                         onChange={(e) => setFilterRequestedDate(e.target.value)}
-                        className="w-40"
+                        className="w-full sm:w-40"
                       />
                     </div>
                     <div className="flex flex-col">
@@ -505,27 +542,30 @@ const OrderManagement = ({ token }) => {
                         type="date"
                         value={filterScheduledDate}
                         onChange={(e) => setFilterScheduledDate(e.target.value)}
-                        className="w-40"
+                        className="w-full sm:w-40"
                       />
                     </div>
                   </div>
 
-                  <Select
-                    value={serviceStatusFilter}
-                    onValueChange={setServiceStatusFilter}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      {SERVICE_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {/* Status Filter */}
+                  <div className="w-full sm:w-auto">
+                    <Select
+                      value={serviceStatusFilter}
+                      onValueChange={setServiceStatusFilter}
+                    >
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        {SERVICE_STATUSES.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -615,7 +655,58 @@ const OrderManagement = ({ token }) => {
                         </TableCell>
 
                         <TableCell>
-                          <ServiceDetailsDialog service={service} />
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <ServiceDetailsDialog service={service} />
+                              <DropdownMenuItem
+                                onClick={handleTrackLocation}
+                                className="cursor-pointer"
+                              >
+                                <MapPin className="mr-2 h-4 w-4" />
+                                <span>Track Location</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+
+                          {/* Profile Details Dialog */}
+                          <Dialog
+                            open={isProfileOpen}
+                            onOpenChange={setIsProfileOpen}
+                          >
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Profile Details</DialogTitle>
+                              </DialogHeader>
+                              {/* Add your profile details content here */}
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Location Tracking Dialog */}
+                          <Dialog
+                            open={isLocationOpen}
+                            onOpenChange={setIsLocationOpen}
+                          >
+                            <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Location Tracking</DialogTitle>
+                              </DialogHeader>
+                              {service && (
+                                <RiderLocationTracker
+                                  riderId={service.rider?._id}
+                                  riderName={`${service.rider?.firstName} ${service.rider?.lastName}`}
+                                  phoneNumber={service.rider?.phoneNumber}
+                                  serviceId={service._id}
+                                  customerAddress={service.address}
+                                  startTime={service.startTime}
+                                />
+                              )}
+                            </DialogContent>
+                          </Dialog>
                         </TableCell>
                       </TableRow>
                     ))}

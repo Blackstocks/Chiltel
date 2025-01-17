@@ -9,19 +9,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Trash2, Loader2 } from "lucide-react";
+import { Search, Trash2, Loader2, CalendarCheck, MoreVertical } from "lucide-react";
 import { Star as StarIcon } from "lucide-react";
 import ReferralCodeDialog from "@/components/ReferralCodeDialog";
 import PendingRidersDialog from "@/components/PendingRidersTable";
 import ExportButtons from "../components/RiderExportButton";
+import RiderAttendance from "@/components/RiderAttendance";
 
 const RiderManagement = ({ token }) => {
   const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRider, setSelectedRider] = useState(null);
+  const [isAttendanceOpen, setIsAttendanceOpen] = useState(false);
+
+
+   // Handle view attendance details
+   const handleViewAttendance = (rider) => {
+    setSelectedRider(rider);
+    setIsAttendanceOpen(true);
+  };
 
   // Fetch riders
   const fetchriders = async () => {
@@ -225,15 +247,31 @@ const RiderManagement = ({ token }) => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteRider(rider._id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleViewAttendance(rider)}
+                            className="cursor-pointer"
+                          >
+                            <CalendarCheck className="mr-2 h-4 w-4" />
+                            <span>Attendance details</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteRider(rider._id)}
+                            className="cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <span>Delete Rider</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      
                     </TableCell>
                   </TableRow>
                 ))}
@@ -242,7 +280,27 @@ const RiderManagement = ({ token }) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Attendance Dialog */}
+      <Dialog open={isAttendanceOpen} onOpenChange={setIsAttendanceOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Attendance Record - {selectedRider ? `${selectedRider.firstName} ${selectedRider.lastName}` : ''}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedRider && (
+            <RiderAttendance 
+              riderId={selectedRider._id}
+              riderName={`${selectedRider.firstName} ${selectedRider.lastName}`}
+              phoneNumber={selectedRider.phoneNumber}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
+
+    
   );
 };
 
