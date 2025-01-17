@@ -68,6 +68,15 @@ riderRouter.post(
 	verifyRider,
 	riderController.startService
 );
+
+riderRouter.post(
+	"/location/update",
+	verifyRider,
+	riderController.trackLocation
+);
+
+riderRouter.post("/verify/bank", riderController.verifyBankDetails);
+riderRouter.post("/verify/court", riderController.verifyCourtCase);
 riderRouter.post(
 	"/services/:id/start-working",
 	verifyRider,

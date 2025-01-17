@@ -56,14 +56,20 @@ const Partner = () => {
           }
 
           .logo-image {
-            width: 120px; /* Adjust as needed */
-            height: 120px; /* Adjust as needed */
-            margin: 0 20px; /* Spacing between images */
+            width: 100px; /* Adjust for responsiveness */
+            height: auto; /* Maintain aspect ratio */
+            margin: 0 15px; /* Spacing between images */
             object-fit: contain;
           }
 
           .lower-marquee {
             margin-top: 1rem; /* Spacing between the two marquees */
+          }
+
+          @media (min-width: 768px) {
+            .logo-image {
+              width: 120px; /* Larger logos for bigger screens */
+            }
           }
         `}
       </style>
@@ -81,13 +87,14 @@ const Partner = () => {
       {/* Upper row - scrolling from right to left */}
       <div className="marquee">
         <div className="marquee-content">
-          {/* Duplicate the logos for seamless scrolling in upper marquee */}
+          {/* Duplicate the logos for seamless scrolling */}
           {[...partnerLogos, ...partnerLogos].map((logo, index) => (
             <img
-              key={index}
+              key={`upper-${index}`}
               src={logo.src}
               alt={`${logo.name} logo`}
               className="inline-block logo-image"
+              aria-label={logo.name}
             />
           ))}
         </div>
@@ -96,13 +103,14 @@ const Partner = () => {
       {/* Lower row - scrolling from left to right */}
       <div className="lower-marquee marquee">
         <div className="marquee-content-reverse">
-          {/* Duplicate the logos for seamless scrolling in lower marquee */}
+          {/* Duplicate the logos for seamless scrolling */}
           {[...partnerLogos, ...partnerLogos].map((logo, index) => (
             <img
-              key={index + partnerLogos.length} // Ensure unique key for each logo
+              key={`lower-${index}`}
               src={logo.src}
               alt={`${logo.name} logo`}
               className="inline-block logo-image"
+              aria-label={logo.name}
             />
           ))}
         </div>

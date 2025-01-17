@@ -11,6 +11,7 @@ import CartContext from '../context/CartContext'
 const PlaceOrder = ({buyNowProduct=null}) => {
 
     const [method, setMethod] = useState('cod');
+    const [orderProcessing, setOrderProcessing] = useState(false);
     const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
     const { cart, cartId, fetchCart } = useContext(CartContext);
     const { user } = useContext(AuthContext);
@@ -21,14 +22,40 @@ const PlaceOrder = ({buyNowProduct=null}) => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
-        email: '',
+        email: user.email,
         street: '',
         city: '',
         state: '',
         zipcode: '',
-        country: '',
+        country: 'India',
         phone: ''
     })
+
+    const fetchStateByPincode = async (pincode) => {
+        try {
+          const response = await fetch(
+            `https://api.postalpincode.in/pincode/${pincode}`
+          );
+          const data = await response.json();
+          if (data[0].Status === "Success") {
+            return data[0].PostOffice[0].State; // Get the state
+          }
+          return null;
+        } catch (error) {
+          console.error("Error fetching state:", error);
+          return null;
+        }
+      };
+    
+      const handleZipCodeChange = async (e) => {
+        const zipcode = e.target.value;
+        setFormData(data => ({ ...data, zipcode }))
+    
+        if (zipcode.length === 6) {
+            const state = await fetchStateByPincode(zipcode);
+            setFormData(data => ({ ...data, state }))
+        }
+      };
 
     const onChangeHandler = (event) => {
         const name = event.target.name
@@ -48,6 +75,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
             receipt: order.receipt,
             handler: async (response) => {
                 console.log('init pay: ', response)
+                setOrderProcessing(false);
                 response.cart = true;
                 response.cartId = cartId;
                 try {
@@ -66,6 +94,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
             },
             modal: {
                 ondismiss: async () => {
+                    setOrderProcessing(false);
                     console.log('Payment window was closed by the user.');
                     toast.error('Payment window closed. Cancelling the order...');
     
@@ -107,6 +136,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
     }
 
     const onSubmitHandler = async (event) => {
+        setOrderProcessing(true);
         event.preventDefault()
         try {
 
@@ -180,6 +210,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     if (responseRazorpay.data.success) {
                         console.log('razorpay init success');
                         console.log('razorpay response: ', responseRazorpay.data);
+                        setOrderProcessing(false);
                         initPay(responseRazorpay.data.order, responseRazorpay.data.newOrder)
                     }
 
@@ -214,11 +245,11 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                 <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Street' />
                 <div className='flex gap-3'>
                     <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='City' />
-                    <input onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
+                    <input required onChange={handleZipCodeChange} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Zipcode' />
                 </div>
                 <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Zipcode' />
-                    <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
+                    <input disabled onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
+                    <input disabled  onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
                 </div>
                 <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone' />
             </div>
@@ -249,7 +280,22 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     </div>
 
                     <div className='w-full text-end mt-8'>
-                        <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
+                        <button 
+                            type='submit' 
+                            // className='bg-black text-white px-16 py-3 text-sm'
+                            className={`bg-black text-white px-16 py-3 text-sm ${
+                                orderProcessing ? 'opacity-70 cursor-not-allowed' : 'hover:bg-green-600'
+                            }`}
+                        >
+                            {orderProcessing ? (
+                                <>
+                                    Processing
+                                    <span className="loader inline-block ml-2 w-4 h-4 border-2 border-t-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                </>
+                            ) : (
+                                'PLACE ORDER'
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
