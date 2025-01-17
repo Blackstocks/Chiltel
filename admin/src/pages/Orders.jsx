@@ -89,7 +89,9 @@ const calculateTotalAmount = (service) => {
 
   // Sum of additional work prices
   const additionalWorkTotal =
-    service.addedWorks?.reduce((sum, work) => sum + (work.price || 0), 0) || 0;
+    service?.addedWorks
+      ?.filter((work) => work.approved === true)
+      .reduce((sum, work) => sum + (work.price || 0), 0) || 0;
 
   return basePrice + additionalWorkTotal;
 };
@@ -430,7 +432,15 @@ const OrderManagement = ({ token }) => {
                           {order.userId.email}
                         </div>
                       </TableCell>
-                      <TableCell>₹{order.totalAmount}</TableCell>
+                      <TableCell>
+                        ₹
+                        {order.products
+                          .reduce(
+                            (sum, item) => sum + item.price * item.quantity,
+                            0
+                          )
+                          .toFixed(2)}
+                      </TableCell>
                       <TableCell>
                         <Badge className={getStatusBadgeColor(order.status)}>
                           {order.status}
@@ -567,10 +577,12 @@ const OrderManagement = ({ token }) => {
                                   Base: ₹{service.service?.price || 0}
                                   <br />
                                   Additional: ₹
-                                  {service.addedWorks.reduce(
-                                    (sum, work) => sum + (work.price || 0),
-                                    0
-                                  )}
+                                  {service.addedWorks
+                                    .filter((work) => work.approved == true)
+                                    .reduce(
+                                      (sum, work) => sum + (work.price || 0),
+                                      0
+                                    )}
                                 </div>
                               )}
                           </div>
@@ -590,132 +602,16 @@ const OrderManagement = ({ token }) => {
                           {new Date(service.scheduledFor).toLocaleDateString()}
                         </TableCell>
 
-                        {/*<TableCell>
-                          <div className="space-y-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  {service.assignedRider
-                                    ? "Reassign Rider"
-                                    : "Assign Rider"}
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-md">
-                                <DialogHeader>
-                                  <DialogTitle>
-                                    {service.assignedRider
-                                      ? "Reassign Rider"
-                                      : "Assign Rider"}
-                                  </DialogTitle>
-                                </DialogHeader>
-                                <ScrollArea className="max-h-[400px] pr-4">
-                                  <div className="space-y-2">
-                                    {Array.isArray(riders) &&
-                                    riders.filter(
-                                      (rider) =>
-                                        service.service &&
-                                        rider.specializations.includes(
-                                          service.service.product
-                                        )
-                                    ).length > 0 ? (
-                                      riders
-                                        .filter(
-                                          (rider) =>
-                                            service.service &&
-                                            rider.specializations.includes(
-                                              service.service.product
-                                            )
-                                        )
-                                        .map((rider) => (
-                                          <Card
-                                            key={rider._id}
-                                            className={`cursor-pointer hover:bg-accent transition-colors ${
-                                              service.assignedRider ===
-                                              rider._id
-                                                ? "border-primary"
-                                                : ""
-                                            }`}
-                                            onClick={() => {
-                                              handleRiderAssignment(
-                                                service._id,
-                                                rider._id
-                                              );
-                                            }}
-                                          >
-                                            <CardContent className="p-4">
-                                              <div className="flex items-center justify-between">
-                                                <div>
-                                                  <p className="font-medium">
-                                                    {`${rider.firstName} ${rider.lastName}`}
-                                                  </p>
-                                                  <p className="text-sm text-muted-foreground">
-                                                    <div className="flex flex-wrap gap-1">
-                                                      {rider.specializations.map(
-                                                        (spec, index) => (
-                                                          <span
-                                                            key={index}
-                                                            className={`text-xs px-2 py-0.5 rounded-full ${
-                                                              spec ===
-                                                              service.service
-                                                                .product
-                                                                ? "bg-primary/10 text-primary"
-                                                                : "bg-secondary/50 text-secondary-foreground"
-                                                            }`}
-                                                          >
-                                                            {spec}
-                                                          </span>
-                                                        )
-                                                      )}
-                                                    </div>
-                                                  </p>
-                                                </div>
-                                                <div className="text-sm">
-                                                  {rider?.rating?.average?.toFixed(
-                                                    1
-                                                  ) || "0.0"}
-                                                  ★
-                                                </div>
-                                              </div>
-                                            </CardContent>
-                                          </Card>
-                                        ))
-                                    ) : (
-                                      <p>
-                                        No rider with the specialization found
-                                      </p>
-                                    )}
-                                  </div>
-                                </ScrollArea>
-                              </DialogContent>
-                            </Dialog>
-
-                            {service.assignedRider && (
-                              <Badge variant="outline">
-                                Currently Assigned:{" "}
-                                {riders.find(
-                                  (r) => r._id === service.assignedRider
-                                )
-                                  ? `${
-                                      riders.find(
-                                        (r) => r._id === service.assignedRider
-                                      ).firstName
-                                    } ${
-                                      riders.find(
-                                        (r) => r._id === service.assignedRider
-                                      ).lastName
-                                    }`
-                                  : ""}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>*/}
-
                         <TableCell>
-                          <RiderAssignmentCell
-                            service={service}
-                            riders={riders}
-                            handleRiderAssignment={handleRiderAssignment}
-                          />
+                          {service.rider ? (
+                            service.rider._id
+                          ) : (
+                            <RiderAssignmentCell
+                              service={service}
+                              riders={riders}
+                              handleRiderAssignment={handleRiderAssignment}
+                            />
+                          )}
                         </TableCell>
 
                         <TableCell>

@@ -532,117 +532,14 @@ export const getSellerProducts = async (req, res) => {
   try {
     const sellerId = req.seller.id;
 
-    // Pagination parameters
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    // Search and filter parameters
-    const {
-      search,
-      mainCategory,
-      type,
-      category,
-      requestedStatus,
-      minPrice,
-      maxPrice,
-      inStock,
-      sortBy,
-      sortOrder = 'desc'
-    } = req.query;
-
-    // Build query
-    const query = { seller: sellerId };
-
-    // Search functionality (search in name, brand, model)
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { brand: { $regex: search, $options: 'i' } },
-        { model: { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    // Category filters
-    if (mainCategory) query.mainCategory = mainCategory;
-    if (type) query.type = type;
-    if (category) query.category = category;
-    if (requestedStatus) query.requestedStatus = requestedStatus;
-
-    // Price range filter
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      query.price = {};
-      if (minPrice !== undefined) query.price.$gte = parseFloat(minPrice);
-      if (maxPrice !== undefined) query.price.$lte = parseFloat(maxPrice);
-    }
-
-    // Stock filter
-    if (inStock === 'true') {
-      query.inStock = { $gt: 0 };
-    } else if (inStock === 'false') {
-      query.inStock = 0;
-    }
-
-    // Sorting
-    let sortOptions = { createdAt: -1 }; // default sort
-    if (sortBy) {
-      sortOptions = {
-        [sortBy]: sortOrder === 'asc' ? 1 : -1
-      };
-    }
-
-    // Execute query with pagination
-    const products = await Product.find(query)
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(limit);
-
-    // Get total count for pagination
-    const total = await Product.countDocuments(query);
-
-    // Calculate pagination info
-    const totalPages = Math.ceil(total / limit);
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
-
-    // Get unique values for filters
-    const aggregateFilters = await Product.aggregate([
-      { $match: { seller: sellerId } },
-      {
-        $group: {
-          _id: null,
-          mainCategories: { $addToSet: '$mainCategory' },
-          types: { $addToSet: '$type' },
-          categories: { $addToSet: '$category' },
-          minPrice: { $min: '$price' },
-          maxPrice: { $max: '$price' }
-        }
-      }
-    ]);
-
-    const filters = aggregateFilters[0] || {};
+    // Get all products for the seller
+    const products = await Product.find({ seller: sellerId })
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
       data: {
-        products,
-        pagination: {
-          currentPage: page,
-          totalPages,
-          totalItems: total,
-          hasNextPage,
-          hasPrevPage,
-          limit
-        },
-        filters: {
-          mainCategories: filters.mainCategories || [],
-          types: filters.types || [],
-          categories: filters.categories || [],
-          priceRange: {
-            min: filters.minPrice || 0,
-            max: filters.maxPrice || 0
-          }
-        }
+        products
       }
     });
 

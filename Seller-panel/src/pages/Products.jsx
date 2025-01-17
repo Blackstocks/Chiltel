@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import React from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -6,14 +7,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { FileDown, Download, Printer, FileSpreadsheet } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -51,326 +45,101 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Edit, Trash2, Plus, FilterX } from "lucide-react";
 import AddProductForm from "@/components/AddProductForm";
+import { toast } from "react-toastify";
+import ProductExport from "@/components/ProductExportButton";
 
-// Add these utility functions outside your component
-const exportToCSV = async (products, exportType = "filtered") => {
-  try {
-    // Define fields to export
-    const fields = [
-      { key: "name", label: "Product Name" },
-      { key: "mainCategory", label: "Main Category" },
-      { key: "brand", label: "Brand" },
-      { key: "model", label: "Model" },
-      { key: "category", label: "Category" },
-      { key: "type", label: "Type" },
-      { key: "price", label: "Price" },
-      { key: "discount", label: "Discount" },
-      { key: "inStock", label: "Stock" },
-      { key: "requestedStatus", label: "Status" },
-    ];
-
-    // Create CSV header
-    const header = fields.map((field) => field.label).join(",") + "\n";
-
-    // Create CSV rows
-    const rows = products
-      .map((product) => {
-        return fields
-          .map((field) => {
-            let value = product[field.key];
-
-            // Handle special cases
-            if (field.key === "price") {
-              value = (product.price * (1 - product.discount)).toFixed(2);
-            } else if (field.key === "discount") {
-              value = `${(product.discount * 100).toFixed(2)}%`;
-            } else if (field.key === "requestedStatus") {
-              value = value.charAt(0).toUpperCase() + value.slice(1);
-            }
-
-            // Handle values containing commas
-            if (typeof value === "string" && value.includes(",")) {
-              value = `"${value}"`;
-            }
-
-            return value;
-          })
-          .join(",");
-      })
-      .join("\n");
-
-    // Combine header and rows
-    const csv = header + rows;
-
-    // Create and download file
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `products_${exportType}_${new Date().toISOString().split("T")[0]}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (error) {
-    console.error("Error exporting CSV:", error);
-    throw error;
-  }
-};
-
-
-
-// Updated printProducts function with loading indicator
-const printProducts = async (products, printAll = false) => {
-  try {
-    let productsToprint = products;
-
-    if (printAll) {
-      // Show loading indicator in print window
-      const loadingWindow = window.open("", "_blank");
-      loadingWindow.document.write(`
-        <html>
-          <head>
-            <title>Loading Products...</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
-              .loader { 
-                border: 4px solid #f3f3f3;
-                border-top: 4px solid #3498db;
-                border-radius: 50%;
-                width: 40px;
-                height: 40px;
-                animation: spin 1s linear infinite;
-                margin: 20px auto;
-              }
-              @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-              }
-            </style>
-          </head>
-          <body>
-            <h2>Loading all products...</h2>
-            <div class="loader"></div>
-            <p>Please wait while we prepare your document...</p>
-          </body>
-        </html>
-      `);
-
-      // Fetch all products
-      productsToprint = await fetchAllProducts();
-      loadingWindow.close();
-    }
-
-    const printWindow = window.open("", "_blank");
-    const content = `
-      <html>
-        <head>
-          <title>Products List</title>
-          <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              padding: 20px; 
-              max-width: 1200px; 
-              margin: 0 auto; 
-            }
-            table { 
-              width: 100%; 
-              border-collapse: collapse; 
-              margin-top: 20px;
-              page-break-inside: auto;
-            }
-            tr { 
-              page-break-inside: avoid; 
-              page-break-after: auto;
-            }
-            th, td { 
-              border: 1px solid #ddd; 
-              padding: 8px; 
-              text-align: left; 
-            }
-            th { 
-              background-color: #f5f5f5; 
-              font-weight: bold;
-            }
-            .status { 
-              padding: 4px 8px; 
-              border-radius: 4px; 
-              display: inline-block;
-            }
-            .status-pending { background-color: #fff7ed; color: #9a3412; }
-            .status-approved { background-color: #f0fdf4; color: #166534; }
-            .status-rejected { background-color: #fef2f2; color: #991b1b; }
-            .header { 
-              display: flex; 
-              justify-content: space-between; 
-              align-items: center;
-              margin-bottom: 20px;
-              padding-bottom: 20px;
-              border-bottom: 2px solid #eee;
-            }
-            .product-image {
-              width: 50px;
-              height: 50px;
-              object-fit: cover;
-              border-radius: 4px;
-            }
-            .price-cell {
-              white-space: nowrap;
-            }
-            .discount {
-              color: #16a34a;
-              font-size: 0.875rem;
-            }
-            @media print {
-              body { -webkit-print-color-adjust: exact; }
-              thead { display: table-header-group; }
-              tfoot { display: table-footer-group; }
-              button { display: none; }
-              .no-break { page-break-inside: avoid; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div>
-              <h1 style="margin: 0;">Products List</h1>
-              <p style="color: #666; margin: 5px 0;">
-                ${printAll ? "All Products" : "Current Page Products"} - 
-                Generated on ${new Date().toLocaleString()}
-              </p>
-            </div>
-            <div style="text-align: right;">
-              <p>Total Products: ${productsToprint.length}</p>
-            </div>
-          </div>
-
-          <table>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Brand/Model</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${productsToprint
-                .map(
-                  (product) => `
-                <tr class="no-break">
-                  <td>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                      <img src="${product.thumbnail}" alt="${
-                    product.name
-                  }" class="product-image"/>
-                      <span>${product.name}</span>
-                    </div>
-                  </td>
-                  <td>${product.mainCategory}</td>
-                  <td>
-                    <div>${product.brand}</div>
-                    <div style="color: #666; font-size: 0.875rem;">${
-                      product.model
-                    }</div>
-                  </td>
-                  <td class="price-cell">
-                    ₹${(product.price * (1 - product.discount)).toFixed(2)}
-                    ${
-                      product.discount > 0
-                        ? `<div class="discount">-${(
-                            product.discount * 100
-                          ).toFixed(2)}% off</div>`
-                        : ""
-                    }
-                  </td>
-                  <td>${product.inStock}</td>
-                  <td>
-                    <span class="status status-${product.requestedStatus.toLowerCase()}">
-                      ${
-                        product.requestedStatus.charAt(0).toUpperCase() +
-                        product.requestedStatus.slice(1)
-                      }
-                    </span>
-                  </td>
-                </tr>
-              `
-                )
-                .join("")}
-            </tbody>
-          </table>
-          
-          <div style="margin-top: 20px; text-align: center;">
-            <button onclick="window.print()" style="padding: 10px 20px; margin: 20px;">
-              Print Document
-            </button>
-          </div>
-        </body>
-      </html>
-    `;
-
-    printWindow.document.write(content);
-    printWindow.document.close();
-  } catch (error) {
-    console.error("Error printing products:", error);
-    alert("Failed to prepare print document. Please try again.");
-  }
-};
-
-
+const ITEMS_PER_PAGE = 5;
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filters, setFilters] = useState({});
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  // Pagination state
+  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [limit] = useState(5);
 
-  // Filter states
+  // Filter and Sort states
   const [searchTerm, setSearchTerm] = useState("");
-  const [mainCategory, setMainCategory] = useState("all");
-  const [type, setType] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  //const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = [...products];
+
+    // Filter by search term
+    if (searchTerm) {
+      result = result.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.model.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      result = result.filter(
+        (product) => product.requestedStatus === statusFilter
+      );
+    }
+
+    // Sort products
+    result.sort((a, b) => {
+      if (sortBy === "price") {
+        const priceA = a.price * (1 - a.discount);
+        const priceB = b.price * (1 - b.discount);
+        return sortOrder === "asc" ? priceA - priceB : priceB - priceA;
+      }
+      if (sortBy === "name") {
+        return sortOrder === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      }
+      // Default sort by createdAt
+      return sortOrder === "asc"
+        ? new Date(a.createdAt) - new Date(b.createdAt)
+        : new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    return result;
+  }, [products, searchTerm, statusFilter, sortBy, sortOrder]);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE));
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [filteredAndSortedProducts.length]);
+
+  // Update paginated data calculation
+  const currentProducts = useMemo(() => {
+    const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+    return filteredAndSortedProducts.slice(indexOfFirstItem, indexOfLastItem);
+  }, [filteredAndSortedProducts, currentPage]);
+
+  // Reset filters function
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setSortBy("createdAt");
+    setSortOrder("desc");
+    setCurrentPage(1);
+  };
 
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, searchTerm, mainCategory, type, status, sortBy, sortOrder]);
+  }, []);
+
+  // Updated fetch function with toast notifications
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const queryParams = new URLSearchParams({
-        page: currentPage,
-        limit,
-        ...(searchTerm && { search: searchTerm }),
-        ...(mainCategory !== "all" && { mainCategory }),
-        ...(type !== "all" && { type }),
-        ...(status !== "all" && { requestedStatus: status }),
-        ...(priceRange.min && { minPrice: priceRange.min }),
-        ...(priceRange.max && { maxPrice: priceRange.max }),
-        sortBy,
-        sortOrder,
-      });
-
       const response = await fetch(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/api/seller/getSellerProducts?${queryParams}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/seller/getSellerProducts`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -378,26 +147,67 @@ const Products = () => {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to fetch products");
+        toast.error(data.message || "Failed to fetch products");
+        return;
       }
 
-      const data = await response.json();
+      if (!Array.isArray(data.data.products)) {
+        toast.error("Invalid products data received");
+        return;
+      }
+
       setProducts(data.data.products);
-      console.log(data.data.products);
-      setTotalPages(data.data.pagination.totalPages);
-      setFilters(data.data.filters);
+      setTotalPages(Math.ceil(data.data.products.length / ITEMS_PER_PAGE));
     } catch (err) {
-      setError(err.message);
+      toast.error("Error fetching products");
+      console.error("Fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Updated delete function with toast notifications
   const handleDelete = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) {
-      return;
-    }
+    const confirmDelete = () => {
+      return new Promise((resolve) => {
+        toast.info(
+          ({ closeToast }) => (
+            <div>
+              <p>Are you sure you want to delete this product?</p>
+              <div className="mt-2 flex justify-end gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    closeToast();
+                    resolve(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => {
+                    closeToast();
+                    resolve(true);
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          ),
+          { autoClose: false }
+        );
+      });
+    };
+
+    const confirmed = await confirmDelete();
+    if (!confirmed) return;
 
     try {
       const response = await fetch(
@@ -412,31 +222,35 @@ const Products = () => {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to delete product");
+        toast.error(data.message || "Failed to delete product");
+        return;
       }
 
-      fetchProducts();
+      setProducts(products.filter((product) => product._id !== productId));
+      toast.success("Product deleted successfully");
     } catch (err) {
-      setError(err.message);
+      toast.error("Error deleting product");
+      console.error("Delete error:", err);
     }
   };
 
+  // Updated add product handler
   const handleAddProduct = async (newProduct) => {
-    await fetchProducts();
-    setProducts([...products, { ...newProduct, id: products.length + 1 }]);
-    setIsAddDialogOpen(false);
+    try {
+      await fetchProducts();
+      setIsAddDialogOpen(false);
+      toast.success("Product added successfully");
+    } catch (error) {
+      toast.error("Failed to add product");
+      console.error("Add product error:", error);
+    }
   };
 
-  const resetFilters = () => {
-    setSearchTerm("");
-    setMainCategory("all");
-    setType("all");
-    setStatus("all");
-    setPriceRange({ min: "", max: "" });
-    setSortBy("createdAt");
-    setSortOrder("desc");
-    setCurrentPage(1);
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   const statusColors = {
@@ -449,70 +263,22 @@ const Products = () => {
     <div className="container mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>My Products</CardTitle>
-              <CardDescription>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 w-full">
+            <div className="w-full sm:w-auto">
+              <CardTitle className="text-xl sm:text-2xl">My Products</CardTitle>
+              <CardDescription className="mt-1 text-sm sm:text-base">
                 Manage and track your product listings
               </CardDescription>
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <FileDown className="h-4 w-4" />
-                  Export
-                </Button>
-              </DropdownMenuTrigger>
-              {/* Replace the existing DropdownMenuContent with this updated version */}
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => exportToCSV(products, "current_page")}
-                  className="flex items-center"
-                >
-                  <FileSpreadsheet className="h-4 w-4 mr-2" />
-                  Export Current Page
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={async () => {
-                    try {
-                      const allProducts = await fetchAllProducts();
-                      await exportToCSV(allProducts, "all");
-                    } catch (error) {
-                      console.error("Export failed:", error);
-                    }
-                  }}
-                  className="flex items-center"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export All Products
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => printProducts(products, false)}
-                  className="flex items-center"
-                >
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print Current Page
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => printProducts(products, true)}
-                  className="flex items-center"
-                >
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print All Products
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="flex items-center">
+                <Button className="w-full sm:w-auto flex items-center justify-center">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Product
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
                 <DialogHeader>
                   <DialogTitle>Add New Product</DialogTitle>
                 </DialogHeader>
@@ -533,8 +299,8 @@ const Products = () => {
 
           <div className="space-y-4">
             {/* Search and Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="relative">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="relative w-full md:w-72">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
                 <Input
                   placeholder="Search products..."
@@ -544,51 +310,22 @@ const Products = () => {
                 />
               </div>
 
-              <Select value={mainCategory} onValueChange={setMainCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Main Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {filters.mainCategories?.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <ProductExport data={filteredAndSortedProducts} />
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <Select value={type} onValueChange={setType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  {filters.types?.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div className="flex gap-4">
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-40">
                     <SelectValue placeholder="Sort By" />
                   </SelectTrigger>
                   <SelectContent>
@@ -599,7 +336,7 @@ const Products = () => {
                 </Select>
 
                 <Select value={sortOrder} onValueChange={setSortOrder}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-full sm:w-32">
                     <SelectValue placeholder="Order" />
                   </SelectTrigger>
                   <SelectContent>
@@ -607,16 +344,16 @@ const Products = () => {
                     <SelectItem value="desc">Descending</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
 
-              <Button
-                variant="outline"
-                onClick={resetFilters}
-                className="gap-2"
-              >
-                <FilterX className="h-4 w-4" />
-                Reset Filters
-              </Button>
+                <Button
+                  variant="outline"
+                  onClick={resetFilters}
+                  className="w-full sm:w-auto gap-2"
+                >
+                  <FilterX className="h-4 w-4" />
+                  Reset
+                </Button>
+              </div>
             </div>
 
             {/* Products Table */}
@@ -640,7 +377,7 @@ const Products = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {products.length === 0 ? (
+                    {currentProducts.length === 0 ? (
                       <TableRow>
                         <TableCell
                           colSpan={6}
@@ -650,7 +387,7 @@ const Products = () => {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      products.map((product) => (
+                      currentProducts.map((product) => (
                         <TableRow key={product._id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
@@ -751,63 +488,109 @@ const Products = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                    />
-                  </PaginationItem>
+              <div className="flex items-center justify-center mt-4">
+                <Pagination>
+                  <PaginationContent className="flex flex-wrap justify-center gap-1 md:gap-0">
+                    {/* Previous Button */}
+                    <PaginationItem>
+                      <PaginationPrevious
+                        className={`${
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        } hidden sm:flex`}
+                        onClick={() =>
+                          currentPage > 1 && handlePageChange(currentPage - 1)
+                        }
+                      />
+                      {/* Mobile Previous Button */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`${
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        } sm:hidden h-9 w-9`}
+                        onClick={() =>
+                          currentPage > 1 && handlePageChange(currentPage - 1)
+                        }
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                    </PaginationItem>
 
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((page) => {
-                      const diff = Math.abs(page - currentPage);
-                      return (
-                        diff === 0 ||
-                        diff === 1 ||
-                        page === 1 ||
-                        page === totalPages
-                      );
-                    })
-                    .map((page, index, array) => {
-                      if (index > 0 && array[index - 1] !== page - 1) {
-                        return [
-                          <PaginationItem key={`ellipsis-${page}`}>
-                            <PaginationEllipsis />
-                          </PaginationItem>,
-                          <PaginationItem key={page}>
+                    {/* Generate page numbers */}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter((page) => {
+                        // On mobile, show fewer pages
+                        if (window.innerWidth < 640) {
+                          if (page === 1) return true;
+                          if (page === totalPages) return true;
+                          if (page === currentPage) return true;
+                          return false;
+                        }
+
+                        // On desktop, show more pages
+                        if (page === 1) return true;
+                        if (page === totalPages) return true;
+                        if (Math.abs(currentPage - page) <= 1) return true;
+                        return false;
+                      })
+                      .map((page, index, array) => (
+                        <React.Fragment key={page}>
+                          {/* Add ellipsis if there's a gap */}
+                          {index > 0 && array[index - 1] !== page - 1 && (
+                            <PaginationItem>
+                              <PaginationEllipsis className="hidden sm:inline-flex" />
+                              <PaginationEllipsis className="sm:hidden w-6" />
+                            </PaginationItem>
+                          )}
+                          <PaginationItem>
                             <PaginationLink
-                              onClick={() => setCurrentPage(page)}
+                              onClick={() => handlePageChange(page)}
                               isActive={currentPage === page}
+                              className="h-9 w-9 sm:h-10 sm:w-10 p-0"
                             >
                               {page}
                             </PaginationLink>
-                          </PaginationItem>,
-                        ];
-                      }
-                      return (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    })}
+                          </PaginationItem>
+                        </React.Fragment>
+                      ))}
 
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      disabled={currentPage === totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                    {/* Next Button */}
+                    <PaginationItem>
+                      <PaginationNext
+                        className={`${
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        } hidden sm:flex`}
+                        onClick={() =>
+                          currentPage < totalPages &&
+                          handlePageChange(currentPage + 1)
+                        }
+                      />
+                      {/* Mobile Next Button */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`${
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        } sm:hidden h-9 w-9`}
+                        onClick={() =>
+                          currentPage < totalPages &&
+                          handlePageChange(currentPage + 1)
+                        }
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             )}
           </div>
         </CardContent>

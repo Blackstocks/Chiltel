@@ -137,7 +137,8 @@ const OrderDetailsSheet = ({ order }) => {
                       Total Amount:
                     </TableCell>
                     <TableCell className="text-right font-bold">
-                      ₹{order.totalAmount.toFixed(2)}
+                 
+                    ₹{order.products.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
                     </TableCell>
                   </TableRow>
                 </TableBody>
