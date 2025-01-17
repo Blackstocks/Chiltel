@@ -11,6 +11,7 @@ import CartContext from '../context/CartContext'
 const PlaceOrder = ({buyNowProduct=null}) => {
 
     const [method, setMethod] = useState('cod');
+    const [orderProcessing, setOrderProcessing] = useState(false);
     const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
     const { cart, cartId, fetchCart } = useContext(CartContext);
     const { user } = useContext(AuthContext);
@@ -48,6 +49,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
             receipt: order.receipt,
             handler: async (response) => {
                 console.log('init pay: ', response)
+                setOrderProcessing(false);
                 response.cart = true;
                 response.cartId = cartId;
                 try {
@@ -66,6 +68,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
             },
             modal: {
                 ondismiss: async () => {
+                    setOrderProcessing(false);
                     console.log('Payment window was closed by the user.');
                     toast.error('Payment window closed. Cancelling the order...');
     
@@ -107,6 +110,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
     }
 
     const onSubmitHandler = async (event) => {
+        setOrderProcessing(true);
         event.preventDefault()
         try {
 
@@ -180,6 +184,7 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     if (responseRazorpay.data.success) {
                         console.log('razorpay init success');
                         console.log('razorpay response: ', responseRazorpay.data);
+                        setOrderProcessing(false);
                         initPay(responseRazorpay.data.order, responseRazorpay.data.newOrder)
                     }
 
@@ -249,7 +254,22 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                     </div>
 
                     <div className='w-full text-end mt-8'>
-                        <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
+                        <button 
+                            type='submit' 
+                            // className='bg-black text-white px-16 py-3 text-sm'
+                            className={`bg-black text-white px-16 py-3 text-sm ${
+                                orderProcessing ? 'opacity-70 cursor-not-allowed' : 'hover:bg-green-600'
+                            }`}
+                        >
+                            {orderProcessing ? (
+                                <>
+                                    Processing
+                                    <span className="loader inline-block ml-2 w-4 h-4 border-2 border-t-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                </>
+                            ) : (
+                                'PLACE ORDER'
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
