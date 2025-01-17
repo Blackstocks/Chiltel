@@ -355,7 +355,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 
   const renderProductServices = (productName) => (
     <div className="space-y-4">
-      {productName === "Air Conditioner" && (
+      {/* {productName === "Air Conditioner" && (
           <div className="flex items-center justify-between p-4 bg-gray-50 border rounded-lg">
             <span className="font-semibold">Air Conditioner Services</span>
             <div className="flex items-center space-x-4">
@@ -371,7 +371,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
               </label>
             </div>
           </div>
-        )}
+        )} */}
       {Object.entries(services[productName] || {}).map(([categoryName, categoryServices]) => (
         <div key={categoryName} className="overflow-hidden border rounded-lg">
           <button
@@ -704,14 +704,58 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
   //   </div>
   // );
 
+  const openPDF = (pdfPath) => {
+    const pdfUrl = `${window.location.origin}${pdfPath}`;
+    window.open(pdfUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="relative w-full max-w-3xl mx-4 my-6 bg-white rounded-lg shadow-xl">
-        <div className="flex items-center justify-between sticky top-0 z-10 p-6 bg-white border-b rounded-t-lg">
-          <h2 className="text-2xl font-bold text-gray-800">{category?.name} Services</h2>
-          <button
+        <div className="flex items-center justify-between sticky top-0 z-10 p-6 shadow-md rounded-t-lg">
+          <h2 className="text-2xl font-semibold tracking-wide">
+            {category?.name} Services
+          </h2>
+          <div className="flex space-x-4">
+            <div className="flex items-center space-x-4">
+                {category?.name==='Air Conditioner' && 
+                  <>
+                    <span className="text-sm font-medium">{acMode}</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={acMode === "Window AC"}
+                        onChange={toggleAcMode}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-gray-300 dark:peer-focus:ring-gray-500 peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+                    </label>
+                  </>
+                }
+              </div>
+            <button
+              onClick={() => openPDF(`/rate_charts/ac_rate_chart.pdf`)}
+              className="flex items-center px-4 py-2 text-sm font-medium text-blue-500 bg-white rounded-md shadow-md hover:bg-blue-100 hover:shadow-lg"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8m-4-6l4 4m-4-4v4h4"
+                />
+              </svg>
+              View Rate Chart
+            </button>
+            <button
               onClick={onClose}
-              className="p-2 text-gray-500 transition-colors rounded-full hover:text-gray-700 hover:bg-gray-100"
+              className="p-2 text-black-200 transition-colors bg-white rounded-full shadow-md hover:bg-gray-100 hover:shadow-lg"
             >
               <svg
                 className="w-6 h-6"
@@ -727,7 +771,9 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
                 />
               </svg>
             </button>
+          </div>
         </div>
+
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto p-6">
           {servicesLoading && <ModalLoader />}
           {renderProductServices(category?.name || "Unknown")}
