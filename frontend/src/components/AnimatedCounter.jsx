@@ -4,8 +4,8 @@ const AnimatedCounter = ({ end, duration = 2000 }) => {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    let startTime;
-    let animationFrame;
+    let startTime = null;
+    let animationFrame = null;
 
     const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
@@ -28,7 +28,7 @@ const AnimatedCounter = ({ end, duration = 2000 }) => {
     };
   }, [end, duration]);
 
-  return count;
+  return <span className="font-bold">{count}</span>;
 };
 
 export default AnimatedCounter;
