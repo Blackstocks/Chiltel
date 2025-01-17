@@ -74,6 +74,9 @@ riderRouter.post(
 	verifyRider,
 	riderController.trackLocation
 );
+
+riderRouter.post("/verify/bank", riderController.verifyBankDetails);
+riderRouter.post("/verify/court", riderController.verifyCourtCase);
 riderRouter.post(
 	"/services/:id/start-working",
 	verifyRider,

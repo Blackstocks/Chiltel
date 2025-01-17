@@ -511,6 +511,84 @@ const riderController = {
 		console.log(latitude, longitude);
 		res.json({ message: "Location updated successfully" });
 	},
+	async verifyBankDetails(req, res) {
+		const {
+			beneficiaryAccount,
+			beneficiaryIFSC,
+			beneficiaryMobile,
+			beneficiaryName,
+		} = req.body;
+
+		const options = {
+			method: "POST",
+			headers: {
+				clientId: process.env.INVINCIBLE_CLIENT_ID,
+				secretKey: process.env.INVINCIBLE_SECRET_KEY,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				beneficiaryAccount,
+				beneficiaryIFSC,
+				beneficiaryMobile,
+				beneficiaryName,
+			}),
+		};
+
+		try {
+			const response = await fetch(
+				"https://api.invincibleocean.com/invincible/bankAccount/verify",
+				options
+			);
+			const data = await response.json();
+
+			if (response.ok) {
+				res.json({ message: "Bank details verified successfully", data });
+			} else {
+				res
+					.status(response.status)
+					.json({ message: "Bank details verification failed", data });
+			}
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+	async verifyCourtCase(req, res) {
+		const { name, fatherName, address, dob, panNumber } = req.body;
+
+		const options = {
+			method: "POST",
+			headers: {
+				clientId: process.env.INVINCIBLE_CLIENT_ID,
+				secretKey: process.env.INVINCIBLE_SECRET_KEY,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				name,
+				fatherName,
+				address,
+				dob,
+				panNumber,
+			}),
+		};
+
+		try {
+			const response = await fetch(
+				"https://api.invincibleocean.com/invincible/courtCase/V2",
+				options
+			);
+			const data = await response.json();
+
+			if (response.ok) {
+				res.json({ message: "Court case verified successfully", data });
+			} else {
+				res
+					.status(response.status)
+					.json({ message: "Court case verification failed", data });
+			}
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
 
 	async startWorking(req, res) {},
 };
