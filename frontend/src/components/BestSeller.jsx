@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const KitchenAppliances = () => {
   const navigate = useNavigate();
-  
+
   const categories = [
     {
       name: "Water Cooler",
@@ -48,6 +48,7 @@ const KitchenAppliances = () => {
       url: "/collection" 
     },
   ];
+
 
   const totalItems = categories.length;
   const duplicatedCategories = [...categories, ...categories];
@@ -100,7 +101,7 @@ const KitchenAppliances = () => {
         {duplicatedCategories.map((category, index) => (
           <div key={index} className="flex-shrink-0 w-full p-2 sm:w-1/4">
             <div className="overflow-hidden bg-white rounded-lg shadow-md hover:shadow-lg h-[400px] flex flex-col">
-              <div 
+              <div
                 className="relative h-[60%] overflow-hidden group cursor-pointer"
                 onClick={() => handlePurchase(category.url)}
               >
@@ -108,6 +109,9 @@ const KitchenAppliances = () => {
                   src={category.image}
                   alt={category.name}
                   className="absolute object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
+                  onError={(e) => {
+                    e.target.src = category.fallbackImage;
+                  }}
                 />
                 <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-black/40 group-hover:opacity-100" />
                 <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100">
@@ -136,7 +140,7 @@ const KitchenAppliances = () => {
                   {category.description}
                 </p>
                 <div className="flex justify-center mt-4">
-                  <button 
+                  <button
                     onClick={() => handlePurchase(category.url)}
                     className="w-1/2 px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
                   >
@@ -149,14 +153,17 @@ const KitchenAppliances = () => {
         ))}
       </div>
 
-      <div 
+      <div
         className="flex justify-center my-8 cursor-pointer"
-        onClick={() => navigate('/collection')}
+        onClick={() => navigate("/collection")}
       >
         <img
           src={isMobile ? "/assets/2.webp" : "/assets/2.webp"}
           alt="Kitchen Appliances Banner"
           className="object-cover w-full transition-transform duration-500 ease-in-out max-h-80 hover:scale-105 hover:shadow-lg"
+          onError={(e) => {
+            e.target.src = "https://via.placeholder.com/300";
+          }}
         />
       </div>
     </div>
