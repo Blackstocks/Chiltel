@@ -68,6 +68,12 @@ riderRouter.post(
 	verifyRider,
 	riderController.startService
 );
+
+riderRouter.post(
+	"/location/update",
+	verifyRider,
+	riderController.trackLocation
+);
 riderRouter.post(
 	"/services/:id/start-working",
 	verifyRider,

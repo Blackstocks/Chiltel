@@ -424,7 +424,7 @@ const riderController = {
 			service.status = "COMPLETED";
 			service.workStarted = false;
 			rider.services.completed += 1;
-			rider.balance -= 200;
+			rider.balance -= 50; // 5 coins deducted (This is in rupees)
 			service.completedAt = new Date();
 			await service.save();
 			await rider.save();
@@ -504,6 +504,12 @@ const riderController = {
 		await service.save();
 
 		res.status(200).json({ message: "Service Stated successfully" });
+	},
+
+	async trackLocation(req, res) {
+		const { latitude, longitude } = req.body;
+		console.log(latitude, longitude);
+		res.json({ message: "Location updated successfully" });
 	},
 
 	async startWorking(req, res) {},
