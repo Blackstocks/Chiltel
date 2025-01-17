@@ -22,14 +22,40 @@ const PlaceOrder = ({buyNowProduct=null}) => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
-        email: '',
+        email: user.email,
         street: '',
         city: '',
         state: '',
         zipcode: '',
-        country: '',
+        country: 'India',
         phone: ''
     })
+
+    const fetchStateByPincode = async (pincode) => {
+        try {
+          const response = await fetch(
+            `https://api.postalpincode.in/pincode/${pincode}`
+          );
+          const data = await response.json();
+          if (data[0].Status === "Success") {
+            return data[0].PostOffice[0].State; // Get the state
+          }
+          return null;
+        } catch (error) {
+          console.error("Error fetching state:", error);
+          return null;
+        }
+      };
+    
+      const handleZipCodeChange = async (e) => {
+        const zipcode = e.target.value;
+        setFormData(data => ({ ...data, zipcode }))
+    
+        if (zipcode.length === 6) {
+            const state = await fetchStateByPincode(zipcode);
+            setFormData(data => ({ ...data, state }))
+        }
+      };
 
     const onChangeHandler = (event) => {
         const name = event.target.name
@@ -219,11 +245,11 @@ const PlaceOrder = ({buyNowProduct=null}) => {
                 <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Street' />
                 <div className='flex gap-3'>
                     <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='City' />
-                    <input onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
+                    <input required onChange={handleZipCodeChange} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Zipcode' />
                 </div>
                 <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Zipcode' />
-                    <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
+                    <input disabled onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
+                    <input disabled  onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
                 </div>
                 <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone' />
             </div>
