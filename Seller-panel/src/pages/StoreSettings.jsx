@@ -19,11 +19,16 @@ import {
   Upload,
   FileCheck,
   Settings,
+  Edit,
 } from "lucide-react";
 
 const StoreSettings = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [editMode, setEditMode] = useState({
+    basic: false,
+    bank: false,
+  });
   const [formData, setFormData] = useState({
     shopName: user?.shopName || "",
     proprietorName: user?.proprietorName || "",
@@ -55,75 +60,42 @@ const StoreSettings = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    console.log("File to be uploaded:", file);
-
-    // Validate file type
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
     if (!allowedTypes.includes(file.type)) {
-        toast.error("Please upload a PDF, JPEG, or PNG file");
-        return;
+      toast.error("Please upload a PDF, JPEG, or PNG file");
+      return;
     }
 
-    // Validate file size (20MB limit)
-    const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+    const maxSize = 20 * 1024 * 1024;
     if (file.size > maxSize) {
-        toast.error("File size must be less than 20MB");
-        return;
+      toast.error("File size must be less than 20MB");
+      return;
     }
 
     setIsUploading(true);
     const uploadFormData = new FormData();
     uploadFormData.append("document", file);
 
-    // Log FormData contents
-    console.log("FormData contents:");
-    for (const [key, value] of uploadFormData.entries()) {
-        console.log(`${key}:`, value);
-    }
-
     try {
-        const response = await fetch(
-            `${import.meta.env.VITE_BACKEND_URL}/api/seller/upload-document`,
-            {
-                method: "POST",
-                body: uploadFormData,
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Upload failed");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/seller/upload-document`,
+        {
+          method: "POST",
+          body: uploadFormData,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
+      );
 
-        toast.success("Certificate uploaded successfully");
-        console.log("Uploaded file data from server:", data.data);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Upload failed");
+      
+      toast.success("Certificate uploaded successfully");
     } catch (error) {
-        console.error(error);
-        toast.error(error.message || "Failed to upload certificate");
+      toast.error(error.message || "Failed to upload certificate");
     } finally {
-        setIsUploading(false);
-    }
-};
-
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      const input = fileInputRef.current;
-      input.files = e.dataTransfer.files;
-      handleFileUpload({ target: input });
+      setIsUploading(false);
     }
   };
 
@@ -131,7 +103,7 @@ const StoreSettings = () => {
     const { id, value } = e.target;
     if (id.startsWith("bank")) {
       const field = id.replace("bank", "").toLowerCase();
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         bankDetails: {
           ...prev.bankDetails,
@@ -140,7 +112,7 @@ const StoreSettings = () => {
       }));
     } else if (id.startsWith("reg")) {
       const field = id.replace("reg", "").toLowerCase();
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         registeredAddress: {
           ...prev.registeredAddress,
@@ -149,7 +121,7 @@ const StoreSettings = () => {
       }));
     } else if (id.startsWith("warehouse")) {
       const field = id.replace("warehouse", "").toLowerCase();
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         warehouseAddress: {
           ...prev.warehouseAddress,
@@ -157,23 +129,52 @@ const StoreSettings = () => {
         },
       }));
     } else {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         [id]: value,
       }));
     }
   };
 
-  const handleSave = async () => {
+  const handleBasicDetailsSave = async () => {
     try {
       setLoading(true);
-
       const updateData = {
         shopName: formData.shopName,
         proprietorName: formData.proprietorName,
         phoneNumber: formData.phoneNumber,
         registeredAddress: formData.registeredAddress,
         warehouseAddress: formData.warehouseAddress,
+      };
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/seller/profile`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(updateData),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      toast.success("Basic details updated successfully");
+      setEditMode(prev => ({ ...prev, basic: false }));
+    } catch (error) {
+      toast.error(error.message || "Failed to update basic details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBankDetailsSave = async () => {
+    try {
+      setLoading(true);
+      const updateData = {
         gstNumber: formData.gstNumber,
         bankDetails: formData.bankDetails,
       };
@@ -191,45 +192,33 @@ const StoreSettings = () => {
       );
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to update settings");
-      }
-
-      toast.success(data.message || "Settings updated successfully");
+      toast.success("Bank details updated successfully");
+      setEditMode(prev => ({ ...prev, bank: false }));
     } catch (error) {
-      toast.error(
-        error.message || "Failed to save settings. Please try again."
-      );
+      toast.error(error.message || "Failed to update bank details");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    setFormData({
-      shopName: user?.shopName || "",
-      proprietorName: user?.proprietorName || "",
-      phoneNumber: user?.phoneNumber || "",
-      registeredAddress: {
-        street: user?.registeredAddress?.street || "",
-        city: user?.registeredAddress?.city || "",
-        state: user?.registeredAddress?.state || "",
-        pincode: user?.registeredAddress?.pincode || "",
-      },
-      warehouseAddress: {
-        street: user?.warehouseAddress?.street || "",
-        city: user?.warehouseAddress?.city || "",
-        state: user?.warehouseAddress?.state || "",
-        pincode: user?.warehouseAddress?.pincode || "",
-      },
-      gstNumber: user?.gstNumber || "",
-      bankDetails: {
-        accountNumber: user?.bankDetails?.accountNumber || "",
-        ifscCode: user?.bankDetails?.ifscCode || "",
-        bankName: user?.bankDetails?.bankName || "",
-      },
-    });
+  const handleCancel = (section) => {
+    setFormData(prev => ({
+      ...prev,
+      ...(section === 'basic' && {
+        shopName: user?.shopName || "",
+        proprietorName: user?.proprietorName || "",
+        phoneNumber: user?.phoneNumber || "",
+        registeredAddress: user?.registeredAddress || {},
+        warehouseAddress: user?.warehouseAddress || {},
+      }),
+      ...(section === 'bank' && {
+        gstNumber: user?.gstNumber || "",
+        bankDetails: user?.bankDetails || {},
+      }),
+    }));
+    setEditMode(prev => ({ ...prev, [section]: false }));
     toast.info("Changes discarded");
   };
 
@@ -260,6 +249,14 @@ const StoreSettings = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <Store className="h-4 w-4" />
                     <h3 className="font-semibold text-sm">Store Information</h3>
+                    <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditMode(prev => ({ ...prev, basic: !prev.basic }))}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  {editMode.basic ? "Cancel Edit" : "Edit Details"}
+                </Button>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-3">
@@ -383,6 +380,25 @@ const StoreSettings = () => {
                   </div>
                 </div>
               </div>
+              {editMode.basic && (
+                <div className="flex justify-end gap-3 mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleCancel('basic')}
+                    disabled={loading}
+                    size="sm"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleBasicDetailsSave}
+                    disabled={loading}
+                    size="sm"
+                  >
+                    {loading ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="bank" className="mt-0">
@@ -390,6 +406,14 @@ const StoreSettings = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <Receipt className="h-4 w-4" />
                   <h3 className="font-semibold text-sm">Bank & Tax Details</h3>
+                  <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditMode(prev => ({ ...prev, bank: !prev.bank }))}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  {editMode.bank ? "Cancel Edit" : "Edit Details"}
+                </Button>
                 </div>
 
                 <div className="grid gap-3">
@@ -446,6 +470,25 @@ const StoreSettings = () => {
                   </div>
                 </div>
               </div>
+              {editMode.bank && (
+                <div className="flex justify-end gap-3 mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleCancel('bank')}
+                    disabled={loading}
+                    size="sm"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleBankDetailsSave}
+                    disabled={loading}
+                    size="sm"
+                  >
+                    {loading ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="documents" className="mt-0">
@@ -514,20 +557,6 @@ const StoreSettings = () => {
               </div>
             </TabsContent>
           </Tabs>
-
-          <div className="flex justify-end gap-3 mt-4 sticky bottom-0 bg-white py-2">
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={loading}
-              size="sm"
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={loading} size="sm">
-              {loading ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

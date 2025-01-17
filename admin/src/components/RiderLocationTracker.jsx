@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { GoogleMap, LoadScript, Marker, DirectionsRenderer, InfoWindow, google } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker, DirectionsRenderer, InfoWindow } from '@react-google-maps/api';
 import {
   Card,
   CardContent,
@@ -52,16 +52,16 @@ const RiderLocationTracker = ({
   const calculateRoute = useCallback((origin, destination) => {
     if (!isGoogleLoaded) return;
     
-    const directionsService = new google.maps.DirectionsService();
+    const directionsService = new window.google.maps.DirectionsService();
     
     directionsService.route(
       {
         origin: origin,
         destination: destination,
-        travelMode: google.maps.TravelMode.DRIVING,
+        travelMode: window.google.maps.TravelMode.DRIVING,
       },
       (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK) {
+        if (status === window.google.maps.DirectionsStatus.OK) {
           setDirections(result);
         } else {
           console.error('Error calculating route:', status);

@@ -16,6 +16,7 @@ import {
   getSellerOrders,
   uploadDocument,
   updateCommission,
+  verifyBankDetails,
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import { validateSellerRegistration } from "../middleware/sellerValidation.js";
@@ -40,6 +41,7 @@ router.put("/update-commision/:id", adminAuth, updateCommission);
 router.use(protectSeller);
 router.get("/profile", getProfile);
 router.put("/profile", updateProfile);
+router.post("/verify-bank-details", verifyBankDetails);
 router.get("/verify", verifyToken);
 router.post("/upload-document", upload.single("document"), uploadDocument);
 

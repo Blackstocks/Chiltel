@@ -123,7 +123,7 @@ const Sidebar = () => {
           {isCollapsed ? (
             <Store className="hidden lg:block h-6 w-6" />
           ) : (
-            <span className="text-xl font-bold">Seller Panel</span>
+            <span className="text-xl font-bold ml-4">Seller Panel</span>
           )}
         </div>
 
