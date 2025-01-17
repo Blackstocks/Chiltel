@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+</head>
+<body style="margin: 0; padding: 0;">
+    <iframe
+        id="pdf-frame"
+        style="width: 100%; height: 100vh; border: none;"
+    ></iframe>
+
+    <script>
+        // Get the file URL from query params
+        const urlParams = new URLSearchParams(window.location.search);
+        const file = urlParams.get('file');
+        
+        // Load the file into the iframe if provided
+        if (file) {
+            const iframe = document.getElementById('pdf-frame');
+            iframe.src = file;
+        } else {
+            document.body.innerHTML = "<p>No PDF file specified.</p>";
+        }
+    </script>
+</body>
+</html>
