@@ -20,22 +20,23 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ServiceCollection from "./components/ServiceCollection";
 import ServiceDetail from "./components/ServiceDetail";
-import ProductList from "./pages/ProductList"; // Let's use just this one
+import ProductList from "./pages/ProductList";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ServiceCartProvider } from "./context/ServiceCartContext";
 import BuyNow from "./pages/BuyNow";
 import OrderSuccess from "./pages/OrderSuccess";
-// import * as serviceWorkerRegistration from './lib/pwa/RegisterServiceWorker';
+import { Analytics } from "@vercel/analytics/react";
+// import { SpeedInsights } from "@vercel/speed-insights/next"; // NOT compatible with non-Next.js apps
 import RegisterServiceWorker from "./lib/pwa/RegisterServiceWorker";
 
 const App = () => {
   RegisterServiceWorker();
+
   return (
+    // Wrap the app with context providers
     <AuthProvider>
-          <ToastContainer
-            position="top-center"
-          />
+      <ToastContainer position="top-center" />
       <CartProvider>
         <ServiceCartProvider>
           <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
@@ -51,7 +52,7 @@ const App = () => {
               <Route path="/cart" element={<Cart />} />
               <Route path="/login" element={<Login />} />
               <Route path="/place-order" element={<PlaceOrder />} />
-              <Route path='/checkout' element={<BuyNow />} />
+              <Route path="/checkout" element={<BuyNow />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/verify" element={<Verify />} />
@@ -62,6 +63,8 @@ const App = () => {
             </Routes>
             <Footer />
           </div>
+          {/* Add Analytics at the root level */}
+          <Analytics />
         </ServiceCartProvider>
       </CartProvider>
     </AuthProvider>
