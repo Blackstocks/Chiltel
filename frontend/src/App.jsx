@@ -26,6 +26,7 @@ import { CartProvider } from "./context/CartContext";
 import { ServiceCartProvider } from "./context/ServiceCartContext";
 import BuyNow from "./pages/BuyNow";
 import OrderSuccess from "./pages/OrderSuccess";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 // import * as serviceWorkerRegistration from './lib/pwa/RegisterServiceWorker';
 import RegisterServiceWorker from "./lib/pwa/RegisterServiceWorker";
 
