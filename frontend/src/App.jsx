@@ -20,14 +20,14 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ServiceCollection from "./components/ServiceCollection";
 import ServiceDetail from "./components/ServiceDetail";
-import ProductList from "./pages/ProductList"; // Let's use just this one
+import ProductList from "./pages/ProductList"; 
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ServiceCartProvider } from "./context/ServiceCartContext";
 import BuyNow from "./pages/BuyNow";
 import OrderSuccess from "./pages/OrderSuccess";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/react";
+// import { SpeedInsights } from "@vercel/speed-insights/next";
+// import { Analytics } from "@vercel/analytics/react";
 // import * as serviceWorkerRegistration from './lib/pwa/RegisterServiceWorker';
 import RegisterServiceWorker from "./lib/pwa/RegisterServiceWorker";
 //Vercel Analytics added
@@ -64,8 +64,8 @@ const App = () => {
               </Routes>
               <Footer />
             </div>
-            <Analytics />
-          </SpeedInsights>
+            {/* <Analytics /> */}
+          {/* </SpeedInsights> */}
         </ServiceCartProvider>
       </CartProvider>
     </AuthProvider>
