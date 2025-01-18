@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import ModalLoader from "../components/ModalLoader";
 import ServiceCartContext from "../context/ServiceCartContext";
+import { useNavigate } from "react-router-dom";
+import PdfViewerWindow from "./PdfViewer";
 
 const ServiceModal = ({ isOpen, onClose, category }) => {
   if (!isOpen) return null;
@@ -15,8 +17,11 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
   const { backendUrl, token } = useContext(ShopContext);
   const { addToServiceCart } = useContext(ServiceCartContext);
 
+  const navigate = useNavigate();
+
   const today = new Date();
 
+  const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
   const [services, setServices] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [servicesLoading, setServicesLoading] = useState(true);
@@ -36,6 +41,10 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
   
   const toggleAcMode = () => {
     setAcMode((prevMode) => (prevMode === "Split AC" ? "Window AC" : "Split AC"));
+  };
+
+  const openPDFInViewer = (pdfPath) => {
+    setIsPdfViewerOpen(true);
   };
 
   console.log('Schedule service: ', scheduleService);
@@ -426,7 +435,33 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
         <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
-          <h2 className="text-lg font-bold">Schedule Service</h2>
+          <div className="flex items-center justify-between sticky top-0 z-10 ">
+          {/* <div className="flex items-center space-x-4"> */}
+            <div className="flex items-center space-x-4">
+              <h2 className="text-lg font-bold">Schedule Service</h2>
+            </div>
+            <button
+              onClick={() => openPDFInViewer(`/rate_charts/ac_rate_chart.pdf`)}
+              className="flex items-center px-4 py-2 text-sm font-medium text-blue-500 bg-white rounded-md shadow-md hover:bg-blue-100 hover:shadow-lg"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8m-4-6l4 4m-4-4v4h4"
+                />
+              </svg>
+              View Rate Chart
+            </button>
+          </div>
+          {isPdfViewerOpen && <PdfViewerWindow pdfPath={`/rate_charts/ac_rate_chart.pdf`} />}
           <div className="mt-4 space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto p-6">
             {/* Day Selection */}
             <div>
@@ -522,6 +557,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
                 setSelectedDate("");
                 setSelectedDay(today.toISOString().split("T")[0])
                 setSelectedTime("");
+                setIsPdfViewerOpen(false);
               }}
               className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
             >
@@ -709,6 +745,13 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     window.open(pdfUrl, "_blank", "noopener,noreferrer");
   };
 
+//   const openPDFInViewer = (pdfPath) => {
+//     const pdfUrl = `${window.location.origin}${pdfPath}`;
+//     const viewerUrl = `/pdf-viewer.html?file=${encodeURIComponent(pdfUrl)}`;
+//     window.open(viewerUrl, "_blank", "noopener,noreferrer");
+// };
+
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="relative w-full max-w-3xl mx-4 my-6 bg-white rounded-lg shadow-xl">
@@ -733,7 +776,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
                   </>
                 }
               </div>
-            <button
+            {/* <button
               onClick={() => openPDF(`/rate_charts/ac_rate_chart.pdf`)}
               className="flex items-center px-4 py-2 text-sm font-medium text-blue-500 bg-white rounded-md shadow-md hover:bg-blue-100 hover:shadow-lg"
             >
@@ -752,7 +795,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
                 />
               </svg>
               View Rate Chart
-            </button>
+            </button> */}
             <button
               onClick={onClose}
               className="p-2 text-black-200 transition-colors bg-white rounded-full shadow-md hover:bg-gray-100 hover:shadow-lg"
