@@ -30,6 +30,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 // import * as serviceWorkerRegistration from './lib/pwa/RegisterServiceWorker';
 import RegisterServiceWorker from "./lib/pwa/RegisterServiceWorker";
+//Vercel Analytics added
 
 const App = () => {
   RegisterServiceWorker();
