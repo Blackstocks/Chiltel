@@ -4,7 +4,7 @@ import LatestCollection from '../components/LatestCollection'
 import BestSeller from '../components/BestSeller'
 import BestSeller2 from '../components/BestSeller2'
 import OurPolicy from '../components/OurPolicy'
-import NewsletterBox from '../components/NewsletterBox'
+// import NewsletterBox from '../components/NewsletterBox'
 import Partner from '../components/Partner'
 
 const Home = () => {
