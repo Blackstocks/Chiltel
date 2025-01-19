@@ -27,14 +27,16 @@ import ServicesTab from "@/components/Services";
 import OverviewTab from "@/components/Overview";
 import HistoryTab from "@/components/History";
 
+import { useAuthActions } from "@/hooks/useAuthActions";
+
 // Main Dashboard Layout
 const RiderDashboard = () => {
+	const { logout } = useAuthActions();
 	const [activeTab, setActiveTab] = useState("overview");
 	const [isOnline, setIsOnline] = useState(true);
 
 	return (
 		<div className="min-h-screen bg-gray-100">
-			{/* Header */}
 			<header className="bg-white shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
 					<div className="flex items-center space-x-4">
@@ -76,13 +78,15 @@ const RiderDashboard = () => {
 							</div>
 						</div>
 					</div>
-					<Button variant="outline" onClick={() => setActiveTab("profile")}>
-						<Settings className="w-4 h-4 mr-2" />
-						Settings
+					<Button
+						variant="destructive"
+						className="m-2 hidden sm:block"
+						onClick={logout}
+					>
+						Log Out
 					</Button>
 				</div>
 			</header>
-
 			{/* Main Content */}
 			<main className="max-w-7xl mx-auto px-4 py-6">
 				<Tabs value={activeTab} onValueChange={setActiveTab}>

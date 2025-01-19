@@ -26,10 +26,13 @@ export const useAuthActions = () => {
 		try {
 			const response = await apiService.signup(riderData);
 			dispatch({ type: "SIGNUP_SUCCESS" });
-			return { ...response, message: "Registration successful. Please login to continue." };
+			return {
+				...response,
+				message: "Registration successful. Please login to continue.",
+			};
 		} catch (error) {
 			dispatch({ type: "SIGNUP_ERROR", payload: error.message });
-			throw error;
+			return { error: error };
 		}
 	};
 

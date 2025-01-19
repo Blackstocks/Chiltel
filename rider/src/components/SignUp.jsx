@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/popover";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { useAuthActions } from "../hooks/useAuthActions";
 
 const MultiStepSignupForm = () => {
 	const fileInputRef = useRef(null);
@@ -32,7 +35,6 @@ const MultiStepSignupForm = () => {
 		// Personal Details
 		firstName: "",
 		lastName: "",
-		fullName: "",
 		fatherName: "",
 		dob: "",
 		email: "",
@@ -68,6 +70,8 @@ const MultiStepSignupForm = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [paymentOrder, setPaymentOrder] = useState(null);
+
+	const { signup } = useAuthActions();
 
 	// Specializations list
 	const specializations = [
@@ -213,88 +217,90 @@ const MultiStepSignupForm = () => {
 		setError("");
 	}, []);
 
-	// Payment creation
-	const handlePayment = async () => {
-		try {
-			// Simulate payment order creation
-			const order = {
-				id: `order_${Date.now()}`,
-				amount: 200000, // ₹2000 in paisa
-				currency: "INR",
-			};
-			setPaymentOrder(order);
-			return order;
-		} catch (error) {
-			console.error("Payment order creation failed", error);
-			setError("Failed to create payment order");
-			return null;
-		}
-	};
-
-	// Payment initiation
-	const initiatePay = (order) => {
+	const initPay = (order, signupData) => {
 		const options = {
 			key: import.meta.env.VITE_RAZORPAY_KEY_ID,
 			amount: order.amount,
 			currency: order.currency,
-			name: "Service Provider Registration",
-			description: "Registration Fee",
+			name: "Order Payment",
+			description: "Order Payment",
 			order_id: order.id,
+			receipt: order.receipt,
 			handler: async (response) => {
+				console.log("init pay: ", response);
 				try {
-					// Simulate payment verification
-					if (response.razorpay_payment_id) {
-						// Complete signup
-						await completeSignup(response.razorpay_payment_id);
-						alert("Account created successfully");
+					const { data } = await axios.post(
+						import.meta.env.VITE_BACKEND_URL + "/rider/verify-payment",
+						response
+					);
+					console.log("transaction data: ", data);
+					if (data.success) {
+						console.log("order info: ", data.message);
+						signupData.paymentId = response.razorpay_payment_id;
+						const res = await signup(signupData);
+						console.log(res);
+						if (!res.error) {
+							formData.profilePhotoPreview = null;
+							setFormData({
+								...formData,
+								...{
+									mode: "normal",
+									referralCode: "",
+									firstName: "",
+									lastName: "",
+									fatherName: "",
+									dob: "",
+									email: "",
+									phoneNumber: "",
+									profilePhoto: null,
+									address: "",
+									state: "",
+									city: "",
+									pincode: "",
+									specializations: [],
+									password: "",
+									confirmPassword: "",
+									panNumber: "",
+									beneficiaryAccount: "",
+									beneficiaryIFSC: "",
+									beneficiaryMobile: "",
+									beneficiaryName: "",
+								},
+							});
+							toast.success(res.message);
+						} else {
+							toast.error(res.error.message);
+						}
 					} else {
-						alert("Payment verification failed");
+						toast.error("Payment failed. Please try again.");
 					}
 				} catch (error) {
-					console.error("Payment verification failed", error);
-					alert("Payment verification failed");
+					console.log(error);
+					toast.error(error);
 				}
 			},
-			prefill: {
-				name: `${formData.firstName} ${formData.lastName}`,
-				email: formData.email,
-				contact: formData.phoneNumber,
-			},
 		};
-
 		const rzp = new window.Razorpay(options);
 		rzp.open();
 	};
 
-	// Complete signup
-	const completeSignup = async (paymentId = null) => {
-		setLoading(true);
-		try {
-			// Prepare signup data
-			const signupData = {
-				...formData,
-				paymentId,
-				// Remove sensitive fields
-				confirmPassword: undefined,
-				profilePhotoPreview: undefined,
-			};
-
-			// Simulate signup (replace with actual signup logic)
-			console.log("Signup Data:", signupData);
-
-			// Show success message
-			alert("Account created successfully");
-		} catch (error) {
-			console.error("Signup failed", error);
-			alert("Signup failed");
-		} finally {
-			setLoading(false);
-		}
+	const handlePayment = async () => {
+		// Add payment logic here
+		const { data } = await axios.post(
+			import.meta.env.VITE_BACKEND_URL + "/rider/create-order"
+		);
+		console.log("order data: ", data);
+		return data;
 	};
 
 	// Form submission handler
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+
+		//remove confirm password from form data
+		const { confirmPassword, profilePhotoPreview, ...signupData } = formData;
+
+		console.log(signupData.profilePhoto);
 
 		// Validate all steps
 		for (let step = 1; step <= 7; step++) {
@@ -309,15 +315,47 @@ const MultiStepSignupForm = () => {
 		if (formData.mode === "commission") {
 			const order = await handlePayment();
 			if (order) {
-				initiatePay(order);
+				initPay(order, signupData);
 			}
 		} else {
 			// Direct signup for normal mode
-			await completeSignup();
+			const res = await signup(signupData);
+			console.log(res);
+			if (!res.error) {
+				formData.profilePhotoPreview = null;
+				setFormData({
+					...formData,
+					...{
+						mode: "normal",
+						referralCode: "",
+						firstName: "",
+						lastName: "",
+						fatherName: "",
+						dob: "",
+						email: "",
+						phoneNumber: "",
+						profilePhoto: null,
+						address: "",
+						state: "",
+						city: "",
+						pincode: "",
+						specializations: [],
+						password: "",
+						confirmPassword: "",
+						panNumber: "",
+						beneficiaryAccount: "",
+						beneficiaryIFSC: "",
+						beneficiaryMobile: "",
+						beneficiaryName: "",
+					},
+				});
+				toast.success(res.message);
+			} else {
+				toast.error(res.error.message);
+			}
 		}
 	};
 
-	// Placeholder for step content rendering
 	const renderStepContent = () => {
 		switch (currentStep) {
 			case 1:

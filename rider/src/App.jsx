@@ -6,6 +6,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { useEffect } from "react";
 import { useAuth } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import LocationTracker from "./components/LocationTracker";
 
 const ProtectedRoute = ({ children }) => {
 	const { state } = useAuth();
@@ -27,6 +28,7 @@ const ProtectedRoute = ({ children }) => {
 function App() {
 	return (
 		<AuthProvider>
+			{/* <LocationTracker apiEndpoint="http://localhost:4000/api/rider/location" /> */}
 			<Router>
 				<Routes>
 					<Route
