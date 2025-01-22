@@ -46,9 +46,12 @@ const riderSchema = {
 	},
 	balance: { type: Number, default: 0 },
 
-	earning: {
-		total: { type: Number, default: 0 },
-	},
+	earning: [
+		{
+			date: { type: Date, required: true },
+			amount: { type: Number, required: true },
+		},
+	],
 
 	location: {
 		type: {

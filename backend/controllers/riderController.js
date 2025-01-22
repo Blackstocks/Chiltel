@@ -452,6 +452,10 @@ const riderController = {
 			service.status = "COMPLETED";
 			service.workStarted = false;
 			rider.services.completed += 1;
+			rider.earning = [
+				...rider.earning,
+				{ date: new Date(), amount: service.price },
+			];
 			rider.balance -= 50; // 5 coins deducted (This is in rupees)
 			service.completedAt = new Date();
 			await service.save();
@@ -611,8 +615,29 @@ const riderController = {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
 	},
+	async markAttendance(req, res) {
+		try {
+			const { date, type, reason } = req.body;
+			const rider = await Rider.findById(req.rider._id);
 
-	async startWorking(req, res) {},
+			if (!rider) {
+				return res.status(404).json({ message: "Rider not found" });
+			}
+
+			if (type === "present") {
+				rider.attendance.present.push({ date });
+			} else if (type === "leave") {
+				rider.attendance.leaves.push({ date, reason });
+			} else {
+				return res.status(400).json({ message: "Invalid attendance type" });
+			}
+
+			await rider.save();
+			res.json({ message: "Attendance marked successfully" });
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
 };
 
 export default riderController;

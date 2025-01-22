@@ -71,10 +71,11 @@ riderRouter.post(
 
 riderRouter.post("/verify/bank", riderController.verifyBankDetails);
 riderRouter.post("/verify/court", riderController.verifyCourtCase);
+
 riderRouter.post(
-	"/services/:id/start-working",
+	"/mark-attendance",
 	verifyRider,
-	riderController.startWorking
+	riderController.markAttendance
 );
 
 export default riderRouter;
