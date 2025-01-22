@@ -6,6 +6,8 @@ import bcrypt from "bcrypt";
 import razorpay from "razorpay";
 import crypto from "crypto";
 import ReferralCode from "../models/referralModel.js";
+import bucket from "../config/firebaseConfig.js";
+import fs from "fs";
 
 const razorpayInstance = new razorpay({
 	key_id: process.env.RAZORPAY_KEY_ID,
@@ -15,6 +17,7 @@ const razorpayInstance = new razorpay({
 const riderController = {
 	// Auth Controllers
 	async signup(req, res) {
+		console.log(req.body);
 		try {
 			const {
 				email,
@@ -26,19 +29,30 @@ const riderController = {
 				paymentId,
 				mode,
 				specializations,
+				fatherName,
+				dob,
+				address,
+				state,
+				city,
+				pincode,
+				panNumber,
+				beneficiaryAccount,
+				beneficiaryIFSC,
+				beneficiaryMobile,
+				beneficiaryName,
 			} = req.body;
 			console.log(req.body);
 
 			if (mode === "normal") {
-				//verify referral code
-				if (referralCode) {
-					const storedReferralCode = await ReferralCode.findOne({ email });
-					if (!storedReferralCode || referralCode !== storedReferralCode.code) {
-						return res.status(400).json({ message: "Invalid referral code" });
-					}
-				} else {
-					return res.status(400).json({ message: "Referral code is required" });
-				}
+				// //verify referral code
+				// if (referralCode) {
+				// 	const storedReferralCode = await ReferralCode.findOne({ email });
+				// 	if (!storedReferralCode || referralCode !== storedReferralCode.code) {
+				// 		return res.status(400).json({ message: "Invalid referral code" });
+				// 	}
+				// } else {
+				// 	return res.status(400).json({ message: "Referral code is required" });
+				// }
 			}
 
 			if (mode === "commission") {
@@ -73,6 +87,17 @@ const riderController = {
 				password,
 				firstName,
 				lastName,
+				fatherName,
+				dateOfBirth: dob,
+				address: `${address}, ${city}, ${state}, ${pincode}`,
+				panNumber,
+				bankDetails: {
+					accountNumber: beneficiaryAccount,
+					ifscCode: beneficiaryIFSC,
+					mobileNumber: beneficiaryMobile,
+					holderName: beneficiaryName,
+				},
+				imageUrl: req.file ? req.file.path : "test.link",
 				phoneNumber,
 				specializations,
 				balance: mode === "commission" ? 2000 : 0,
@@ -168,6 +193,8 @@ const riderController = {
 				return res.status(400).json({ message: "Invalid credentials" });
 			}
 
+			console.log(rider);
+
 			// Verify password
 			const isMatch = bcrypt.compare(password, rider.password);
 			if (!isMatch) {
@@ -259,13 +286,14 @@ const riderController = {
 	async updateLocation(req, res) {
 		try {
 			const { latitude, longitude } = req.body;
+			console.log(req.body);
 
-			await Rider.findByIdAndUpdate(req.rider._id, {
-				location: {
-					type: "Point",
-					coordinates: [longitude, latitude],
-				},
-			});
+			// await Rider.findByIdAndUpdate(req.rider._id, {
+			// 	location: {
+			// 		type: "Point",
+			// 		coordinates: [longitude, latitude],
+			// 	},
+			// });
 
 			res.json({ message: "Location updated successfully" });
 		} catch (error) {
@@ -424,6 +452,10 @@ const riderController = {
 			service.status = "COMPLETED";
 			service.workStarted = false;
 			rider.services.completed += 1;
+			rider.earning = [
+				...rider.earning,
+				{ date: new Date(), amount: service.price },
+			];
 			rider.balance -= 50; // 5 coins deducted (This is in rupees)
 			service.completedAt = new Date();
 			await service.save();
@@ -505,12 +537,6 @@ const riderController = {
 
 		res.status(200).json({ message: "Service Stated successfully" });
 	},
-
-	async trackLocation(req, res) {
-		const { latitude, longitude } = req.body;
-		console.log(latitude, longitude);
-		res.json({ message: "Location updated successfully" });
-	},
 	async verifyBankDetails(req, res) {
 		const {
 			beneficiaryAccount,
@@ -589,8 +615,29 @@ const riderController = {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
 	},
+	async markAttendance(req, res) {
+		try {
+			const { date, type, reason } = req.body;
+			const rider = await Rider.findById(req.rider._id);
 
-	async startWorking(req, res) {},
+			if (!rider) {
+				return res.status(404).json({ message: "Rider not found" });
+			}
+
+			if (type === "present") {
+				rider.attendance.present.push({ date });
+			} else if (type === "leave") {
+				rider.attendance.leaves.push({ date, reason });
+			} else {
+				return res.status(400).json({ message: "Invalid attendance type" });
+			}
+
+			await rider.save();
+			res.json({ message: "Attendance marked successfully" });
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
 };
 
 export default riderController;

@@ -65,7 +65,9 @@ const OverviewTab = () => {
 							</div>
 							<div className="mt-3">
 								<h4 className="text-2xl font-bold text-green-700">
-									₹ {profile.earnings?.total || 0}
+									₹{" "}
+									{profile.earning.reduce((total, e) => total + e.amount, 0) ||
+										0}
 								</h4>
 								<p className="text-xs text-green-600">Lifetime earnings</p>
 							</div>
@@ -83,7 +85,15 @@ const OverviewTab = () => {
 							</div>
 							<div className="mt-3">
 								<h4 className="text-2xl font-bold text-blue-700">
-									₹ {profile.earnings?.monthly || 0}
+									₹{" "}
+									{profile.earning
+										.filter(
+											(e) =>
+												new Date(e.date).getMonth() === new Date().getMonth() &&
+												new Date(e.date).getFullYear() ===
+													new Date().getFullYear()
+										)
+										.reduce((total, e) => total + e.amount, 0) || 0}
 								</h4>
 								<p className="text-xs text-blue-600">This month's total</p>
 							</div>
@@ -101,7 +111,14 @@ const OverviewTab = () => {
 							</div>
 							<div className="mt-3">
 								<h4 className="text-2xl font-bold text-purple-700">
-									₹ {profile.earnings?.today || 0}
+									₹{" "}
+									{profile.earning
+										.filter(
+											(e) =>
+												new Date(e.date).toDateString() ===
+												new Date().toDateString()
+										)
+										.reduce((total, e) => total + e.amount, 0) || 0}
 								</h4>
 								<p className="text-xs text-purple-600">Earned today</p>
 							</div>

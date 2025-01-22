@@ -5,7 +5,7 @@ import riderController from "../controllers/riderController.js";
 
 const riderRouter = express.Router();
 
-// Auth routes
+// Update the signup route to use the new middleware
 riderRouter.post("/signup", riderController.signup);
 riderRouter.post("/login", riderController.login);
 riderRouter.post("/logout", verifyRider, riderController.logout);
@@ -18,7 +18,7 @@ riderRouter.post("/verify-payment", riderController.verifyPayment);
 // Profile routes
 riderRouter.get("/profile", verifyRider, riderController.getProfile);
 riderRouter.put("/profile", verifyRider, riderController.updateProfile);
-riderRouter.put("/location", verifyRider, riderController.updateLocation);
+riderRouter.put("/location", riderController.updateLocation);
 
 // Service routes
 riderRouter.get("/services", verifyRider, riderController.getAssignedServices);
@@ -69,18 +69,13 @@ riderRouter.post(
 	riderController.startService
 );
 
-riderRouter.post(
-	"/location/update",
-	verifyRider,
-	riderController.trackLocation
-);
-
 riderRouter.post("/verify/bank", riderController.verifyBankDetails);
 riderRouter.post("/verify/court", riderController.verifyCourtCase);
+
 riderRouter.post(
-	"/services/:id/start-working",
+	"/mark-attendance",
 	verifyRider,
-	riderController.startWorking
+	riderController.markAttendance
 );
 
 export default riderRouter;

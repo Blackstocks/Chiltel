@@ -126,36 +126,10 @@ const ProfileTab = () => {
 					<Button onClick={handleSaveChanges}>Save Changes</Button>
 				</CardFooter>
 			</Card>
+			<Button variant="destructive" className="m-2" onClick={logout}>
+				Log Out
+			</Button>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Account Settings</CardTitle>
-					<CardDescription>Manage your account preferences</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="flex items-center justify-between">
-						<div>
-							<h4 className="font-medium">Push Notifications</h4>
-							<p className="text-sm text-gray-500">
-								Receive notifications for new services
-							</p>
-						</div>
-						<Button variant="outline">Configure</Button>
-					</div>
-					<div className="flex items-center justify-between">
-						<div>
-							<h4 className="font-medium">Location Services</h4>
-							<p className="text-sm text-gray-500">
-								Allow location tracking while on duty
-							</p>
-						</div>
-						<Button variant="outline">Configure</Button>
-					</div>
-				</CardContent>
-				<Button variant="destructive" className="m-2" onClick={logout}>
-					Log Out
-				</Button>
-			</Card>
 			{/* 
 			<AlertDialog>
 				<AlertDialogTrigger asChild>

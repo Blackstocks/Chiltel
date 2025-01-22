@@ -74,6 +74,7 @@ const LoginForm = () => {
 	const handleLogin = async (e) => {
 		e.preventDefault();
 		try {
+			console.log("Logging in with", formData);
 			await login(formData);
 			// Redirect on success - use your router's navigation
 			navigate("/");

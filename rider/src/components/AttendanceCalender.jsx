@@ -11,9 +11,14 @@ import {
 	DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "react-toastify";
 
 const AttendanceCalendar = () => {
 	const [selectedDate, setSelectedDate] = useState(new Date());
+	const [leaveReason, setLeaveReason] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	// Example data - replace with your actual data
 	const [attendance] = useState({
@@ -23,17 +28,27 @@ const AttendanceCalendar = () => {
 	});
 
 	const [leaveRequests, setLeaveRequests] = useState({
-		"2024-01-20": { status: "leave" },
-		"2024-01-21": { status: "leave" },
+		"2024-01-20": { status: "leave", reason: "Personal" },
+		"2024-01-21": { status: "leave", reason: "Sick" },
 	});
 
-	const handleLeaveRequest = () => {
+	const handleLeaveRequest = async () => {
+		if (!leaveReason) {
+			toast.error("Please enter a reason for leave");
+			return;
+		}
 		if (selectedDate > new Date()) {
+			setIsLoading(true);
 			const dateKey = selectedDate.toISOString().split("T")[0];
+			// Simulate a backend request with a timeout
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 			setLeaveRequests((prev) => ({
 				...prev,
-				[dateKey]: { status: "leave" },
+				[dateKey]: { status: "leave", reason: leaveReason },
 			}));
+			setLeaveReason("");
+			setIsLoading(false);
+			setIsDialogOpen(false); // Close the dialog after processing
 		}
 	};
 
@@ -71,11 +86,11 @@ const AttendanceCalendar = () => {
 	};
 
 	return (
-		<Card>
+		<Card className="w-full max-w-4xl mx-auto">
 			<CardHeader>
-				<CardTitle className="flex items-center justify-between">
+				<CardTitle className="flex flex-col sm:flex-row items-center justify-between">
 					<span>Attendance & Leave</span>
-					<div className="flex items-center gap-4 text-sm">
+					<div className="flex items-center gap-4 text-sm mt-2 sm:mt-0">
 						<div className="flex items-center gap-1">
 							<CheckCircle2 className="h-4 w-4 text-green-500" />
 							<span>{Object.keys(attendance).length} Present</span>
@@ -89,7 +104,7 @@ const AttendanceCalendar = () => {
 			</CardHeader>
 			<CardContent>
 				<div className="flex flex-col gap-4">
-					<div className="rounded-md border p-3">
+					<div className="rounded-md border p-3 overflow-x-auto">
 						<Calendar
 							mode="single"
 							selected={selectedDate}
@@ -98,14 +113,18 @@ const AttendanceCalendar = () => {
 								DayContent: ({ date, isSelected }) =>
 									renderDay(date, isSelected),
 							}}
+							className="flex justify-center"
 						/>
 					</div>
 
 					{selectedDate > new Date() &&
 						!leaveRequests[formatDateKey(selectedDate)] && (
-							<Dialog>
+							<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 								<DialogTrigger asChild>
-									<Button variant="outline">
+									<Button
+										variant="outline"
+										onClick={() => setIsDialogOpen(true)}
+									>
 										Request Leave for {selectedDate.toLocaleDateString()}
 									</Button>
 								</DialogTrigger>
@@ -113,21 +132,28 @@ const AttendanceCalendar = () => {
 									<DialogHeader>
 										<DialogTitle>Confirm Leave Request</DialogTitle>
 									</DialogHeader>
+									<Input
+										placeholder="Enter reason for leave"
+										value={leaveReason}
+										onChange={(e) => setLeaveReason(e.target.value)}
+										className="mt-2"
+										required
+									/>
 									<div className="flex justify-end gap-2 pt-4">
 										<DialogClose asChild>
-											<Button variant="outline">Cancel</Button>
-										</DialogClose>
-										<DialogClose asChild>
-											<Button onClick={handleLeaveRequest}>
-												Confirm Leave
+											<Button variant="outline" disabled={isLoading}>
+												Cancel
 											</Button>
 										</DialogClose>
+										<Button onClick={handleLeaveRequest} disabled={isLoading}>
+											{isLoading ? "Processing..." : "Confirm Leave"}
+										</Button>
 									</div>
 								</DialogContent>
 							</Dialog>
 						)}
 
-					<div className="grid grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div className="rounded-lg border p-3">
 							<div className="flex items-center gap-2">
 								<CheckCircle2 className="h-4 w-4 text-green-500" />

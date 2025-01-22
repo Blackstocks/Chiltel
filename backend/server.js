@@ -14,9 +14,15 @@ import serviceRequestRoutes from "./routes/serviceRequestRoute.js";
 import emailRoutes from "./routes/emailRoute.js";
 import dashboardRouter from "./routes/dashboardRoute.js";
 import riderRouter from "./routes/riderRoute.js";
-import sellerRoutes from './routes/sellerRoutes.js';
+import sellerRoutes from "./routes/sellerRoutes.js";
 import referralRouter from "./routes/referralCodeRoute.js";
-import ticketRoutes from './routes/ticketRoute.js';
+import ticketRoutes from "./routes/ticketRoute.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Get directory name for ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // App Config
 const app = express();
@@ -26,6 +32,8 @@ connectCloudinary();
 
 // middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(cors());
 
 // api endpoints
@@ -40,10 +48,10 @@ app.use("/api/order", orderRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/user", userRouter);
 app.use("/api/rider", riderRouter);
-app.use('/api/seller', sellerRoutes);
+app.use("/api/seller", sellerRoutes);
 
 app.use("/api/referralCode", adminAuth, referralRouter);
-app.use('/api/tickets', ticketRoutes);
+app.use("/api/tickets", ticketRoutes);
 
 app.get("/", (req, res) => {
 	res.send("API Working");
