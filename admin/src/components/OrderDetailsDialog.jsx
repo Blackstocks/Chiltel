@@ -8,6 +8,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Printer, FileText } from "lucide-react";
+import ProductOrderChalan from "@/components/ProductOrderChalan";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -49,10 +52,24 @@ const OrderDetailsSheet = ({ order }) => {
         <Button variant="ghost">View Order Details</Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-3xl overflow-y-auto">
-        <SheetHeader className="pb-4">
-          <SheetTitle>Order Details</SheetTitle>
-          <SheetDescription>Order ID: {order._id}</SheetDescription>
-        </SheetHeader>
+      <SheetHeader className="pb-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <SheetTitle>Order Details</SheetTitle>
+                <SheetDescription>Order ID: {order._id}</SheetDescription>
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" /> View Chalan
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <ProductOrderChalan order={order} />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </SheetHeader>
 
         <div className="grid gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -62,6 +79,9 @@ const OrderDetailsSheet = ({ order }) => {
               </CardHeader>
               <CardContent className="space-y-2">
                 <p className="text-sm">Name: {order.userId.name}</p>
+                <p className="text-sm">
+                  Contact number: {order.userId.phoneNumber}
+                </p>
                 <p className="text-sm">Email: {order.userId.email}</p>
                 <div className="pt-2">
                   <p className="font-medium text-sm">Shipping Address:</p>
@@ -115,10 +135,21 @@ const OrderDetailsSheet = ({ order }) => {
                 <TableBody>
                   {order.products.map((item) => (
                     <TableRow key={item._id}>
-                      <TableCell className="font-medium">
-                        <div className="font-medium">{item.product?.name}</div>
-                        <div className="text-sm text-gray-500">
-                          {item.product?._id}
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="font-medium">
+                            {item.product?.name}
+                          </div>
+                          {item.product?.brand && (
+                            <div className="text-sm text-gray-600">
+                              Brand: {item.product.brand}{" "}
+                              {item.product.model &&
+                                `• Model: ${item.product.model}`}
+                            </div>
+                          )}
+                          <div className="text-xs text-gray-500">
+                            ID: {item.product?._id}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -137,8 +168,13 @@ const OrderDetailsSheet = ({ order }) => {
                       Total Amount:
                     </TableCell>
                     <TableCell className="text-right font-bold">
-                 
-                    ₹{order.products.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+                      ₹
+                      {order.products
+                        .reduce(
+                          (sum, item) => sum + item.price * item.quantity,
+                          0
+                        )
+                        .toFixed(2)}
                     </TableCell>
                   </TableRow>
                 </TableBody>

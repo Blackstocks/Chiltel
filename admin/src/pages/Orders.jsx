@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, User, MapPin } from "lucide-react";
+import { MoreVertical, User, MapPin, Search, Phone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -43,7 +43,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search } from "lucide-react";
 import RiderAssignmentCell from "../components/RiderAssignmentCell";
 import ExportButtons from "../components/OrderExportButtons";
 import RiderLocationTracker from "../components/RiderLocationTracker";
@@ -644,7 +643,16 @@ const OrderManagement = ({ token }) => {
 
                         <TableCell>
                           {service.rider ? (
-                            service.rider._id
+                            <div className="flex flex-col gap-1">
+                            <span className="font-medium flex items-center gap-1">
+                              <User className="h-3 w-3" />
+                              {service.rider.firstName + " " + service.rider.lastName}
+                            </span>
+                            <span className="text-sm text-gray-500 flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {service.rider.phoneNumber}
+                            </span>
+                          </div>
                           ) : (
                             <RiderAssignmentCell
                               service={service}

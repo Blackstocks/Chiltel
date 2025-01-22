@@ -25,8 +25,8 @@ const mapContainerStyle = {
 };
 
 const center = {
-  lat: 12.9716,
-  lng: 77.5946
+  lat: 22.3148869,
+  lng: 87.2995948
 };
 
 const RiderLocationTracker = ({ 
@@ -76,8 +76,8 @@ const RiderLocationTracker = ({
       try {
         // Simulated initial location
         const riderLocation = {
-          lat: 12.9716,
-          lng: 77.5946,
+          lat: 22.3148869,
+          lng: 87.2995948,
           timestamp: new Date().toISOString(),
           speed: 20,
           accuracy: 10,
@@ -101,14 +101,14 @@ const RiderLocationTracker = ({
         
         setLocationHistory([
           {
-            lat: 12.9716,
-            lng: 77.5946,
+            lat: 22.3148869,
+            lng: 87.2995948,
             timestamp: new Date().toISOString(),
             status: 'Started journey',
           },
           {
-            lat: 12.9720,
-            lng: 77.5950,
+            lat: 22.3148869,
+            lng: 87.2995948,
             timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
             status: 'En route to customer',
           },
