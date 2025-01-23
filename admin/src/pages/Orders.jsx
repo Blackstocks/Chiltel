@@ -24,7 +24,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, User, MapPin, Search, Phone } from "lucide-react";
+import {
+  MoreVertical,
+  User,
+  MapPin,
+  Search,
+  Phone,
+  FileText,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -42,12 +49,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import RiderAssignmentCell from "../components/RiderAssignmentCell";
 import ExportButtons from "../components/OrderExportButtons";
 import RiderLocationTracker from "../components/RiderLocationTracker";
+import ProductOrderChalan from "../components/ProductOrderChalan";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 5;
 
 const ORDER_STATUSES = ["PENDING", "ORDERED", "DELIVERED", "CANCELLED"];
 const SERVICE_STATUSES = [
@@ -441,7 +450,9 @@ const OrderManagement = ({ token }) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Order ID</TableHead>
+                    <TableHead>Order ID / Product</TableHead>
+                    <TableHead>Brand / Model</TableHead>
+                    <TableHead>Seller</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
@@ -452,7 +463,40 @@ const OrderManagement = ({ token }) => {
                 <TableBody>
                   {currentOrders.map((order) => (
                     <TableRow key={order._id}>
-                      <TableCell>{order._id}</TableCell>
+                      <TableCell>
+                        <div className="space-y-4">
+                          {order.products.map((item) => (
+                            <div
+                              key={item._id}
+                              className="border-b border-gray-200 pb-3 last:border-0 last:pb-0"
+                            >
+                              <div className="font-medium text-gray-900">
+                                {item.product?.name}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mb-2 text-sm font-medium text-gray-600">
+                          Order ID: {order._id}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-4">
+                          {order.products.map((item) => (
+                            <div key={item._id}>
+                              <div className="font-medium">
+                                {item.product?.brand}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {item.product?.model}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {order.seller ? order.seller.name : "Admin"}
+                      </TableCell>
                       <TableCell>
                         <div className="font-medium">{order.userId.name}</div>
                         <div className="text-sm text-gray-500">
@@ -477,7 +521,31 @@ const OrderManagement = ({ token }) => {
                         {new Date(order.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <OrderDetailsDialog order={order} />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <OrderDetailsDialog order={order} />
+                            <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <div className="flex items-center">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    View Chalan
+                                  </div>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl">
+                                  <ProductOrderChalan order={order} />
+                                </DialogContent>
+                              </Dialog>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -644,15 +712,17 @@ const OrderManagement = ({ token }) => {
                         <TableCell>
                           {service.rider ? (
                             <div className="flex flex-col gap-1">
-                            <span className="font-medium flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              {service.rider.firstName + " " + service.rider.lastName}
-                            </span>
-                            <span className="text-sm text-gray-500 flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {service.rider.phoneNumber}
-                            </span>
-                          </div>
+                              <span className="font-medium flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                {service.rider.firstName +
+                                  " " +
+                                  service.rider.lastName}
+                              </span>
+                              <span className="text-sm text-gray-500 flex items-center gap-1">
+                                <Phone className="h-3 w-3" />
+                                {service.rider.phoneNumber}
+                              </span>
+                            </div>
                           ) : (
                             <RiderAssignmentCell
                               service={service}

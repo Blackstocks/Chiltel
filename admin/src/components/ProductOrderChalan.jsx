@@ -10,6 +10,11 @@ const ProductOrderChalan = () => {
           <head>
             <style>
               @page { size: A4; margin: 2cm; margin-top: 0.5cm; margin-bottom: 0.5cm; }
+              @media print {
+                button {
+                  display: none !important;
+                }
+              }
               body { 
                 font-family: -apple-system, system-ui, sans-serif;
                 font-size: 12pt;
@@ -175,11 +180,19 @@ const ProductOrderChalan = () => {
         >
           <div className="p-8">
             {/* Header */}
-            <div className="text-center border-b pb-6 mb-6">
-              <h1 className="text-3xl font-bold mb-2">Tax Invoice</h1>
+            <div className="relative border-b pb-6 mb-6">
+              <h1 className="text-3xl font-bold text-center w-full absolute top-0">
+                Tax Invoice
+              </h1>
+              <div className="flex justify-end">
+                <button
+                  onClick={handlePrint}
+                  className="bg-blue-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-blue-600 transition-colors"
+                >
+                  Print Invoice
+                </button>
+              </div>
             </div>
-
-            {/* Company Info */}
 
             {/* Invoice title and company details */}
             <div className="flex mb-8">
@@ -187,7 +200,7 @@ const ProductOrderChalan = () => {
                 <img
                   src="/chiltelLogo.png"
                   alt="Chiltel Logo"
-                  className="w-32 p-4"
+                  className="w-32"
                 />
               </div>
               <div className="flex">
@@ -432,9 +445,8 @@ const ProductOrderChalan = () => {
               </div>
             </div>
 
-            {/* Footer Sections */}
             {/* Footer Section */}
-            <div className="grid grid-cols-3 border-t border-gray-200 mt-4">
+            <div className="grid grid-cols-3 border-t border-gray-200">
               {/* Terms & Bank Details */}
               <div className="col-span-1 border-r">
                 <div className="bg-cyan-500 text-white p-2">
@@ -489,7 +501,7 @@ const ProductOrderChalan = () => {
             </div>
 
             {/* Acknowledgement Section */}
-            <div className="border-t border-dashed mt-8 pt-4">
+            <div className="border-t border-dashed pt-4">
               <div className="text-center font-bold mb-4">ACKNOWLEDGEMENT</div>
               <div className="text-center text-lg text-cyan-500 font-bold mb-4">
                 CHILTEL INDIA PRIVATE LIMITED
