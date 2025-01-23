@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 
-const ProductOrderChalan = () => {
+const ProductOrderChalan = ({ order }) => {
   const printRef = useRef();
   const handlePrint = () => {
     const printContent = printRef.current;
@@ -9,7 +9,7 @@ const ProductOrderChalan = () => {
         <html>
           <head>
             <style>
-              @page { size: A4; margin: 2cm; margin-top: 0.5cm; margin-bottom: 0.5cm; }
+              @page { size: A4; margin: 1cm; margin-top: 1cm; margin-bottom: 1cm; }
               @media print {
                 button {
                   display: none !important;
@@ -18,7 +18,9 @@ const ProductOrderChalan = () => {
               body { 
                 font-family: -apple-system, system-ui, sans-serif;
                 font-size: 12pt;
-                line-height: 0.95;
+                line-height: 1;
+                border: 1px solid rgb(20, 20, 21);
+                padding: 1rem; 
               }
               table {
                 width: 100%;
@@ -44,6 +46,7 @@ const ProductOrderChalan = () => {
               .grid { display: grid; gap: 1rem; }
               .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
               .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+              .border { border: 1px solid rgb(22, 22, 23); }
               .border-t { border-top: 1px solid #e5e7eb; }
               .border-r { border-right: 1px solid #e5e7eb; }
               .border-x { border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; }
@@ -76,7 +79,14 @@ const ProductOrderChalan = () => {
             .text-right { text-align: right; }
             .bg-cyan-500 { background-color: #00bcd4; }
             .text-white { color: white; }
-            
+            .pt-0 { padding-top: 0; }
+            .mt-0 { margin-top: 0; }
+            .ml-0 { margin-left: 0; }
+            .mr-0 { margin-right: 0; }
+            .mb-0 { margin-bottom: 0; }
+            .pb-0 { padding-bottom: 0; }
+            .pl-0 { padding-left: 0; }
+            .pr-0 { padding-right: 0; }
 
                .border-t.border-dashed { border-top: 1px dashed #000; }
             .mt-8 { margin-top: 2rem; }
@@ -101,16 +111,109 @@ const ProductOrderChalan = () => {
         </html>
       `);
     newWindow.document.close();
-    newWindow.focus();
-    newWindow.print();
-    newWindow.close();
+    const images = newWindow.document.querySelectorAll("img");
+    const promises = Array.from(images).map(
+      (img) =>
+        new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve; // Resolve even if an image fails to load
+        })
+    );
+
+    Promise.all(promises).then(() => {
+      newWindow.focus();
+      newWindow.print();
+      newWindow.close();
+    });
   };
 
+  // Helper function to convert numbers to words
+  const convertNumberToWords = (amount) => {
+    const ones = [
+      "",
+      "One",
+      "Two",
+      "Three",
+      "Four",
+      "Five",
+      "Six",
+      "Seven",
+      "Eight",
+      "Nine",
+    ];
+    const tens = [
+      "",
+      "",
+      "Twenty",
+      "Thirty",
+      "Forty",
+      "Fifty",
+      "Sixty",
+      "Seventy",
+      "Eighty",
+      "Ninety",
+    ];
+    const teens = [
+      "Eleven",
+      "Twelve",
+      "Thirteen",
+      "Fourteen",
+      "Fifteen",
+      "Sixteen",
+      "Seventeen",
+      "Eighteen",
+      "Nineteen",
+    ];
+  
+    const convertBelowThousand = (num) => {
+      let result = "";
+  
+      if (num > 99) {
+        result += ones[Math.floor(num / 100)] + " Hundred ";
+        num %= 100;
+      }
+  
+      if (num > 10 && num < 20) {
+        result += teens[num - 11] + " ";
+      } else {
+        result += tens[Math.floor(num / 10)] + " ";
+        result += ones[num % 10] + " ";
+      }
+  
+      return result.trim();
+    };
+  
+    if (amount === 0) return "Zero Rupees Only";
+  
+    let result = "";
+    const crore = Math.floor(amount / 10000000);
+    const lakh = Math.floor((amount % 10000000) / 100000);
+    const thousand = Math.floor((amount % 100000) / 1000);
+    const hundred = Math.floor((amount % 1000) / 100);
+    const belowHundred = Math.floor(amount % 100);
+  
+    if (crore) result += convertBelowThousand(crore) + " Crore ";
+    if (lakh) result += convertBelowThousand(lakh) + " Lakh ";
+    if (thousand) result += convertBelowThousand(thousand) + " Thousand ";
+    if (hundred) result += ones[hundred] + " Hundred ";
+    if (belowHundred) result += "and " + convertBelowThousand(belowHundred);
+  
+    // Handle decimal part (fractional part)
+    const fractionalPart = Math.round((amount % 1) * 100); // Get two decimal places
+    if (fractionalPart > 0) {
+      result +=
+        " and " + convertBelowThousand(fractionalPart) + " Paise";
+    }
+  
+    return result.trim() + " Only";
+  };
+  
+
   const orderDetails = {
-    invoiceNumber: "CIPL/23-24/20",
-    invoiceDate: "19-08-2023",
-    poNumber: "CIPLQ/23-24/1",
-    poDate: "17-08-2023",
+    invoiceNumber: order._id,
+    invoiceDate: new Date().toLocaleDateString(),
+    poNumber: order._id,
+    poDate: new Date(order.createdAt).toLocaleDateString(),
     transport: {
       name: "Porter",
       vehicleNumber: "WB-05-7799",
@@ -127,12 +230,11 @@ const ProductOrderChalan = () => {
       state: "19-West Bengal",
     },
     customer: {
-      name: "Danish Music House Private Limited",
-      address:
-        "GR-FR, 155/2 GROUND FLOOR FIRST FLR, KESHAB CHANDRA SEN STREET, KOLKATA, WEST BENGAL, 700009",
+      name: order.userId.name,
+      address: `${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.zipCode}`,
       contact: "9830186398",
       gstin: "19AAJCD0841N1ZB",
-      state: "19-West Bengal",
+      state: order.address.state,
     },
     bank: {
       name: "STATE BANK OF INDIA, GARFA",
@@ -140,34 +242,39 @@ const ProductOrderChalan = () => {
       ifsc: "SBIN0001450",
       accountHolder: "Chiltel India Private Limited",
     },
-    items: [
-      {
-        name: "EF 335 SDG (00254)",
-        serialNumbers: ["SVEF335SDG221100187", "SVEF335SDG221100103"],
-        hsn: "84183010",
-        mrp: 32500.0,
-        quantity: 2,
-        unit: "Nos",
-        unitPrice: 16101.69,
-        taxableAmount: 32203.39,
-        cgst: 2898.31,
-        sgst: 2898.31,
-        total: 38000.0,
-      },
-    ],
-    totals: {
-      cgst: 5796.62,
-      sgst: 5796.62,
-      subTotal: 38000.0,
-      total: 49593.24,
-    },
-    amounts: {
-      subTotal: 38000.0,
-      received: 0.0,
-      balance: 38000.0,
-      previousBalance: 0.0,
-      currentBalance: 38000.0,
-      youSaved: 27000.0,
+    items: order.products.map((item) => ({
+      name: item.product.name,
+      serialNumbers: ["6567894972365"], // Add if available
+      hsn: "84183010",
+      mrp: item.product.price,
+      quantity: item.quantity,
+      discount: item.product.discount * 100,
+      unit: "Nos",
+      unitPrice: item.price,
+      taxableAmount: item.price * 1.18, // Including 18% GST
+      cgst: item.price * 0.09, // 9% CGST
+      sgst: item.price * 0.09, // 9% SGST
+      gst: item.price * 0.18, // 18% GST
+      total: item.price * 1.18, // Including 18% GST
+    })),
+    total: {
+      subTotal: order.products.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      ),
+      cgst: order.products.reduce(
+        (sum, item) => sum + item.price * item.quantity * 0.09,
+        0
+      ),
+      sgst: order.products.reduce(
+        (sum, item) => sum + item.price * item.quantity * 0.09,
+        0
+      ),
+      gst: order.products.reduce(
+        (sum, item) => sum + item.price * item.quantity * 0.18,
+        0
+      ),
+      total: order.totalAmount,
     },
   };
 
@@ -200,7 +307,7 @@ const ProductOrderChalan = () => {
                 <img
                   src="/chiltelLogo.png"
                   alt="Chiltel Logo"
-                  className="w-32"
+                  className="w-32 p-4"
                 />
               </div>
               <div className="flex">
@@ -224,30 +331,22 @@ const ProductOrderChalan = () => {
             </div>
 
             {/* Bill To, Transportation Details, Invoice Details */}
-            <div className="grid grid-cols-3 gap-8 mb-8">
-              <div>
-                <h2 className="font-bold text-lg mb-4">Bill To</h2>
-                <p className="font-medium">{orderDetails.customer.name}</p>
-                <p className="whitespace-pre-line">
-                  {orderDetails.customer.address}
-                </p>
-                <p>Contact No.: {orderDetails.customer.contact}</p>
-                <p>GSTIN: {orderDetails.customer.gstin}</p>
-                <p>State: {orderDetails.customer.state}</p>
-                <p>Place of supply: {orderDetails.customer.state}</p>
-              </div>
-              <div>
-                <h2 className="font-bold text-lg mb-4">
-                  Transportation Details
+            <div className="grid grid-cols-2 gap-8 mb-8">
+              <div className="border">
+                <h2 className="font-bold text-lg bg-cyan-500 text-white p-2 mt-0 mb-0">
+                  Bill To
                 </h2>
-                <p>Transport Name: {orderDetails.transport.name}</p>
-                <p>Vehicle Number: {orderDetails.transport.vehicleNumber}</p>
-                <p>Delivery Date: {orderDetails.transport.deliveryDate}</p>
-                <p>
-                  Delivery Location: {orderDetails.transport.deliveryLocation}
-                </p>
+                <div className="p-4 mt-0 pt-0">
+                  <p className="font-medium">{orderDetails.customer.name}</p>
+                  <p className="whitespace-pre-line">
+                    {orderDetails.customer.address}
+                  </p>
+                  <p>Contact No.: {orderDetails.customer.contact}</p>
+                  <p>State: {orderDetails.customer.state}</p>
+                  <p>Place of supply: {orderDetails.customer.state}</p>
+                </div>
               </div>
-              <div className="text-right">
+              <div className="text-right border p-4">
                 <p className="mb-2">
                   Invoice No.: {orderDetails.invoiceNumber}
                 </p>
@@ -266,16 +365,11 @@ const ProductOrderChalan = () => {
                     <th className="border px-2 py-1 text-left">HSN/SAC</th>
                     <th className="border px-2 py-1 text-right">MRP</th>
                     <th className="border px-2 py-1 text-right">Quantity</th>
+                    <th className="border px-2 py-1 text-right">Discount</th>
                     <th className="border px-2 py-1 text-right">Price/Unit</th>
                     <th className="border px-2 py-1 text-right">
-                      Taxable Price/Unit
+                      Total Amount
                     </th>
-                    <th className="border px-2 py-1 text-right">
-                      Taxable amount
-                    </th>
-                    <th className="border px-2 py-1 text-right">CGST</th>
-                    <th className="border px-2 py-1 text-right">SGST</th>
-                    <th className="border px-2 py-1 text-right">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -293,25 +387,16 @@ const ProductOrderChalan = () => {
                         ₹{item.mrp.toLocaleString()}
                       </td>
                       <td className="border px-2 py-1 text-right">
-                        {item.quantity} Nos
+                        {item.quantity}
+                      </td>
+                      <td className="border px-2 py-1 text-right">
+                        {item.discount.toLocaleString()}%
                       </td>
                       <td className="border px-2 py-1 text-right">
                         ₹{item.unitPrice.toLocaleString()}
                       </td>
                       <td className="border px-2 py-1 text-right">
-                        ₹{item.unitPrice.toLocaleString()}
-                      </td>
-                      <td className="border px-2 py-1 text-right">
-                        ₹{item.taxableAmount.toLocaleString()}
-                      </td>
-                      <td className="border px-2 py-1 text-right">
-                        ₹{item.cgst.toLocaleString()} (9%)
-                      </td>
-                      <td className="border px-2 py-1 text-right">
-                        ₹{item.sgst.toLocaleString()} (9%)
-                      </td>
-                      <td className="border px-2 py-1 text-right font-medium">
-                        ₹{item.total.toLocaleString()}
+                        ₹{item.unitPrice * item.quantity}
                       </td>
                     </tr>
                   ))}
@@ -322,29 +407,8 @@ const ProductOrderChalan = () => {
                     >
                       Total
                     </td>
-                    <td className="border px-2 py-1 text-right">
-                      ₹
-                      {orderDetails.items
-                        .reduce((sum, item) => sum + item.taxableAmount, 0)
-                        .toLocaleString()}
-                    </td>
-                    <td className="border px-2 py-1 text-right">
-                      ₹
-                      {orderDetails.items
-                        .reduce((sum, item) => sum + item.cgst, 0)
-                        .toLocaleString()}
-                    </td>
-                    <td className="border px-2 py-1 text-right">
-                      ₹
-                      {orderDetails.items
-                        .reduce((sum, item) => sum + item.sgst, 0)
-                        .toLocaleString()}
-                    </td>
                     <td className="border px-2 py-1 text-right font-bold">
-                      ₹
-                      {orderDetails.items
-                        .reduce((sum, item) => sum + item.total, 0)
-                        .toLocaleString()}
+                      ₹{orderDetails.total.subTotal.toLocaleString()}
                     </td>
                   </tr>
                 </tbody>
@@ -356,21 +420,19 @@ const ProductOrderChalan = () => {
                   <table className="w-full">
                     <tbody>
                       <tr>
-                        <td colSpan="2" className="font-bold">
-                          Tax details
-                        </td>
+                        <td className="font-bold">Tax details</td>
                         <td className="text-right">9%</td>
                       </tr>
                       <tr>
                         <td>CGST</td>
                         <td className="text-right">
-                          ₹{orderDetails.totals.cgst.toFixed(2)}
+                          ₹{orderDetails.total.cgst.toFixed(2)}
                         </td>
                       </tr>
                       <tr>
                         <td>SGST</td>
                         <td className="text-right">
-                          ₹{orderDetails.totals.sgst.toFixed(2)}
+                          ₹{orderDetails.total.sgst.toFixed(2)}
                         </td>
                       </tr>
                     </tbody>
@@ -381,12 +443,16 @@ const ProductOrderChalan = () => {
                       Invoice Amount In Words
                     </div>
                     <div className="p-2 border-x border-b">
-                      Thirty Eight Thousand Rupees only
+                      {convertNumberToWords(
+                        orderDetails.total.subTotal + orderDetails.total.gst
+                      )}
                     </div>
                     <div className="bg-cyan-500 text-white p-2 font-medium mt-2">
                       Payment mode
                     </div>
-                    <div className="p-2 border-x border-b">Credit</div>
+                    <div className="p-2 border-x border-b">
+                      {order.paymentDetails.method}
+                    </div>
                   </div>
                 </div>
                 <div className="p-2">
@@ -400,43 +466,20 @@ const ProductOrderChalan = () => {
                       <tr>
                         <td>Sub Total</td>
                         <td className="text-right">
-                          ₹{orderDetails.totals.subTotal.toFixed(2)}
+                          ₹{orderDetails.total.subTotal}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>GST(18%)</td>
+                        <td className="text-right">
+                          ₹{orderDetails.total.gst}
                         </td>
                       </tr>
                       <tr>
                         <td>Total</td>
                         <td className="text-right">
-                          ₹{orderDetails.totals.total.toFixed(2)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Received</td>
-                        <td className="text-right">
-                          ₹{orderDetails.amounts.received.toFixed(2)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Balance</td>
-                        <td className="text-right">
-                          ₹{orderDetails.amounts.balance.toFixed(2)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Previous Balance</td>
-                        <td className="text-right">
-                          ₹{orderDetails.amounts.previousBalance.toFixed(2)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Current Balance</td>
-                        <td className="text-right">
-                          ₹{orderDetails.amounts.currentBalance.toFixed(2)}
-                        </td>
-                      </tr>
-                      <tr className="text-cyan-500">
-                        <td>You Saved</td>
-                        <td className="text-right">
-                          ₹{orderDetails.amounts.youSaved.toFixed(2)}
+                          ₹
+                          {orderDetails.total.subTotal + orderDetails.total.gst}
                         </td>
                       </tr>
                     </tbody>
@@ -471,17 +514,10 @@ const ProductOrderChalan = () => {
               {/* QR Code */}
               <div className="p-4 flex flex-col items-center justify-center">
                 <img
-                  src="/api/placeholder/150/150"
-                  alt="QR Code"
+                  src="/qrCode.png"
+                  alt="Invoice QR Code"
                   className="w-32 h-32"
                 />
-                <div className="mt-2">
-                  <img
-                    src="/api/placeholder/100/30"
-                    alt="UPI Pay"
-                    className="h-8"
-                  />
-                </div>
               </div>
 
               {/* Signature */}
@@ -490,7 +526,7 @@ const ProductOrderChalan = () => {
                   <p>For, {orderDetails.company.name}</p>
                   <div className="mt-16">
                     <img
-                      src="/api/placeholder/100/50"
+                      src="/chiltelSignature.png"
                       alt="Signature"
                       className="inline-block"
                     />
@@ -509,13 +545,9 @@ const ProductOrderChalan = () => {
 
               <div className="grid grid-cols-2">
                 <div>
-                  <div className="font-bold">
-                    DANISH MUSIC HOUSE PRIVATE LIMITED
-                  </div>
+                  <div className="font-bold">{orderDetails.customer.name}</div>
                   <div className="max-w-md">
-                    GR-FR, 155/2 GROUND FLOOR FIRST FLR, KESHAB CHANDRA SEN
-                    STREET, GR-FR, 155/2 GROUND FLOOR FIRST FLR, KOLKATA, WEST
-                    BENGAL, 700009
+                    {orderDetails.customer.address}
                   </div>
                   <div className="mt-8">Receiver's Seal & Sign</div>
                 </div>
@@ -524,7 +556,7 @@ const ProductOrderChalan = () => {
                   <div>INVOICE DATE : {orderDetails.invoiceDate}</div>
                   <div>
                     INVOICE AMOUNT : ₹
-                    {orderDetails.totals.total.toLocaleString()}
+                    {orderDetails.total.subTotal + orderDetails.total.gst}
                   </div>
                 </div>
               </div>
