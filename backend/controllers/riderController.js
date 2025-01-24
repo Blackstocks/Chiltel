@@ -309,7 +309,8 @@ const riderController = {
 				status: "ASSIGNED",
 			})
 				.populate("service", "name estimatedDuration")
-				.populate("user", "firstName lastName");
+				.populate("user", "firstName lastName")
+				.select("-OTP");
 
 			res.json(services);
 		} catch (error) {
@@ -324,7 +325,8 @@ const riderController = {
 				workStarted: true,
 			})
 				.populate("user", "name phoneNumber address")
-				.populate("service", "name rateChart");
+				.populate("service", "name rateChart")
+				.select("-OTP");
 
 			if (!service) {
 				return res.status(404).json({ message: "No service is active now" });
@@ -344,7 +346,8 @@ const riderController = {
 				workStarted: false,
 			})
 				.populate("service", "name estimatedDuration")
-				.populate("user", "name phoneNumber address");
+				.populate("user", "name phoneNumber address")
+				.select("-OTP");
 			if (services.length === 0) {
 				return res.status(404).json({ message: "No accepted services found" });
 			}
@@ -366,7 +369,8 @@ const riderController = {
 				.populate("service", "name")
 				.sort({ completedAt: -1 })
 				.limit(limit * 1)
-				.skip((page - 1) * limit);
+				.skip((page - 1) * limit)
+				.select("-OTP");
 
 			const count = await ServiceRequest.countDocuments({
 				rider: req.rider._id,
@@ -461,7 +465,7 @@ const riderController = {
 			await service.save();
 			await rider.save();
 
-			res.json(service);
+			res.json(service.select("-OTP"));
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
@@ -479,7 +483,7 @@ const riderController = {
 				return res.status(404).json({ message: "Service not found" });
 			}
 
-			res.json(service);
+			res.json(service.select("-OTP"));
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}

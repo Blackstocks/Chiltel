@@ -33,6 +33,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import CompleteBtn from "./CompleteBtn";
 
 const ActiveService = () => {
 	const [activeService, setActiveService] = useState(null);
@@ -49,6 +57,10 @@ const ActiveService = () => {
 	const [selectedWorks, setSelectedWorks] = useState([]);
 	const [workStarted, setWorkStarted] = useState(false);
 	const [openAccordions, setOpenAccordions] = useState([]);
+	const [faultImages, setFaultImages] = useState([]);
+	const [showFaultImageDialog, setShowFaultImageDialog] = useState(false);
+	const [faultType, setFaultType] = useState("");
+	const [faultNote, setFaultNote] = useState("");
 
 	useEffect(() => {
 		getActiveService().then((service) => {
@@ -86,11 +98,28 @@ const ActiveService = () => {
 	};
 
 	const handleCompleteWork = async () => {
-		// Implementation here
 		await completeService(activeService._id);
 		setTimeout(() => {
 			window.location.reload();
 		}, 500);
+	};
+
+	const handleUploadFaultImages = (event) => {
+		const files = Array.from(event.target.files);
+		if (files.length >= 2) {
+			setFaultImages(files);
+			console.log("Selected fault images:", files);
+		} else {
+			alert("Please select at least two images.");
+		}
+	};
+
+	const handleSubmitFaultImages = () => {
+		// Handle the submission of fault images, fault type, and fault note
+		console.log("Fault Type:", faultType);
+		console.log("Fault Note:", faultNote);
+		console.log("Fault Images:", faultImages);
+		setShowFaultImageDialog(false);
 	};
 
 	// Loading skeleton
@@ -191,6 +220,15 @@ const ActiveService = () => {
 		);
 	};
 
+	const handleNavigate = (currService) => {
+		console.log(currService);
+		if (currService?.userLocation?.coordinates) {
+			window.open(
+				`https://www.google.com/maps/dir/?api=1&destination=${currService.userLocation.coordinates[0]},${currService.userLocation.coordinates[1]}`,
+				"_blank"
+			);
+		}
+	};
 	return (
 		<Card className="md:col-span-2 lg:col-span-3 relative overflow-hidden border-2 border-green-100">
 			{/* Active card indicator - subtle gradient background */}
@@ -214,6 +252,7 @@ const ActiveService = () => {
 							</p>
 						)}
 					</div>
+
 					{workStarted && (
 						<Badge
 							variant="success"
@@ -256,13 +295,7 @@ const ActiveService = () => {
 										size="sm"
 										className="border-green-200 hover:bg-green-50"
 										onClick={() => {
-											const address = encodeURIComponent(
-												activeService.userLocation.address
-											);
-											window.open(
-												`https://www.google.com/maps/search/?api=1&query=${address}`,
-												"_blank"
-											);
+											handleNavigate(activeService);
 										}}
 									>
 										<Navigation className="w-4 h-4 mr-2 text-green-600" />
@@ -376,6 +409,77 @@ const ActiveService = () => {
 
 					<CardFooter className="border-t border-green-100 bg-white/80 px-6 py-4 relative">
 						<div className="flex justify-end w-full space-x-4">
+							<Dialog
+								open={showFaultImageDialog}
+								onOpenChange={setShowFaultImageDialog}
+							>
+								<DialogTrigger asChild>
+									<Button
+										variant="outline"
+										size="lg"
+										className="border-green-200 hover:bg-green-50"
+									>
+										{workStarted ? "Add Work Details" : "Add Fault Details"}
+									</Button>
+								</DialogTrigger>
+								<DialogContent className="max-w-md">
+									<DialogHeader>
+										<DialogTitle>
+											Upload {workStarted ? "Repaired" : "Fault"} Images
+										</DialogTitle>
+									</DialogHeader>
+									<Input
+										type="file"
+										accept="image/*"
+										multiple
+										onChange={handleUploadFaultImages}
+									/>
+									{faultImages.length > 0 && (
+										<div className="mt-4 space-y-2 flex flex-wrap">
+											{faultImages.map((image, index) => (
+												<img
+													key={index}
+													src={URL.createObjectURL(image)}
+													alt={`Fault ${index + 1}`}
+													className="w-[30%] h-auto rounded-lg object-contain"
+												/>
+											))}
+										</div>
+									)}
+									{!workStarted && (
+										<Select
+											value={faultType}
+											onValueChange={setFaultType} // Changed from onChange
+										>
+											<SelectTrigger className="mt-4">
+												<SelectValue placeholder="Select Fault Type" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="type1">Type 1</SelectItem>
+												<SelectItem value="type2">Type 2</SelectItem>
+												<SelectItem value="type3">Type 3</SelectItem>
+											</SelectContent>
+										</Select>
+									)}
+									<Input
+										type="text"
+										placeholder={`Add a note about the ${
+											workStarted ? "repair" : "fault"
+										}`}
+										value={faultNote}
+										onChange={(e) => setFaultNote(e.target.value)}
+										className="mt-4"
+									/>
+									<DialogFooter>
+										<Button
+											onClick={handleSubmitFaultImages}
+											className="bg-green-600 hover:bg-green-700 text-white"
+										>
+											Submit
+										</Button>
+									</DialogFooter>
+								</DialogContent>
+							</Dialog>
 							{!workStarted ? (
 								<Button
 									onClick={() =>
@@ -395,24 +499,7 @@ const ActiveService = () => {
 									)}
 								</Button>
 							) : (
-								<Button
-									onClick={handleCompleteWork}
-									disabled={loading}
-									size="lg"
-									className="bg-green-600 hover:bg-green-700 text-white"
-								>
-									{loading ? (
-										<>
-											<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-											Completing...
-										</>
-									) : (
-										<>
-											<CheckCircle2 className="h-4 w-4 mr-2" />
-											Complete Work
-										</>
-									)}
-								</Button>
+								<CompleteBtn loading= {loading} />
 							)}
 						</div>
 					</CardFooter>

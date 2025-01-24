@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import userModel from "./userModel.js";
 import Service from "./serviceModel.js";
 import Rider from "./riderModel.js";
+import { faults } from "../constants/index.js";
 // Service Request Schema
 const serviceRequestSchema = {
 	user: {
@@ -61,6 +62,19 @@ const serviceRequestSchema = {
 		method: String,
 		transactionId: String,
 		paidAt: Date,
+	},
+	faults: {
+		type: { type: String, enum: faults },
+		note: String,
+		images: [String],
+	},
+	repair: {
+		description: String,
+		rectifiedImages: [String],
+		spareImages: [String],
+	},
+	OTP: {
+		type: Number,
 	},
 	remarks: String,
 	completedAt: Date,
