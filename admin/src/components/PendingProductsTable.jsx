@@ -48,7 +48,7 @@ import { toast } from "react-toastify";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const PendingProductsTable = ({ token }) => {
+const PendingProductsTable = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
@@ -63,7 +63,11 @@ const PendingProductsTable = ({ token }) => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/product/getPendingProducts`,
-          { headers: { token } }
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
         );
         setProducts(response.data.data);
         console.log("Pending Products:", response.data.data);
@@ -92,7 +96,11 @@ const PendingProductsTable = ({ token }) => {
           selectedProduct._id
         }`,
         {},
-        { headers: { token } }
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
 
       setProducts(products.filter((p) => p._id !== selectedProduct._id));

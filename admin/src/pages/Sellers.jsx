@@ -280,7 +280,7 @@ const getStatusBadge = (status) => {
   );
 };
 
-const Sellers = ({ token }) => {
+const Sellers = () => {
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -326,7 +326,9 @@ const Sellers = ({ token }) => {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/seller/list?${params}`,
         {
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
@@ -352,7 +354,9 @@ const Sellers = ({ token }) => {
         `${import.meta.env.VITE_BACKEND_URL}/api/seller/${action}/${sellerId}`,
         {
           method: "PUT",
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
@@ -428,7 +432,7 @@ const Sellers = ({ token }) => {
   }, [debouncedSearch, status, currentPage]);
 
   return (
-    <div className="p-6">
+    <div className="">
       <Card className="w-full">
         <CardHeader className="py-4">
           <div className="flex items-center justify-between">
@@ -481,7 +485,7 @@ const Sellers = ({ token }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sellers.map((seller) => (
+                {sellers?.map((seller) => (
                   <TableRow key={seller._id}>
                     <TableCell>
                       <div className="flex flex-col gap-1">
@@ -545,7 +549,7 @@ const Sellers = ({ token }) => {
                   </TableRow>
                 ))}
 
-                {sellers.length === 0 && !loading && (
+                {sellers?.length === 0 && !loading && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8">
                       No sellers found

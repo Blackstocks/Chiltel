@@ -40,7 +40,7 @@ const StatsCard = ({ title, value, icon: Icon, trend }) => {
 };
 
 // Main Dashboard Component
-const Dashboard = ({ token }) => {
+const Dashboard = () => {
   // Sample data
   const [stats, setStats] = useState({
     products: 0,
@@ -56,7 +56,9 @@ const Dashboard = ({ token }) => {
     try {
       const [statsRes] = await Promise.all([
         axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard/stats`, {
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }),
         //axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard/sales`, { headers: { token } }),
         //axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard/recent-orders`, { headers: { token } })
@@ -124,7 +126,7 @@ const Dashboard = ({ token }) => {
   return (
     <div className="flex h-screen">
       <div className="flex-1">
-        <main className="p-6">
+        <main className="">
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

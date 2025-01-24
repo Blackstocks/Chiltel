@@ -20,7 +20,7 @@ import axios from "axios";
 
 
 // Full component with API integration
-const ReferralCodeDialog = ({ token }) => {
+const ReferralCodeDialog = () => {
   const [email, setEmail] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -38,7 +38,9 @@ const ReferralCodeDialog = ({ token }) => {
         `${import.meta.env.VITE_BACKEND_URL}/api/referralCode/generate`,
         { email },
         {
-          headers: { token }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
   

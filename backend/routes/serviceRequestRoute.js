@@ -1,7 +1,7 @@
 // routes/serviceRequestRoutes.js
 import express from 'express';
 import { serviceRequestController } from '../controllers/serviceRequestController.js';
-import adminAuth from '../middleware/adminAuth.js';
+import { protect, authorize } from '../middleware/adminAuthMiddleware.js';
 
 const serviceRequestRoutes = express.Router();
 
@@ -15,8 +15,8 @@ serviceRequestRoutes.put('/:id', serviceRequestController.updateServiceRequest);
 serviceRequestRoutes.delete('/:id', serviceRequestController.cancelServiceRequest);
 
 // Admin only routes
-serviceRequestRoutes.get('/',adminAuth, serviceRequestController.getAllServiceRequests);
-serviceRequestRoutes.post('/:id/assign-rider',adminAuth, serviceRequestController.assignRider);
-serviceRequestRoutes.put('/:id/payment',adminAuth, serviceRequestController.updatePaymentStatus);
+serviceRequestRoutes.get('/',protect, authorize(['super-admin', 'sub-admin']), serviceRequestController.getAllServiceRequests);
+serviceRequestRoutes.post('/:id/assign-rider',protect, authorize(['super-admin', 'sub-admin']), serviceRequestController.assignRider);
+serviceRequestRoutes.put('/:id/payment',protect, authorize(['super-admin', 'sub-admin']), serviceRequestController.updatePaymentStatus);
 
 export default serviceRequestRoutes;

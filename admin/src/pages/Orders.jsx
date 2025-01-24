@@ -109,7 +109,7 @@ const calculateTotalAmount = (service) => {
   return basePrice + additionalWorkTotal;
 };
 
-const OrderManagement = ({ token }) => {
+const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [riders, setRiders] = useState([]);
@@ -225,7 +225,9 @@ const OrderManagement = ({ token }) => {
         `${import.meta.env.VITE_BACKEND_URL}/api/order/list`,
         {
           method: "POST",
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
       if (!response.ok) throw new Error("Failed to fetch orders");
@@ -249,7 +251,9 @@ const OrderManagement = ({ token }) => {
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/serviceRequests`,
         {
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
       const data = response.data.data;
@@ -271,7 +275,9 @@ const OrderManagement = ({ token }) => {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/riders/list`,
         {
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
       if (!response.ok) throw new Error("Failed to fetch riders");
@@ -296,8 +302,7 @@ const OrderManagement = ({ token }) => {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            token: token,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ riderId }),
         }
@@ -378,7 +383,7 @@ const OrderManagement = ({ token }) => {
   };
 
   return (
-    <div className="p-6">
+    <div className="">
       <Tabs defaultValue="orders" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="orders">Product Orders</TabsTrigger>

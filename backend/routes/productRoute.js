@@ -9,18 +9,16 @@ import {
 	approveProduct,
 	rejectProduct,
 } from "../controllers/productController.js";
-import upload from "../middleware/multer.js";
-import adminAuth from "../middleware/adminAuth.js";
-import { get } from "mongoose";
+import { protect, authorize } from "../middleware/adminAuthMiddleware.js";
 
 const productRouter = express.Router();
 
-productRouter.post("/add", adminAuth, addProduct);
-productRouter.delete("/remove/:id", adminAuth, removeProduct);
-productRouter.put("/update/:id", adminAuth, updateProduct);
-productRouter.get("/getPendingProducts", adminAuth, getPendingProducts);
-productRouter.put("/approve/:id", adminAuth, approveProduct);
-productRouter.put("/reject/:id", adminAuth, rejectProduct);
+productRouter.post("/add", protect, authorize(['super-admin', 'sub-admin']), addProduct);
+productRouter.delete("/remove/:id", protect, authorize(['super-admin', 'sub-admin']), removeProduct);
+productRouter.put("/update/:id", protect, authorize(['super-admin', 'sub-admin']), updateProduct);
+productRouter.get("/getPendingProducts", protect, authorize(['super-admin', 'sub-admin']), getPendingProducts);
+productRouter.put("/approve/:id", protect, authorize(['super-admin', 'sub-admin']), approveProduct);
+productRouter.put("/reject/:id", protect, authorize(['super-admin', 'sub-admin']), rejectProduct);
 productRouter.get("/single", getProduct);
 productRouter.get("/list", listProducts);
 

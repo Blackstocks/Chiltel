@@ -1,10 +1,10 @@
 import express from 'express'
 const dashboardRouter = express.Router();
 import { getDashboardStats, getSalesData, getRecentOrders } from '../controllers/dashboardController.js';
-import adminAuth from '../middleware/adminAuth.js';
+import { protect, authorize } from '../middleware/adminAuthMiddleware.js';
 
-dashboardRouter.get('/stats', adminAuth, getDashboardStats);
-dashboardRouter.get('/sales', adminAuth, getSalesData); 
-dashboardRouter.get('/recent-orders', adminAuth, getRecentOrders);
+dashboardRouter.get('/stats', protect, authorize(['super-admin', 'sub-admin']), getDashboardStats);
+dashboardRouter.get('/sales', protect, authorize(['super-admin', 'sub-admin']), getSalesData); 
+dashboardRouter.get('/recent-orders', protect, authorize(['super-admin', 'sub-admin']), getRecentOrders);
 
 export default dashboardRouter;

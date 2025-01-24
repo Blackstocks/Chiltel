@@ -9,16 +9,16 @@ import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import ridersRouter from "./routes/ridersRoute.js";
 import serviceRoutes from "./routes/serviceRoute.js";
-import adminAuth from "./middleware/adminAuth.js";
 import serviceRequestRoutes from "./routes/serviceRequestRoute.js";
-import emailRoutes from "./routes/emailRoute.js";
 import dashboardRouter from "./routes/dashboardRoute.js";
 import riderRouter from "./routes/riderRoute.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
 import referralRouter from "./routes/referralCodeRoute.js";
 import ticketRoutes from "./routes/ticketRoute.js";
+import adminRoutes from "./routes/adminRoute.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { protect, authorize } from "./middleware/adminAuthMiddleware.js";
 
 // Get directory name for ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -38,7 +38,7 @@ app.use(cors());
 
 // api endpoints
 app.use("/api/user", userRouter);
-app.use("/api/riders", adminAuth, ridersRouter);
+app.use("/api/riders", protect, authorize(['super-admin', 'sub-admin']), ridersRouter);
 app.use("/api/services", serviceRoutes);
 app.use("/api/serviceRequests", serviceRequestRoutes);
 app.use("/api/product", productRouter);
@@ -50,8 +50,11 @@ app.use("/api/user", userRouter);
 app.use("/api/rider", riderRouter);
 app.use("/api/seller", sellerRoutes);
 
-app.use("/api/referralCode", adminAuth, referralRouter);
+app.use("/api/referralCode", protect, authorize(['super-admin']), referralRouter);
 app.use("/api/tickets", ticketRoutes);
+
+
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
 	res.send("API Working");

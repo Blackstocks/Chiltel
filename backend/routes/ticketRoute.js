@@ -11,16 +11,16 @@ import {
   getAllTicketsBySellerId,
 } from '../controllers/ticketController.js';
 import { protectSeller } from '../middleware/sellerAuth.js';
-import adminAuth from '../middleware/adminAuth.js';
+import { protect, authorize } from '../middleware/adminAuthMiddleware.js';
 
 const router = express.Router();
 
 router.get('/list', getAllTickets);
 router.get('/get/:id', getTicketById);
-router.put('/:id/status', adminAuth, updateTicketStatus);
-router.post('/:id/response', adminAuth, addResponse);
-router.put('/:id/priority', adminAuth, updatePriority);
-router.put('/:id/close', adminAuth, closeTicket);
+router.put('/:id/status', protect, authorize(['super-admin', 'sub-admin']), updateTicketStatus);
+router.post('/:id/response', protect, authorize(['super-admin', 'sub-admin']), addResponse);
+router.put('/:id/priority', protect, authorize(['super-admin', 'sub-admin']), updatePriority);
+router.put('/:id/close', protect, authorize(['super-admin', 'sub-admin']), closeTicket);
 
 router.use(protectSeller);
 router.post('/create', createTicket);

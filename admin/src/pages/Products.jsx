@@ -48,7 +48,7 @@ import {
 } from "lucide-react";
 import ProductDetailDialog from "@/components/ProductDetailDialog";
 
-const ProductsPage = ({ token }) => {
+const ProductsPage = () => {
   // Add pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -104,7 +104,9 @@ const ProductsPage = ({ token }) => {
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/product/list`,
         {
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
       setProducts(response.data.data);
@@ -142,7 +144,9 @@ const ProductsPage = ({ token }) => {
       await axios.delete(
         `${import.meta.env.VITE_BACKEND_URL}/api/product/remove/${id}`,
         {
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
       setProducts(products.filter((product) => product.id !== id));
@@ -319,7 +323,7 @@ const ProductsPage = ({ token }) => {
   };
 
   return (
-    <div className="p-6">
+    <div className="">
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">
@@ -386,7 +390,6 @@ const ProductsPage = ({ token }) => {
                 </DialogHeader>
                 <PendingProductsTable
                   onClose={() => isPendingProductsDialogOpen(false)}
-                  token={token}
                 />
               </DialogContent>
             </Dialog>

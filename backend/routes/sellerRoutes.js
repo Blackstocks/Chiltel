@@ -20,7 +20,7 @@ import {
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import { validateSellerRegistration } from "../middleware/sellerValidation.js";
-import adminAuth from "../middleware/adminAuth.js";
+import { protect, authorize } from "../middleware/adminAuthMiddleware.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -30,10 +30,10 @@ const upload = multer({ dest: "uploads/" });
 router.post("/register", validateSellerRegistration, register);
 router.post("/login", login);
 
-router.put("/approve/:id", adminAuth, approveSeller);
-router.put("/reject/:id", adminAuth, rejectSeller);
-router.get("/list", adminAuth, getSellers);
-router.put("/update-commision/:id", adminAuth, updateCommission);
+router.put("/approve/:id", protect, authorize(['super-admin', 'sub-admin']), approveSeller);
+router.put("/reject/:id", protect, authorize(['super-admin', 'sub-admin']), rejectSeller);
+router.get("/list", protect, authorize(['super-admin', 'sub-admin']), getSellers);
+router.put("/update-commision/:id", protect, authorize(['super-admin', 'sub-admin']), updateCommission);
 
 
 

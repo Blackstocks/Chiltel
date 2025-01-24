@@ -31,7 +31,7 @@ import PendingRidersDialog from "@/components/PendingRidersTable";
 import ExportButtons from "../components/RiderExportButton";
 import RiderAttendance from "@/components/RiderAttendance";
 
-const RiderManagement = ({ token }) => {
+const RiderManagement = () => {
   const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,7 +51,9 @@ const RiderManagement = ({ token }) => {
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/riders/list`,
         {
-          headers: { token },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
       setRiders(response.data.data);
@@ -65,7 +67,7 @@ const RiderManagement = ({ token }) => {
 
   useEffect(() => {
     fetchriders();
-  }, [token]);
+  }, []);
 
   // Delete rider
   const handleDeleteRider = async (id) => {
@@ -74,7 +76,9 @@ const RiderManagement = ({ token }) => {
         await axios.delete(
           `${import.meta.env.VITE_BACKEND_URL}/api/riders/${id}`,
           {
-            headers: { token },
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
         );
 
@@ -87,7 +91,7 @@ const RiderManagement = ({ token }) => {
     }
   };
 
-  const filteredRiders = riders.filter((rider) => {
+  const filteredRiders = riders?.filter((rider) => {
     const name = rider?.name || "";
     const specialization = rider?.specialization || "";
     const email = rider?.email || "";
@@ -101,62 +105,8 @@ const RiderManagement = ({ token }) => {
     );
   });
 
-  // Form validation
-  const validateForm = (rider) => {
-    const errors = {};
-
-    // Required field validations
-    if (!rider.name) errors.name = "Name is required";
-    if (!rider.email) errors.email = "Email is required";
-    if (!rider.password) errors.password = "Password is required";
-    if (!rider.phoneNumber) errors.phoneNumber = "Phone number is required";
-    if (!rider.specialization)
-      errors.specialization = "Specialization is required";
-    if (!rider.location?.coordinates) errors.location = "Location is required";
-
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (rider.email && !emailRegex.test(rider.email)) {
-      errors.email = "Invalid email format";
-    }
-
-    // Password strength validation
-    if (rider.password && rider.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
-    }
-
-    // Specialization enum validation
-    const validSpecializations = ["AC", "Cooler", "Microwave"];
-    if (
-      rider.specialization &&
-      !validSpecializations.includes(rider.specialization)
-    ) {
-      errors.specialization = "Invalid specialization selected";
-    }
-
-    // Location coordinates validation
-    if (rider.location?.coordinates) {
-      const [longitude, latitude] = rider.location.coordinates;
-
-      if (longitude < -180 || longitude > 180) {
-        errors.longitude = "Longitude must be between -180 and 180";
-      }
-      if (latitude < -90 || latitude > 90) {
-        errors.latitude = "Latitude must be between -90 and 90";
-      }
-    }
-
-    // Phone number format validation (basic)
-    const phoneRegex = /^\+?[\d\s-]{8,}$/;
-    if (rider.phoneNumber && !phoneRegex.test(rider.phoneNumber)) {
-      errors.phoneNumber = "Invalid phone number format";
-    }
-
-    return errors;
-  };
-
   return (
-    <div className="p-6">
+    <div className="">
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">
@@ -164,7 +114,7 @@ const RiderManagement = ({ token }) => {
           </CardTitle>
           <div className="flex space-x-4">
             <ExportButtons data={filteredRiders} type="riders"/>
-            <ReferralCodeDialog  token={token}/>
+            <ReferralCodeDialog />
             <div className="flex items-center border rounded-md px-2">
               <Search className="h-4 w-4 text-gray-500" />
               <Input
@@ -175,7 +125,6 @@ const RiderManagement = ({ token }) => {
               />
             </div>
             <PendingRidersDialog
-              token={token}
               onRiderApproved={() => {
                 console.log("Rider approved");
                 fetchriders();
@@ -201,7 +150,7 @@ const RiderManagement = ({ token }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRiders.map((rider) => (
+                {filteredRiders?.map((rider) => (
                   <TableRow key={rider._id}>
                     <TableCell className="font-medium">
                       {rider.firstName + " " + rider.lastName}
