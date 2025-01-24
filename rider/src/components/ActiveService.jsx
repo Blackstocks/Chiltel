@@ -33,6 +33,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import CompleteBtn from "./CompleteBtn";
 
 const ActiveService = () => {
 	const [activeService, setActiveService] = useState(null);
@@ -51,6 +59,8 @@ const ActiveService = () => {
 	const [openAccordions, setOpenAccordions] = useState([]);
 	const [faultImages, setFaultImages] = useState([]);
 	const [showFaultImageDialog, setShowFaultImageDialog] = useState(false);
+	const [faultType, setFaultType] = useState("");
+	const [faultNote, setFaultNote] = useState("");
 
 	useEffect(() => {
 		getActiveService().then((service) => {
@@ -99,10 +109,17 @@ const ActiveService = () => {
 		if (files.length >= 2) {
 			setFaultImages(files);
 			console.log("Selected fault images:", files);
-			setShowFaultImageDialog(false);
 		} else {
 			alert("Please select at least two images.");
 		}
+	};
+
+	const handleSubmitFaultImages = () => {
+		// Handle the submission of fault images, fault type, and fault note
+		console.log("Fault Type:", faultType);
+		console.log("Fault Note:", faultNote);
+		console.log("Fault Images:", faultImages);
+		setShowFaultImageDialog(false);
 	};
 
 	// Loading skeleton
@@ -402,12 +419,14 @@ const ActiveService = () => {
 										size="lg"
 										className="border-green-200 hover:bg-green-50"
 									>
-										Upload Fault Images
+										{workStarted ? "Add Work Details" : "Add Fault Details"}
 									</Button>
 								</DialogTrigger>
 								<DialogContent className="max-w-md">
 									<DialogHeader>
-										<DialogTitle>Upload Fault Images</DialogTitle>
+										<DialogTitle>
+											Upload {workStarted ? "Repaired" : "Fault"} Images
+										</DialogTitle>
 									</DialogHeader>
 									<Input
 										type="file"
@@ -415,12 +434,48 @@ const ActiveService = () => {
 										multiple
 										onChange={handleUploadFaultImages}
 									/>
+									{faultImages.length > 0 && (
+										<div className="mt-4 space-y-2 flex flex-wrap">
+											{faultImages.map((image, index) => (
+												<img
+													key={index}
+													src={URL.createObjectURL(image)}
+													alt={`Fault ${index + 1}`}
+													className="w-[30%] h-auto rounded-lg object-contain"
+												/>
+											))}
+										</div>
+									)}
+									{!workStarted && (
+										<Select
+											value={faultType}
+											onValueChange={setFaultType} // Changed from onChange
+										>
+											<SelectTrigger className="mt-4">
+												<SelectValue placeholder="Select Fault Type" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="type1">Type 1</SelectItem>
+												<SelectItem value="type2">Type 2</SelectItem>
+												<SelectItem value="type3">Type 3</SelectItem>
+											</SelectContent>
+										</Select>
+									)}
+									<Input
+										type="text"
+										placeholder={`Add a note about the ${
+											workStarted ? "repair" : "fault"
+										}`}
+										value={faultNote}
+										onChange={(e) => setFaultNote(e.target.value)}
+										className="mt-4"
+									/>
 									<DialogFooter>
 										<Button
-											onClick={() => setShowFaultImageDialog(false)}
+											onClick={handleSubmitFaultImages}
 											className="bg-green-600 hover:bg-green-700 text-white"
 										>
-											Close
+											Submit
 										</Button>
 									</DialogFooter>
 								</DialogContent>
@@ -444,24 +499,7 @@ const ActiveService = () => {
 									)}
 								</Button>
 							) : (
-								<Button
-									onClick={handleCompleteWork}
-									disabled={loading}
-									size="lg"
-									className="bg-green-600 hover:bg-green-700 text-white"
-								>
-									{loading ? (
-										<>
-											<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-											Completing...
-										</>
-									) : (
-										<>
-											<CheckCircle2 className="h-4 w-4 mr-2" />
-											Complete Work
-										</>
-									)}
-								</Button>
+								<CompleteBtn loading= {loading} />
 							)}
 						</div>
 					</CardFooter>
