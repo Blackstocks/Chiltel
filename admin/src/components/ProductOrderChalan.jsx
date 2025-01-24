@@ -1,7 +1,110 @@
-import React, { useRef } from "react";
+import { useRef, useState } from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
 const ProductOrderChalan = ({ order }) => {
+  const [serialNumbers, setSerialNumbers] = useState(
+    order.products.map(() => "")
+  );
+  const [showChalan, setShowChalan] = useState(false);
   const printRef = useRef();
+
+  const handleSerialNumberChange = (index, value) => {
+    const newSerialNumbers = [...serialNumbers];
+    for (let i = 0; i < order.products[Math.floor(index / order.products[index % order.products.length].quantity)].quantity; i++) {
+      newSerialNumbers[index + i] = value;
+    }
+    setSerialNumbers(newSerialNumbers);
+  };
+
+  const handleProceed = () => {
+    let allFilled = true;
+    for (let i = 0; i < order.products.length; i++) {
+      for (let j = 0; j < order.products[i].quantity; j++) {
+        if (serialNumbers[i * order.products[i].quantity + j].trim() === "") {
+          allFilled = false;
+          break;
+        }
+      }
+      if (!allFilled) break;
+    }
+  
+    if (allFilled) {
+      setShowChalan(true);
+    } else {
+      alert("Please fill serial numbers for all products");
+    }
+  };
+
+  // If chalan is not yet shown, render serial number input
+  if (!showChalan) {
+    return (
+      <Card className="shadow-md">
+  <CardHeader>
+    <CardTitle className="text-2xl font-bold">Enter Serial Numbers</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Product Name</TableHead>
+          <TableHead>Brand</TableHead>
+          <TableHead>Model</TableHead>
+          <TableHead>Quantity</TableHead>
+          <TableHead>Serial Numbers</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {order.products.map((item, index) => (
+          <TableRow key={index}>
+            <TableCell>{item.product.name}</TableCell>
+            <TableCell>{item.product.brand || "N/A"}</TableCell>
+            <TableCell>{item.product.model || "N/A"}</TableCell>
+            <TableCell>{item.quantity}</TableCell>
+            <TableCell>
+              {Array.from({ length: item.quantity }).map((_, i) => (
+                <Input
+                  key={`${index}-${i}`}
+                  type="text"
+                  value={serialNumbers[index * item.quantity + i]}
+                  onChange={(e) =>
+                    handleSerialNumberChange(index * item.quantity + i, e.target.value)
+                  }
+                  placeholder={`Serial # for ${item.product.name}`}
+                  className="w-full mb-2"
+                  required
+                />
+              ))}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </CardContent>
+  <CardFooter className="text-center">
+    <Button onClick={handleProceed} className="w-full md:w-auto">
+      Proceed to Invoice
+    </Button>
+  </CardFooter>
+</Card>
+    );
+  }
+
   const handlePrint = () => {
     const printContent = printRef.current;
     const newWindow = window.open("", "_blank");
@@ -164,50 +267,48 @@ const ProductOrderChalan = ({ order }) => {
       "Eighteen",
       "Nineteen",
     ];
-  
+
     const convertBelowThousand = (num) => {
       let result = "";
-  
+
       if (num > 99) {
         result += ones[Math.floor(num / 100)] + " Hundred ";
         num %= 100;
       }
-  
+
       if (num > 10 && num < 20) {
         result += teens[num - 11] + " ";
       } else {
         result += tens[Math.floor(num / 10)] + " ";
         result += ones[num % 10] + " ";
       }
-  
+
       return result.trim();
     };
-  
+
     if (amount === 0) return "Zero Rupees Only";
-  
+
     let result = "";
     const crore = Math.floor(amount / 10000000);
     const lakh = Math.floor((amount % 10000000) / 100000);
     const thousand = Math.floor((amount % 100000) / 1000);
     const hundred = Math.floor((amount % 1000) / 100);
     const belowHundred = Math.floor(amount % 100);
-  
+
     if (crore) result += convertBelowThousand(crore) + " Crore ";
     if (lakh) result += convertBelowThousand(lakh) + " Lakh ";
     if (thousand) result += convertBelowThousand(thousand) + " Thousand ";
     if (hundred) result += ones[hundred] + " Hundred ";
     if (belowHundred) result += "and " + convertBelowThousand(belowHundred);
-  
+
     // Handle decimal part (fractional part)
     const fractionalPart = Math.round((amount % 1) * 100); // Get two decimal places
     if (fractionalPart > 0) {
-      result +=
-        " and " + convertBelowThousand(fractionalPart) + " Paise";
+      result += " and " + convertBelowThousand(fractionalPart) + " Paise";
     }
-  
+
     return result.trim() + " Only";
   };
-  
 
   const orderDetails = {
     invoiceNumber: order._id,
@@ -242,9 +343,11 @@ const ProductOrderChalan = ({ order }) => {
       ifsc: "SBIN0001450",
       accountHolder: "Chiltel India Private Limited",
     },
-    items: order.products.map((item) => ({
+    items: order.products.map((item, index) => ({
       name: item.product.name,
-      serialNumbers: ["6567894972365"], // Add if available
+      model: item.product.model,
+      brand: item.product.brand,
+      serialNumbers: Array.from({ length: item.quantity }).map((_, i) => serialNumbers[index * item.quantity + i]), // Add if available
       hsn: "84183010",
       mrp: item.product.price,
       quantity: item.quantity,
@@ -362,6 +465,7 @@ const ProductOrderChalan = ({ order }) => {
                   <tr className="bg-cyan-500 text-white">
                     <th className="border px-2 py-1 text-left">#</th>
                     <th className="border px-2 py-1 text-left">Item name</th>
+                    <th className="border px-2 py-1 text-left">Brand/Model</th>
                     <th className="border px-2 py-1 text-left">HSN/SAC</th>
                     <th className="border px-2 py-1 text-right">MRP</th>
                     <th className="border px-2 py-1 text-right">Quantity</th>
@@ -381,6 +485,10 @@ const ProductOrderChalan = ({ order }) => {
                         <div className="text-xs">
                           Serial No.: {item.serialNumbers.join(", ")}
                         </div>
+                      </td>
+                      <td className="border px-2 py-1">
+                        <div>{item.brand}</div>
+                        <div>{item.model}</div>
                       </td>
                       <td className="border px-2 py-1">{item.hsn}</td>
                       <td className="border px-2 py-1 text-right">
@@ -402,7 +510,7 @@ const ProductOrderChalan = ({ order }) => {
                   ))}
                   <tr>
                     <td
-                      colSpan="7"
+                      colSpan="8"
                       className="border px-2 py-1 text-right font-bold"
                     >
                       Total
@@ -477,7 +585,7 @@ const ProductOrderChalan = ({ order }) => {
                       </tr>
                       <tr>
                         <td>Total</td>
-                        <td className="text-right">
+                        <td className="text-right font-bold">
                           ₹
                           {orderDetails.total.subTotal + orderDetails.total.gst}
                         </td>
@@ -489,7 +597,7 @@ const ProductOrderChalan = ({ order }) => {
             </div>
 
             {/* Footer Section */}
-            <div className="grid grid-cols-3 border-t border-gray-200">
+            <div className="grid grid-cols-2 border-t border-gray-200">
               {/* Terms & Bank Details */}
               <div className="col-span-1 border-r">
                 <div className="bg-cyan-500 text-white p-2">
@@ -509,15 +617,6 @@ const ProductOrderChalan = ({ order }) => {
                     Account holder's name: {orderDetails.bank.accountHolder}
                   </p>
                 </div>
-              </div>
-
-              {/* QR Code */}
-              <div className="p-4 flex flex-col items-center justify-center">
-                <img
-                  src="/qrCode.png"
-                  alt="Invoice QR Code"
-                  className="w-32 h-32"
-                />
               </div>
 
               {/* Signature */}
@@ -554,7 +653,7 @@ const ProductOrderChalan = ({ order }) => {
                 <div className="text-right">
                   <div>INVOICE NO. : {orderDetails.invoiceNumber}</div>
                   <div>INVOICE DATE : {orderDetails.invoiceDate}</div>
-                  <div>
+                  <div className="font-bold">
                     INVOICE AMOUNT : ₹
                     {orderDetails.total.subTotal + orderDetails.total.gst}
                   </div>
@@ -565,6 +664,12 @@ const ProductOrderChalan = ({ order }) => {
         </div>
 
         <div className="mt-8 text-center">
+          <button
+            onClick={() => setShowChalan(false)}
+            className="mr-4 bg-gray-500 text-white px-8 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+          >
+            Edit Serial Numbers
+          </button>
           <button
             onClick={handlePrint}
             className="bg-blue-500 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-blue-600 transition-colors"
