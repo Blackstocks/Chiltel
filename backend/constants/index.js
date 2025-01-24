@@ -19,3 +19,12 @@ export const productEnums = [
 	"Food Prep Chiller",
 	"Ice Maker",
 ];
+
+export const faults = [
+	"Gas Refilling",
+	"Installation",
+	"Uninstallation",
+	"General Service",
+	"Repair",
+	"Other",
+];

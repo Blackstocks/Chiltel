@@ -49,6 +49,8 @@ const ActiveService = () => {
 	const [selectedWorks, setSelectedWorks] = useState([]);
 	const [workStarted, setWorkStarted] = useState(false);
 	const [openAccordions, setOpenAccordions] = useState([]);
+	const [faultImages, setFaultImages] = useState([]);
+	const [showFaultImageDialog, setShowFaultImageDialog] = useState(false);
 
 	useEffect(() => {
 		getActiveService().then((service) => {
@@ -86,11 +88,21 @@ const ActiveService = () => {
 	};
 
 	const handleCompleteWork = async () => {
-		// Implementation here
 		await completeService(activeService._id);
 		setTimeout(() => {
 			window.location.reload();
 		}, 500);
+	};
+
+	const handleUploadFaultImages = (event) => {
+		const files = Array.from(event.target.files);
+		if (files.length >= 2) {
+			setFaultImages(files);
+			console.log("Selected fault images:", files);
+			setShowFaultImageDialog(false);
+		} else {
+			alert("Please select at least two images.");
+		}
 	};
 
 	// Loading skeleton
@@ -191,6 +203,15 @@ const ActiveService = () => {
 		);
 	};
 
+	const handleNavigate = (currService) => {
+		console.log(currService);
+		if (currService?.userLocation?.coordinates) {
+			window.open(
+				`https://www.google.com/maps/dir/?api=1&destination=${currService.userLocation.coordinates[0]},${currService.userLocation.coordinates[1]}`,
+				"_blank"
+			);
+		}
+	};
 	return (
 		<Card className="md:col-span-2 lg:col-span-3 relative overflow-hidden border-2 border-green-100">
 			{/* Active card indicator - subtle gradient background */}
@@ -214,6 +235,7 @@ const ActiveService = () => {
 							</p>
 						)}
 					</div>
+
 					{workStarted && (
 						<Badge
 							variant="success"
@@ -256,13 +278,7 @@ const ActiveService = () => {
 										size="sm"
 										className="border-green-200 hover:bg-green-50"
 										onClick={() => {
-											const address = encodeURIComponent(
-												activeService.userLocation.address
-											);
-											window.open(
-												`https://www.google.com/maps/search/?api=1&query=${address}`,
-												"_blank"
-											);
+											handleNavigate(activeService);
 										}}
 									>
 										<Navigation className="w-4 h-4 mr-2 text-green-600" />
@@ -376,6 +392,39 @@ const ActiveService = () => {
 
 					<CardFooter className="border-t border-green-100 bg-white/80 px-6 py-4 relative">
 						<div className="flex justify-end w-full space-x-4">
+							<Dialog
+								open={showFaultImageDialog}
+								onOpenChange={setShowFaultImageDialog}
+							>
+								<DialogTrigger asChild>
+									<Button
+										variant="outline"
+										size="lg"
+										className="border-green-200 hover:bg-green-50"
+									>
+										Upload Fault Images
+									</Button>
+								</DialogTrigger>
+								<DialogContent className="max-w-md">
+									<DialogHeader>
+										<DialogTitle>Upload Fault Images</DialogTitle>
+									</DialogHeader>
+									<Input
+										type="file"
+										accept="image/*"
+										multiple
+										onChange={handleUploadFaultImages}
+									/>
+									<DialogFooter>
+										<Button
+											onClick={() => setShowFaultImageDialog(false)}
+											className="bg-green-600 hover:bg-green-700 text-white"
+										>
+											Close
+										</Button>
+									</DialogFooter>
+								</DialogContent>
+							</Dialog>
 							{!workStarted ? (
 								<Button
 									onClick={() =>
