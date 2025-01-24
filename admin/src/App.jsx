@@ -31,8 +31,6 @@ const App = () => {
         <Login setToken={setToken} />
       ) : (
         <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-slate-100" >
-          {/*<Navbar setToken={setToken} />
-          <hr className="border-gray-200" />*/}
           <div className="flex flex-1 overflow-hidden">
             <Sidebar setToken={setToken}/>
             <main className="flex-1 overflow-y-auto p-4 pt-0 bg-gray-50">
