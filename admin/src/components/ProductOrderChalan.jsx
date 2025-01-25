@@ -26,9 +26,7 @@ const ProductOrderChalan = ({ order }) => {
 
   const handleSerialNumberChange = (index, value) => {
     const newSerialNumbers = [...serialNumbers];
-    for (let i = 0; i < order.products[Math.floor(index / order.products[index % order.products.length].quantity)].quantity; i++) {
-      newSerialNumbers[index + i] = value;
-    }
+    newSerialNumbers[index] = value;
     setSerialNumbers(newSerialNumbers);
   };
 
@@ -43,7 +41,7 @@ const ProductOrderChalan = ({ order }) => {
       }
       if (!allFilled) break;
     }
-  
+
     if (allFilled) {
       setShowChalan(true);
     } else {
@@ -55,53 +53,58 @@ const ProductOrderChalan = ({ order }) => {
   if (!showChalan) {
     return (
       <Card className="shadow-md">
-  <CardHeader>
-    <CardTitle className="text-2xl font-bold">Enter Serial Numbers</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Product Name</TableHead>
-          <TableHead>Brand</TableHead>
-          <TableHead>Model</TableHead>
-          <TableHead>Quantity</TableHead>
-          <TableHead>Serial Numbers</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {order.products.map((item, index) => (
-          <TableRow key={index}>
-            <TableCell>{item.product.name}</TableCell>
-            <TableCell>{item.product.brand || "N/A"}</TableCell>
-            <TableCell>{item.product.model || "N/A"}</TableCell>
-            <TableCell>{item.quantity}</TableCell>
-            <TableCell>
-              {Array.from({ length: item.quantity }).map((_, i) => (
-                <Input
-                  key={`${index}-${i}`}
-                  type="text"
-                  value={serialNumbers[index * item.quantity + i]}
-                  onChange={(e) =>
-                    handleSerialNumberChange(index * item.quantity + i, e.target.value)
-                  }
-                  placeholder={`Serial # for ${item.product.name}`}
-                  className="w-full mb-2"
-                  required
-                />
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            Enter Serial Numbers
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product Name</TableHead>
+                <TableHead>Brand</TableHead>
+                <TableHead>Model</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Serial Numbers</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {order.products.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell>{item.product.name}</TableCell>
+                  <TableCell>{item.product.brand || "N/A"}</TableCell>
+                  <TableCell>{item.product.model || "N/A"}</TableCell>
+                  <TableCell>{item.quantity}</TableCell>
+                  <TableCell>
+                    {Array.from({ length: item.quantity }).map((_, i) => (
+                      <Input
+                        key={`${index}-${i}`}
+                        type="text"
+                        value={serialNumbers[index * item.quantity + i]}
+                        onChange={(e) =>
+                          handleSerialNumberChange(
+                            index * item.quantity + i,
+                            e.target.value
+                          )
+                        }
+                        placeholder={`Serial # for ${item.product.name}`}
+                        className="w-full mb-2"
+                        required
+                      />
+                    ))}
+                  </TableCell>
+                </TableRow>
               ))}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </CardContent>
-  <CardFooter className="text-center">
-    <Button onClick={handleProceed} className="w-full md:w-auto">
-      Proceed to Invoice
-    </Button>
-  </CardFooter>
-</Card>
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="text-center">
+          <Button onClick={handleProceed} className="w-full md:w-auto">
+            Proceed to Invoice
+          </Button>
+        </CardFooter>
+      </Card>
     );
   }
 
@@ -347,7 +350,9 @@ const ProductOrderChalan = ({ order }) => {
       name: item.product.name,
       model: item.product.model,
       brand: item.product.brand,
-      serialNumbers: Array.from({ length: item.quantity }).map((_, i) => serialNumbers[index * item.quantity + i]), // Add if available
+      serialNumbers: Array.from({ length: item.quantity }).map(
+        (_, i) => serialNumbers[index * item.quantity + i]
+      ), // Add if available
       hsn: "84183010",
       mrp: item.product.price,
       quantity: item.quantity,
