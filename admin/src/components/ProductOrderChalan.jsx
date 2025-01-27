@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -24,10 +24,29 @@ const ProductOrderChalan = ({ order }) => {
   const [showChalan, setShowChalan] = useState(false);
   const printRef = useRef();
 
+  // Load serial numbers from localStorage on component mount
+  useEffect(() => {
+    const storedSerialNumbers = localStorage.getItem(`serial_numbers_${order._id}`);
+    if (storedSerialNumbers) {
+      setSerialNumbers(JSON.parse(storedSerialNumbers));
+      // If we have stored serial numbers, check if they're all filled to show chalan
+      const parsedNumbers = JSON.parse(storedSerialNumbers);
+      const allFilled = parsedNumbers.every(num => num.trim() !== "");
+      setShowChalan(allFilled);
+    } else {
+      // Initialize with empty strings if no stored values
+      setSerialNumbers(order.products.reduce((acc, product) => {
+        return [...acc, ...Array(product.quantity).fill("")];
+      }, []));
+    }
+  }, [order._id, order.products]);
+
   const handleSerialNumberChange = (index, value) => {
     const newSerialNumbers = [...serialNumbers];
     newSerialNumbers[index] = value;
     setSerialNumbers(newSerialNumbers);
+    // Save to localStorage whenever serial numbers change
+    localStorage.setItem(`serial_numbers_${order._id}`, JSON.stringify(newSerialNumbers));
   };
 
   const handleProceed = () => {
@@ -41,7 +60,7 @@ const ProductOrderChalan = ({ order }) => {
       }
       if (!allFilled) break;
     }
-
+  
     if (allFilled) {
       setShowChalan(true);
     } else {
@@ -49,64 +68,6 @@ const ProductOrderChalan = ({ order }) => {
     }
   };
 
-  // If chalan is not yet shown, render serial number input
-  if (!showChalan) {
-    return (
-      <Card className="shadow-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">
-            Enter Serial Numbers
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product Name</TableHead>
-                <TableHead>Brand</TableHead>
-                <TableHead>Model</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Serial Numbers</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {order.products.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.product.name}</TableCell>
-                  <TableCell>{item.product.brand || "N/A"}</TableCell>
-                  <TableCell>{item.product.model || "N/A"}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>
-                    {Array.from({ length: item.quantity }).map((_, i) => (
-                      <Input
-                        key={`${index}-${i}`}
-                        type="text"
-                        value={serialNumbers[index * item.quantity + i]}
-                        onChange={(e) =>
-                          handleSerialNumberChange(
-                            index * item.quantity + i,
-                            e.target.value
-                          )
-                        }
-                        placeholder={`Serial # for ${item.product.name}`}
-                        className="w-full mb-2"
-                        required
-                      />
-                    ))}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        <CardFooter className="text-center">
-          <Button onClick={handleProceed} className="w-full md:w-auto">
-            Proceed to Invoice
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
 
   const handlePrint = () => {
     const printContent = printRef.current;
@@ -385,6 +346,69 @@ const ProductOrderChalan = ({ order }) => {
       total: order.totalAmount,
     },
   };
+
+
+
+  // If chalan is not yet shown, render serial number input
+  if (!showChalan) {
+    return (
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            Enter Serial Numbers
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product Name</TableHead>
+                <TableHead>Brand</TableHead>
+                <TableHead>Model</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Serial Numbers</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {order.products.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell>{item.product.name}</TableCell>
+                  <TableCell>{item.product.brand || "N/A"}</TableCell>
+                  <TableCell>{item.product.model || "N/A"}</TableCell>
+                  <TableCell>{item.quantity}</TableCell>
+                  <TableCell>
+                    {Array.from({ length: item.quantity }).map((_, i) => (
+                      <Input
+                        key={`${index}-${i}`}
+                        type="text"
+                        value={serialNumbers[index * item.quantity + i]}
+                        onChange={(e) =>
+                          handleSerialNumberChange(
+                            index * item.quantity + i,
+                            e.target.value
+                          )
+                        }
+                        placeholder={`Serial # for ${item.product.name}`}
+                        className="w-full mb-2"
+                        required
+                      />
+                    ))}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="text-center">
+          <Button onClick={handleProceed} className="w-full md:w-auto">
+            Proceed to Invoice
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  
 
   return (
     <div className="max-h-[80vh] bg-gray-50 rounded-lg overflow-y-auto">
