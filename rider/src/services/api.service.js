@@ -200,6 +200,90 @@ class ApiService {
 		);
 		return this.handleResponse(response);
 	}
+
+	async markAttendance(token, body) {
+		const response = await fetch(`${this.baseURL}/rider/mark-attendance`, {
+			method: "POST",
+			headers: this.getHeaders(token),
+			body: JSON.stringify({ ...body }),
+		});
+		return this.handleResponse(response);
+	}
+
+	async getAttendance(token) {
+		const response = await fetch(`${this.baseURL}/rider/attendance`, {
+			headers: this.getHeaders(token),
+		});
+		return this.handleResponse(response);
+	}
+
+	async addFaults(token, serviceId, faults) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/add-faults`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+				body: JSON.stringify({ ...faults }),
+			}
+		);
+		return this.handleResponse(response);
+	}
+
+	async addRepairDetails(token, serviceId, repairDetails) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/add-repair`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+				body: JSON.stringify({ ...repairDetails }),
+			}
+		);
+		return this.handleResponse(response);
+	}
+
+	// Verification endpoints
+	async verifyBankDetails(token, bankDetails) {
+		const response = await fetch(`${this.baseURL}/rider/verify/bank`, {
+			method: "POST",
+			headers: this.getHeaders(token),
+			body: JSON.stringify(bankDetails),
+		});
+		return this.handleResponse(response);
+	}
+
+	async verifyCourtCase(token, courtCase) {
+		const response = await fetch(`${this.baseURL}/rider/verify/court`, {
+			method: "POST",
+			headers: this.getHeaders(token),
+			body: JSON.stringify(courtCase),
+		});
+		return this.handleResponse(response);
+	}
+
+	// OTP endpoints
+
+	async sendOTP(token, serviceId) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/send-otp`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+			}
+		);
+		return this.handleResponse(response);
+	}
+
+	async verifyOTP(token, serviceId, OTP) {
+		const response = await fetch(
+			`${this.baseURL}/rider/services/${serviceId}/verify-otp`,
+			{
+				method: "POST",
+				headers: this.getHeaders(token),
+				body: JSON.stringify({ OTP }),
+			}
+		);
+		return this.handleResponse(response);
+	}
 }
 
 export const apiService = new ApiService();

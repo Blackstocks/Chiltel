@@ -52,11 +52,11 @@ riderRouter.post(
 	verifyRider,
 	riderController.declineService
 );
-riderRouter.post(
-	"/services/:id/complete",
-	verifyRider,
-	riderController.completeService
-);
+// riderRouter.post(
+// 	"/services/:id/complete",
+// 	verifyRider,
+// 	riderController.completeService
+// );
 
 riderRouter.post(
 	"/services/:id/extra-works",
@@ -76,6 +76,32 @@ riderRouter.post(
 	"/mark-attendance",
 	verifyRider,
 	riderController.markAttendance
+);
+
+riderRouter.get("/attendance", verifyRider, riderController.getAttendance);
+
+riderRouter.post(
+	"/services/:id/add-faults",
+	verifyRider,
+	riderController.addFaults
+);
+
+riderRouter.post(
+	"/services/:id/add-repair",
+	verifyRider,
+	riderController.addRepairDetails
+);
+
+riderRouter.post(
+	"/services/:id/send-otp",
+	verifyRider,
+	riderController.sendOTP
+);
+
+riderRouter.post(
+	"/services/:id/verify-otp",
+	verifyRider,
+	riderController.verifyOTP
 );
 
 export default riderRouter;

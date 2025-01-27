@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { CheckCircle2, CalendarOff } from "lucide-react";
@@ -13,13 +13,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
+import { useServices } from "@/hooks/useServices";
 
 const AttendanceCalendar = () => {
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [leaveReason, setLeaveReason] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
-
 	// Example data - replace with your actual data
 	const [attendance] = useState({
 		"2024-01-15": { status: "present" },
@@ -31,6 +31,17 @@ const AttendanceCalendar = () => {
 		"2024-01-20": { status: "leave", reason: "Personal" },
 		"2024-01-21": { status: "leave", reason: "Sick" },
 	});
+
+	const { markAttendance, getAttendance } = useServices();
+
+	// Fetch attendance data on component mount
+	useEffect(() => {
+		const fetchAttendance = async () => {
+			const attendances = await getAttendance();
+			console.log(attendances);
+		};
+		fetchAttendance();
+	}, []);
 
 	const handleLeaveRequest = async () => {
 		if (!leaveReason) {

@@ -41,6 +41,16 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import CompleteBtn from "./CompleteBtn";
+import { toast } from "react-toastify";
+
+const faultTypes = [
+	"Gas Refilling",
+	"Installation",
+	"Uninstallation",
+	"General Service",
+	"Repair",
+	"Other",
+];
 
 const ActiveService = () => {
 	const [activeService, setActiveService] = useState(null);
@@ -48,7 +58,8 @@ const ActiveService = () => {
 		getActiveService,
 		loading,
 		error,
-		completeService,
+		addFaults,
+		addRepairDetails,
 		addExtraWorks,
 		updateServiceStatus,
 	} = useServices();
@@ -97,13 +108,6 @@ const ActiveService = () => {
 		setWorkStarted(true);
 	};
 
-	const handleCompleteWork = async () => {
-		await completeService(activeService._id);
-		setTimeout(() => {
-			window.location.reload();
-		}, 500);
-	};
-
 	const handleUploadFaultImages = (event) => {
 		const files = Array.from(event.target.files);
 		if (files.length >= 2) {
@@ -114,12 +118,51 @@ const ActiveService = () => {
 		}
 	};
 
-	const handleSubmitFaultImages = () => {
+	const handleSubmitFaultImages = async () => {
+		if (faultImages.length < 2) {
+			toast.error("Please select at least two images.");
+			return;
+		}
+
+		if (!workStarted && !faultType) {
+			toast.error("Please select a fault type.");
+			return;
+		}
+
+		if (!faultNote) {
+			toast.error(
+				`Please add a note about the ${workStarted ? "repair" : "fault"}.`
+			);
+			return;
+		}
+
 		// Handle the submission of fault images, fault type, and fault note
 		console.log("Fault Type:", faultType);
 		console.log("Fault Note:", faultNote);
 		console.log("Fault Images:", faultImages);
-		setShowFaultImageDialog(false);
+
+		try {
+			// Call the API to add the fault details
+			if (workStarted) {
+				await addRepairDetails(activeService._id, { faultImages, faultNote });
+			} else {
+				await addFaults(activeService._id, {
+					faultImages,
+					faultType,
+					faultNote,
+				});
+			}
+			toast.success(
+				(workStarted ? "Repair" : "Fault") + " details added successfully"
+			);
+			setFaultImages([]);
+			setFaultType("");
+			setFaultNote("");
+			setShowFaultImageDialog(false);
+		} catch (error) {
+			console.error("Error adding fault details:", error);
+			toast.error(error.message);
+		}
 	};
 
 	// Loading skeleton
@@ -455,9 +498,11 @@ const ActiveService = () => {
 												<SelectValue placeholder="Select Fault Type" />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="type1">Type 1</SelectItem>
-												<SelectItem value="type2">Type 2</SelectItem>
-												<SelectItem value="type3">Type 3</SelectItem>
+												{faultTypes.map((type) => (
+													<SelectItem key={type} value={type}>
+														{type}
+													</SelectItem>
+												))}
 											</SelectContent>
 										</Select>
 									)}
@@ -499,7 +544,7 @@ const ActiveService = () => {
 									)}
 								</Button>
 							) : (
-								<CompleteBtn loading= {loading} />
+								<CompleteBtn serviceId={activeService._id} loading={loading} />
 							)}
 						</div>
 					</CardFooter>
