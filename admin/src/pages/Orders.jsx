@@ -322,6 +322,47 @@ const OrderManagement = () => {
     }
   };
 
+  const handleMultipleRiderAssignment = async (requestId, riderIds) => {
+    console.log("Assigning multiple riders to service request:", requestId, riderIds);
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/serviceRequests/${requestId}/assign-multiple-riders`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ riderIds }),
+        }
+      );
+  
+      const data = await response.json();
+      console.log("assigned multiple riders response:", data);
+  
+      // Check for error before success
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to assign riders");
+      }
+  
+      // Refresh service requests to get updated data
+      await fetchServiceRequests();
+  
+      // Show success message with number of riders assigned
+      toast.success(
+        `Successfully assigned multiple riders`
+      );
+  
+      return data;
+    } catch (error) {
+      console.error("Error assigning multiple riders:", error);
+      toast.error(error.message || "Failed to assign riders");
+      throw error; // Re-throw to handle in the component
+    }
+  };
+
   // Update service request status
   const updateServiceStatus = async (requestId, status) => {
     try {
@@ -732,7 +773,7 @@ const OrderManagement = () => {
                             <RiderAssignmentCell
                               service={service}
                               riders={riders}
-                              handleRiderAssignment={handleRiderAssignment}
+                              handleMultipleRiderAssignment={handleMultipleRiderAssignment}
                             />
                           )}
                         </TableCell>

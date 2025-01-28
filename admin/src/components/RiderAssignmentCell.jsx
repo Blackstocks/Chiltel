@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckIcon } from "lucide-react";
 
-const RiderAssignmentCell = ({ service, riders, handleRiderAssignment }) => {
+const RiderAssignmentCell = ({ service, riders, handleMultipleRiderAssignment }) => {
   const [selectedRiders, setSelectedRiders] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -24,42 +23,55 @@ const RiderAssignmentCell = ({ service, riders, handleRiderAssignment }) => {
       rider.specializations.includes(service.service.product)
   );
 
-  const handleSelect = (riderId) => {
-    setSelectedRiders(prev =>
-      prev.includes(riderId)
+  const handleSelect = useCallback((riderId) => {
+    setSelectedRiders(prev => {
+      const isSelected = prev.includes(riderId);
+      const newSelection = isSelected
         ? prev.filter(id => id !== riderId)
-        : [...prev, riderId]
-    );
-  };
+        : [...prev, riderId];
+      
+      console.log("Updated selection:", newSelection);
+      return newSelection;
+    });
+  }, []);
 
-  const handleSelectAll = () => {
-    if (selectedRiders.length === eligibleRiders.length) {
-      setSelectedRiders([]);
-    } else {
-      setSelectedRiders(eligibleRiders.map(rider => rider._id));
-    }
-  };
+  const handleSelectAll = useCallback(() => {
+    setSelectedRiders(prev => {
+      const allRiderIds = eligibleRiders.map(rider => rider._id);
+      const newSelection = prev.length === eligibleRiders.length ? [] : allRiderIds;
+      
+      console.log("Updated all selection:", newSelection);
+      return newSelection;
+    });
+  }, [eligibleRiders]);
 
   const handleAssignSelected = async () => {
+    if (selectedRiders.length === 0) return;
+
     try {
-      // Assuming handleRiderAssignment can be modified to accept array of rider IDs
-      await Promise.all(
-        selectedRiders.map(riderId => 
-          handleRiderAssignment(service._id, riderId)
-        )
-      );
+      await handleMultipleRiderAssignment(service._id, selectedRiders);
       setIsOpen(false);
       setSelectedRiders([]);
     } catch (error) {
       console.error('Error assigning riders:', error);
+      // Error is already handled by the handler function
     }
   };
+
+  const resetSelections = useCallback(() => {
+    setSelectedRiders([]);
+    setIsOpen(false);
+  }, []);
 
   return (
     <div className="space-y-2">
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setSelectedRiders([])} // Reset selections when opening
+          >
             {service.assignedRider ? "Reassign Riders" : "Assign Riders"}
           </Button>
         </DialogTrigger>
@@ -101,14 +113,21 @@ const RiderAssignmentCell = ({ service, riders, handleRiderAssignment }) => {
                     className={`cursor-pointer hover:bg-accent transition-colors ${
                       selectedRiders.includes(rider._id) ? "border-primary" : ""
                     }`}
-                    onClick={() => handleSelect(rider._id)}
                   >
-                    <CardContent className="p-4">
+                    <CardContent 
+                      className="p-4"
+                      onClick={(e) => {
+                        // Prevent handling card click if checkbox was clicked
+                        if (e.target.closest('[role="checkbox"]')) return;
+                        handleSelect(rider._id);
+                      }}
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Checkbox
                             checked={selectedRiders.includes(rider._id)}
                             className="h-4 w-4"
+                            onCheckedChange={() => handleSelect(rider._id)}
                           />
                           <div>
                             <p className="font-medium">
@@ -119,7 +138,7 @@ const RiderAssignmentCell = ({ service, riders, handleRiderAssignment }) => {
                                 <span
                                   key={index}
                                   className={`text-xs px-2 py-0.5 rounded-full ${
-                                    spec === service.service.product
+                                    spec === service.service?.product
                                       ? "bg-primary/10 text-primary"
                                       : "bg-secondary/50 text-secondary-foreground"
                                   }`}
@@ -146,10 +165,7 @@ const RiderAssignmentCell = ({ service, riders, handleRiderAssignment }) => {
           <DialogFooter className="mt-4">
             <Button
               variant="outline"
-              onClick={() => {
-                setIsOpen(false);
-                setSelectedRiders([]);
-              }}
+              onClick={resetSelections}
             >
               Cancel
             </Button>
