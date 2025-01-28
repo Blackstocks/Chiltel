@@ -209,6 +209,96 @@ export const useServices = () => {
 		}
 	};
 
+	const addFaults = async (serviceId, faults) => {
+		setLoading(true);
+		try {
+			const updatedService = await apiService.addFaults(
+				state.token,
+				serviceId,
+				faults
+			);
+			setLoading(false);
+			return updatedService;
+		} catch (err) {
+			setError(err.message);
+			setLoading(false);
+			throw err;
+		}
+	};
+
+	const markAttendance = async (body) => {
+		setLoading(true);
+		try {
+			const response = await apiService.markAttendance(state.token, body);
+			setLoading(false);
+			return response;
+		} catch (err) {
+			setError(err.message);
+			setLoading(false);
+			throw err;
+		}
+	};
+
+	const getAttendance = async () => {
+		setLoading(true);
+		try {
+			const attendance = await apiService.getAttendance(state.token);
+			setLoading(false);
+			return attendance;
+		} catch (err) {
+			setError(err.message);
+			setLoading(false);
+			throw err;
+		}
+	};
+
+	const addRepairDetails = async (serviceId, repairDetails) => {
+		setLoading(true);
+		try {
+			const updatedService = await apiService.addRepairDetails(
+				state.token,
+				serviceId,
+				repairDetails
+			);
+			setLoading(false);
+			return updatedService;
+		} catch (err) {
+			setError(err.message);
+			setLoading(false);
+			throw err;
+		}
+	};
+
+	const sendOTP = async (serviceId) => {
+		setLoading(true);
+		try {
+			const updatedService = await apiService.sendOTP(state.token, serviceId);
+			setLoading(false);
+			return updatedService;
+		} catch (err) {
+			setError(err.message);
+			setLoading(false);
+			throw err;
+		}
+	};
+
+	const verifyOTP = async (serviceId, OTP) => {
+		setLoading(true);
+		try {
+			const updatedService = await apiService.verifyOTP(
+				state.token,
+				serviceId,
+				OTP
+			);
+			setLoading(false);
+			return updatedService;
+		} catch (err) {
+			setError(err.message);
+			setLoading(false);
+			throw err;
+		}
+	};
+
 	return {
 		services,
 		loading,
@@ -223,5 +313,11 @@ export const useServices = () => {
 		startService,
 		addExtraWorks,
 		startWorking,
+		addFaults,
+		addRepairDetails,
+		sendOTP,
+		verifyOTP,
+		markAttendance,
+		getAttendance,
 	};
 };

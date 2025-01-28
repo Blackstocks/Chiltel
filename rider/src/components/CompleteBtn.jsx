@@ -9,22 +9,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, Send } from "lucide-react";
+import { useServices } from "@/hooks/useServices";
+import { toast } from "react-toastify";
 
-const CompleteBtn = ({ loading }) => {
+const CompleteBtn = ({ serviceId, loading }) => {
 	const [showVerifyModal, setShowVerifyModal] = useState(false);
 	const [happyCode, setHappyCode] = useState("");
 	const [isVerifying, setIsVerifying] = useState(false);
 	const [isSendingOTP, setIsSendingOTP] = useState(false);
 
+	const { sendOTP, verifyOTP } = useServices();
+
 	const handleSendOTP = async () => {
 		try {
 			setIsSendingOTP(true);
-			// Add your OTP sending logic here
-			// await sendOTP();
+			// Add your send OTP logic here
+			await sendOTP(serviceId);
+
 			// Show success message or toast
+			toast.success("OTP sent successfully");
 		} catch (error) {
 			console.error("Error sending OTP:", error);
 			// Show error message or toast
+			toast.error("Error sending OTP");
 		} finally {
 			setIsSendingOTP(false);
 		}
@@ -33,13 +40,18 @@ const CompleteBtn = ({ loading }) => {
 	const handleVerifyAndComplete = async () => {
 		try {
 			setIsVerifying(true);
-			// Add your verification logic here
-			// if verification successful:
-			// await handleCompleteWork();
+
+			// Add your verify OTP logic here
+			await verifyOTP(serviceId, happyCode);
+
+			// Show success message or toast
+			toast.success("Service completed successfully");
 			setShowVerifyModal(false);
+			window.location.reload();
 		} catch (error) {
 			console.error("Error verifying code:", error);
 			// Show error message or toast
+			toast.error(error.message);
 		} finally {
 			setIsVerifying(false);
 		}

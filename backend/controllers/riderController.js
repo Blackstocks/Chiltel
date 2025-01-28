@@ -4,7 +4,7 @@ import ServiceRequest from "../models/serviceRequestModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import razorpay from "razorpay";
-import crypto from "crypto";
+import crypto, { verify } from "crypto";
 import ReferralCode from "../models/referralModel.js";
 import bucket from "../config/firebaseConfig.js";
 import fs from "fs";
@@ -439,37 +439,37 @@ const riderController = {
 		}
 	},
 
-	async completeService(req, res) {
-		try {
-			const service = await ServiceRequest.findById(req.params.id);
+	// async completeService(req, res) {
+	// 	try {
+	// 		const service = await ServiceRequest.findById(req.params.id);
 
-			if (!service) {
-				return res.status(404).json({ message: "Service not found" });
-			}
+	// 		if (!service) {
+	// 			return res.status(404).json({ message: "Service not found" });
+	// 		}
 
-			if (service.status !== "IN_PROGRESS") {
-				return res.status(400).json({ message: "Service cannot be completed" });
-			}
+	// 		if (service.status !== "IN_PROGRESS") {
+	// 			return res.status(400).json({ message: "Service cannot be completed" });
+	// 		}
 
-			const rider = await Rider.findById(req.rider._id);
+	// 		const rider = await Rider.findById(req.rider._id);
 
-			service.status = "COMPLETED";
-			service.workStarted = false;
-			rider.services.completed += 1;
-			rider.earning = [
-				...rider.earning,
-				{ date: new Date(), amount: service.price },
-			];
-			rider.balance -= 50; // 5 coins deducted (This is in rupees)
-			service.completedAt = new Date();
-			await service.save();
-			await rider.save();
+	// 		service.status = "COMPLETED";
+	// 		service.workStarted = false;
+	// 		rider.services.completed += 1;
+	// 		rider.earning = [
+	// 			...rider.earning,
+	// 			{ date: new Date(), amount: service.price },
+	// 		];
+	// 		rider.balance -= 50; // 5 coins deducted (This is in rupees)
+	// 		service.completedAt = new Date();
+	// 		await service.save();
+	// 		await rider.save();
 
-			res.json(service.select("-OTP"));
-		} catch (error) {
-			res.status(500).json({ message: "Server error", error: error.message });
-		}
-	},
+	// 		res.json(service.select("-OTP"));
+	// 	} catch (error) {
+	// 		res.status(500).json({ message: "Server error", error: error.message });
+	// 	}
+	// },
 
 	async updateServiceStatus(req, res) {
 		try {
@@ -483,7 +483,14 @@ const riderController = {
 				return res.status(404).json({ message: "Service not found" });
 			}
 
-			res.json(service.select("-OTP"));
+			res.json(
+				service.toObject({
+					versionKey: false,
+					transform: (doc, ret) => {
+						delete ret.OTP;
+					},
+				})
+			);
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
@@ -638,6 +645,157 @@ const riderController = {
 
 			await rider.save();
 			res.json({ message: "Attendance marked successfully" });
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async getAttendance(req, res) {
+		try {
+			const rider = await Rider.findById(req.rider._id).select("attendance");
+			res.json(rider.attendance);
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async addFaults(req, res) {
+		const { faultType, faultImages, faultNotes } = req.body;
+		const service = await ServiceRequest.findById(req.params.id);
+
+		console.log(req.body);
+
+		if (!service) {
+			return res.status(404).json({ message: "Service not found" });
+		}
+
+		if (!service.workStarted) {
+			return res.status(400).json({ message: "Service not started yet" });
+		}
+
+		console.log(
+			service.status === "ASSIGNED",
+			service.status === "IN_PROGRESS"
+		);
+
+		if (service.status !== "ASSIGNED" && service.status !== "IN_PROGRESS") {
+			return res.status(400).json({ message: "Faults cannot be assigned" });
+		}
+
+		service.faults = {
+			type: faultType,
+			images: ["some", "img"],
+			note: faultNotes,
+		};
+		await service.save();
+
+		res.json({ message: "Faults added" });
+	},
+
+	async addRepairDetails(req, res) {
+		const { faultNote, faultImages } = req.body;
+		const service = await ServiceRequest.findById(req.params.id);
+
+		if (!service) {
+			return res.status(404).json({ message: "Service not found" });
+		}
+
+		if (!service.workStarted) {
+			return res.status(400).json({ message: "Service not started yet" });
+		}
+
+		if (service.status !== "IN_PROGRESS") {
+			return res
+				.status(400)
+				.json({ message: "Repair details cannot be added" });
+		}
+
+		service.repairDetails = {
+			description: faultNote,
+			rectifiedImages: ["some", "img"],
+		};
+		await service.save();
+
+		res.json({ message: "Repair details added" });
+	},
+
+	async sendOTP(req, res) {
+		try {
+			const service = await ServiceRequest.findById(req.params.id);
+
+			if (!service) {
+				return res.status(404).json({ message: "Service not found" });
+			}
+
+			if (service.status !== "IN_PROGRESS") {
+				return res.status(400).json({ message: "OTP cannot be sent" });
+			}
+
+			const OTP = Math.floor(100000 + Math.random() * 900000);
+			console.log(OTP);
+			service.OTP = OTP;
+			await service.save();
+
+			res.json({ message: "OTP sent successfully" });
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async verifyOTP(req, res) {
+		try {
+			const { OTP } = req.body;
+			console.log(OTP);
+
+			const service = await ServiceRequest.findById(req.params.id);
+
+			if (!service) {
+				return res.status(404).json({ message: "Service not found" });
+			}
+
+			if (service.status !== "IN_PROGRESS") {
+				return res.status(400).json({ message: "OTP cannot be verified" });
+			}
+
+			console.log(service.OTP);
+			if (service.OTP != OTP) {
+				return res.status(400).json({ message: "Invalid OTP" });
+			}
+
+			const rider = await Rider.findById(req.rider._id);
+			const today = new Date().toISOString().split("T")[0];
+			const isTodayMarked = rider.attendance.present.some(
+				(attendance) => attendance.date.toISOString().split("T")[0] === today
+			);
+
+			const session = await Rider.startSession();
+			session.startTransaction();
+			try {
+				service.status = "COMPLETED";
+				service.workStarted = false;
+				rider.services.completed += 1;
+
+				if (!isTodayMarked) {
+					rider.attendance.present.push({ date: new Date() });
+				}
+				rider.earning = [
+					...rider.earning,
+					{ date: new Date(), amount: service.price },
+				];
+				rider.balance -= 50; // 5 coins deducted (This is in rupees)
+				service.completedAt = new Date();
+				await service.save({ session });
+				await rider.save({ session });
+
+				await session.commitTransaction();
+				session.endSession();
+			} catch (error) {
+				await session.abortTransaction();
+				session.endSession();
+				throw error;
+			}
+
+			res.json({ message: "OTP verified and work completed successfully" });
 		} catch (error) {
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
