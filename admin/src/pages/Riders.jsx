@@ -24,12 +24,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Trash2, Loader2, CalendarCheck, MoreVertical } from "lucide-react";
+import { Search, Trash2, Loader2, CalendarCheck, MoreVertical, User } from "lucide-react";
 import { Star as StarIcon } from "lucide-react";
 import ReferralCodeDialog from "@/components/ReferralCodeDialog";
 import PendingRidersDialog from "@/components/PendingRidersTable";
 import ExportButtons from "../components/RiderExportButton";
 import RiderAttendance from "@/components/RiderAttendance";
+import RiderProfileDialog from "@/components/PendingRiderProfileDialog";
 
 const RiderManagement = () => {
   const [riders, setRiders] = useState([]);
@@ -37,6 +38,12 @@ const RiderManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRider, setSelectedRider] = useState(null);
   const [isAttendanceOpen, setIsAttendanceOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const handleViewProfile = (rider) => {
+    setSelectedRider(rider);
+    setIsProfileOpen(true);
+  };
 
 
    // Handle view attendance details
@@ -204,6 +211,13 @@ const RiderManagement = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => handleViewProfile(rider)}
+                          className="gap-2"
+                        >
+                          <User className="h-4 w-4" />
+                          <span>View Profile</span>
+                        </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleViewAttendance(rider)}
                             className="cursor-pointer"
@@ -247,6 +261,15 @@ const RiderManagement = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <RiderProfileDialog
+        isOpen={isProfileOpen}
+        onClose={() => {
+          setIsProfileOpen(false);
+          setSelectedRider(null);
+        }}
+        rider={selectedRider}
+      />
     </div>
 
     
