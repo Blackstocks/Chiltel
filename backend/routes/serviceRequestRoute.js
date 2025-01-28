@@ -17,6 +17,7 @@ serviceRequestRoutes.delete('/:id', serviceRequestController.cancelServiceReques
 // Admin only routes
 serviceRequestRoutes.get('/',protect, authorize(['super-admin', 'sub-admin']), serviceRequestController.getAllServiceRequests);
 serviceRequestRoutes.post('/:id/assign-rider',protect, authorize(['super-admin', 'sub-admin']), serviceRequestController.assignRider);
+serviceRequestRoutes.post('/:id/assign-multiple-riders',protect, authorize(['super-admin', 'sub-admin']), serviceRequestController.assignMultipleRiders);
 serviceRequestRoutes.put('/:id/payment',protect, authorize(['super-admin', 'sub-admin']), serviceRequestController.updatePaymentStatus);
 
 export default serviceRequestRoutes;

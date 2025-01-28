@@ -309,7 +309,7 @@ const OrderManagement = () => {
       );
 
       const data = await response.json();
-      console.log("assigned service request: ", data);
+      console.log("assigned service request: ", data.data);
 
       if (!response.ok) throw new Error("Failed to assign rider");
 
