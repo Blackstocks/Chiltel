@@ -1,0 +1,29 @@
+{
+    "theme_color": "#8936FF",
+    "background_color": "#2EC6FE",
+    "icons": [
+      {
+        "purpose": "maskable",
+        "sizes": "512x512",
+        "src": "icon512_maskable.png",
+        "type": "image/png"
+      },
+      {
+        "purpose": "any",
+        "sizes": "512x512",
+        "src": "icon512_rounded.png",
+        "type": "image/png"
+      }
+    ],
+    "orientation": "portrait",
+    "display": "standalone",
+    "dir": "auto",
+    "lang": "en-US",
+    "name": "Chiltel Partner",
+    "short_name": "Chiltel Partner",
+    "start_url": "/",
+    "scope": "/",
+    "description": "Chiltel India, established in 2021 by Mr. Sudarshan Kuumar Raut, is a recognized startup in the Domestic and Commercial Home Appliances sector. Operating both offline and online, we specialize in offering premium services for Deep Freezers, Visi-Coolers, Chest Freezers, Back Bar Freezers, and more. Trusted by the Government of India as a DIIPT-recognized startup, we aim to deliver top-notch services at affordable rates, right at your doorstep.",
+    "id": "/"
+  }
+  

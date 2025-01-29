@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useAuth } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import LocationTracker from "./components/LocationTracker";
+import RegisterServiceWorker from "./lib/pwa/RegisterServiceWorker";
 
 const ProtectedRoute = ({ children }) => {
 	const { state } = useAuth();
