@@ -50,3 +50,6 @@ function App() {
 }
 
 export default App;
+
+
+//Partner panel developed by blackstocks
