@@ -27,6 +27,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+	RegisterServiceWorker();
 	return (
 		<AuthProvider>
 			{/* <LocationTracker apiEndpoint="http://localhost:4000/api/rider/location" /> */}
