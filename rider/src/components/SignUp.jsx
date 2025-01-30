@@ -22,6 +22,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useAuthActions } from "../hooks/useAuthActions";
+import { Link } from "react-router-dom";
 
 const MultiStepSignupForm = () => {
 	const fileInputRef = useRef(null);
@@ -70,6 +71,8 @@ const MultiStepSignupForm = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [paymentOrder, setPaymentOrder] = useState(null);
+
+	const [isSignupSuccess, setIsSignupSuccess] = useState(false);
 
 	const { signup } = useAuthActions();
 
@@ -350,11 +353,32 @@ const MultiStepSignupForm = () => {
 					},
 				});
 				toast.success(res.message);
+				setIsSignupSuccess(true);
 			} else {
 				toast.error(res.error.message);
 			}
 		}
 	};
+
+	const afterLoginScreen = () => {
+		return (
+			<div className="flex flex-col items-center space-y-4">
+				<h2 className="text-xl font-bold">Thank you for signing up!</h2>
+				<p className="text-gray-500">
+					Your account has been successfully created and sent to admin for
+					approval. You can login to your account and start using our services
+					once its verified.
+				</p>
+				<a href="/auth" className="text-blue-500 underline">
+					Login here
+				</a>
+			</div>
+		);
+	};
+
+	if (isSignupSuccess) {
+		return afterLoginScreen();
+	}
 
 	const renderStepContent = () => {
 		switch (currentStep) {
@@ -683,8 +707,15 @@ const MultiStepSignupForm = () => {
 								onChange={handleChange}
 								required
 							/>
-							<Label htmlFor="agreeToVerify">
-								I agree to verify my court cases and bank details
+							<Label htmlFor="agreeToVerify" className="pl-2">
+								I agree to{" "}
+								<Link
+									to="/terms"
+									target="blank"
+									className="text-blue-500 underline"
+								>
+									terms and conditions
+								</Link>
 							</Label>
 						</div>
 					</div>

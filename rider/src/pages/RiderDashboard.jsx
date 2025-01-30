@@ -28,6 +28,7 @@ import OverviewTab from "@/components/Overview";
 import HistoryTab from "@/components/History";
 
 import { useAuthActions } from "@/hooks/useAuthActions";
+import AttendanceCalendar from "../components/AttendanceCalender";
 
 // Main Dashboard Layout
 const RiderDashboard = () => {
@@ -94,6 +95,7 @@ const RiderDashboard = () => {
 						<TabsTrigger value="overview">Overview</TabsTrigger>
 						<TabsTrigger value="services">Services</TabsTrigger>
 						<TabsTrigger value="history">History</TabsTrigger>
+						<TabsTrigger value="attendance">Attendance</TabsTrigger>
 						<TabsTrigger value="profile">Profile</TabsTrigger>
 					</TabsList>
 
@@ -106,6 +108,11 @@ const RiderDashboard = () => {
 					<TabsContent value="history">
 						<HistoryTab />
 					</TabsContent>
+
+					<TabsContent value="attendance">
+						<AttendanceCalendar />
+					</TabsContent>
+
 					<TabsContent value="profile">
 						<ProfileTab />
 					</TabsContent>

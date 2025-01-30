@@ -544,6 +544,25 @@ const riderController = {
 
 		service.workStarted = true;
 
+		const rider = await Rider.findById(req.rider._id);
+		rider.status = "BUSY";
+
+		const today = new Date().toISOString().split("T")[0];
+		const workingHoursEntry = rider.attendance.workingHours.find(
+			(entry) => entry.date.toISOString().split("T")[0] === today
+		);
+
+		if (workingHoursEntry) {
+			workingHoursEntry.durations.push({ start: new Date(), end: null });
+		} else {
+			rider.attendance.workingHours.push({
+				date: new Date(),
+				hours: 0,
+				durations: [{ start: new Date(), end: null }],
+			});
+		}
+
+		await rider.save();
 		await service.save();
 
 		res.status(200).json({ message: "Service Stated successfully" });
@@ -783,6 +802,16 @@ const riderController = {
 					{ date: new Date(), amount: service.price },
 				];
 				rider.balance -= 50; // 5 coins deducted (This is in rupees)
+
+				//update working hours
+				const workingHoursEntry = rider.attendance.workingHours.find(
+					(entry) => entry.date.toISOString().split("T")[0] === today
+				);
+				const lastEntry = workingHoursEntry.durations.pop();
+				lastEntry.end = new Date();
+				workingHoursEntry.durations.push(lastEntry);
+				const diff = lastEntry.end - lastEntry.start;
+				workingHoursEntry.hours += diff / 1000 / 60 / 60;
 				service.completedAt = new Date();
 				await service.save({ session });
 				await rider.save({ session });

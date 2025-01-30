@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useAuth } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import LocationTracker from "./components/LocationTracker";
+import Terms from "./pages/Terms";
 
 const ProtectedRoute = ({ children }) => {
 	const { state } = useAuth();
@@ -40,6 +41,7 @@ function App() {
 						}
 					/>
 					<Route path="/auth" element={<RiderAuth />} />
+					<Route path="/terms" element={<Terms />} />
 					<Route path="*" element={<div>404 Not Found</div>} />
 				</Routes>
 			</Router>
