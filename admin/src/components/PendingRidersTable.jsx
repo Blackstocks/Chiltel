@@ -21,13 +21,35 @@ import {
   CheckCircle,
   AlertCircle,
   XCircle,
+  Building2,
+  ShieldAlert,
+  MoreHorizontal,
+  User,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "react-toastify";
 import axios from "axios";
+import RiderProfileDialog from "./PendingRiderProfileDialog";
 
 const PendingRidersDialog = ({ onRiderApproved }) => {
   const [pendingRiders, setPendingRiders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [verificationLoading, setVerificationLoading] = useState({});
+
+  const [selectedRider, setSelectedRider] = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const handleViewProfile = (rider) => {
+    setSelectedRider(rider);
+    setIsProfileOpen(true);
+  };
 
   const fetchPendingRiders = async () => {
     try {
@@ -87,6 +109,81 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
     } catch (error) {
       toast.error("Failed to reject rider");
     }
+  };
+
+  const handleBankVerification = async (riderId) => {
+    try {
+      setVerificationLoading((prev) => ({ ...prev, [riderId]: "bank" }));
+      // Find the rider to get their bank details
+      const rider = pendingRiders.find(r => r._id === riderId);
+      
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/rider/verify/bank`,
+        {
+          beneficiaryAccount: rider.bankAccount,
+          beneficiaryIFSC: rider.ifscCode,
+          beneficiaryMobile: rider.phoneNumber,
+          beneficiaryName: `${rider.firstName} ${rider.lastName}`
+        },
+      );
+
+      if (response.data.verified) {
+        setPendingRiders((prev) =>
+          prev.map((rider) =>
+            rider._id === riderId ? { ...rider, bankVerified: true } : rider
+          )
+        );
+        toast.success("Bank details verified successfully");
+      } else {
+        toast.error("Bank verification failed");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to verify bank details"
+      );
+    } finally {
+      setVerificationLoading((prev) => ({ ...prev, [riderId]: null }));
+    }
+  };
+
+  const handleCriminalCheck = async (riderId) => {
+    try {
+      setVerificationLoading((prev) => ({ ...prev, [riderId]: "criminal" }));
+      // Find the rider to get their details
+    const rider = pendingRiders.find(r => r._id === riderId);
+    
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/rider/verify/court`,
+      {
+        name: `${rider.firstName} ${rider.lastName}`,
+        fatherName: rider.fatherName,
+        address: rider.address,
+        dob: rider.dateOfBirth,  // Assuming the date is in the correct format
+        panNumber: rider.panNumber
+      },
+    );
+
+      if (response.data.verified) {
+        setPendingRiders((prev) =>
+          prev.map((rider) =>
+            rider._id === riderId ? { ...rider, criminalChecked: true } : rider
+          )
+        );
+        toast.success("Criminal background check completed");
+      } else {
+        toast.error("Criminal background check failed");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to complete criminal check"
+      );
+    } finally {
+      setVerificationLoading((prev) => ({ ...prev, [riderId]: null }));
+    }
+  };
+
+  const isVerificationComplete = (rider) => {
+    return rider.bankVerified && rider.criminalChecked;
   };
 
   return (
@@ -167,27 +264,81 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-green-600 hover:text-green-700"
-                        onClick={() => handleApproveRider(rider._id)}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600 hover:text-red-700"
-                        onClick={() => handleRejectRider(rider._id)}
-                      >
-                        <XCircle className="h-4 w-4 mr-1" />
-                        Reject
-                      </Button>
-                    </div>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>Verifications</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          disabled={
+                            rider.bankVerified || verificationLoading[rider._id]
+                          }
+                          onClick={() => handleBankVerification(rider._id)}
+                          className="gap-2"
+                        >
+                          {verificationLoading[rider._id] === "bank" ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Building2 className="h-4 w-4" />
+                          )}
+                          <span>Bank Verification</span>
+                          {rider.bankVerified && (
+                            <CheckCircle className="h-4 w-4 ml-auto text-green-600" />
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={
+                            rider.criminalChecked ||
+                            verificationLoading[rider._id]
+                          }
+                          onClick={() => handleCriminalCheck(rider._id)}
+                          className="gap-2"
+                        >
+                          {verificationLoading[rider._id] === "criminal" ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <ShieldAlert className="h-4 w-4" />
+                          )}
+                          <span>Criminal Check</span>
+                          {rider.criminalChecked && (
+                            <CheckCircle className="h-4 w-4 ml-auto text-green-600" />
+                          )}
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                        <DropdownMenuItem
+                          onClick={() => handleViewProfile(rider)}
+                          className="gap-2"
+                        >
+                          <User className="h-4 w-4" />
+                          <span>View Profile</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          disabled={!isVerificationComplete(rider)}
+                          onClick={() => handleApproveRider(rider._id)}
+                          className="gap-2 text-green-600"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Approve Rider</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={() => handleRejectRider(rider._id)}
+                          className="gap-2 text-red-600"
+                        >
+                          <XCircle className="h-4 w-4" />
+                          <span>Reject Rider</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
@@ -195,6 +346,15 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
           </Table>
         )}
       </DialogContent>
+
+      <RiderProfileDialog
+        isOpen={isProfileOpen}
+        onClose={() => {
+          setIsProfileOpen(false);
+          setSelectedRider(null);
+        }}
+        rider={selectedRider}
+      />
     </Dialog>
   );
 };

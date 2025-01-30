@@ -315,16 +315,16 @@ const ProductOrderChalan = ({ order }) => {
         (_, i) => serialNumbers[index * item.quantity + i]
       ), // Add if available
       hsn: "84183010",
-      mrp: item.product.price,
+      mrp: item.price/(0.9*1.18),
       quantity: item.quantity,
       discount: item.product.discount * 100,
       unit: "Nos",
-      unitPrice: item.price,
-      taxableAmount: item.price * 1.18, // Including 18% GST
-      cgst: item.price * 0.09, // 9% CGST
-      sgst: item.price * 0.09, // 9% SGST
-      gst: item.price * 0.18, // 18% GST
-      total: item.price * 1.18, // Including 18% GST
+      unitPrice: item.price/1.18,
+      taxableAmount: item.price, // Including 18% GST
+      cgst: item.price/1.18 * 0.09, // 9% CGST
+      sgst: item.price/1.18 * 0.09, // 9% SGST
+      gst: item.price/1.18 * 0.18, // 18% GST
+      total: item.price, // Including 18% GST
     })),
     total: {
       subTotal: order.products.reduce(
@@ -500,6 +500,7 @@ const ProductOrderChalan = ({ order }) => {
                     <th className="border px-2 py-1 text-right">Quantity</th>
                     <th className="border px-2 py-1 text-right">Discount</th>
                     <th className="border px-2 py-1 text-right">Price/Unit</th>
+                    <th className="border px-2 py-1 text-right">Gst</th>
                     <th className="border px-2 py-1 text-right">
                       Total Amount
                     </th>
@@ -530,16 +531,19 @@ const ProductOrderChalan = ({ order }) => {
                         {item.discount.toLocaleString()}%
                       </td>
                       <td className="border px-2 py-1 text-right">
-                        ₹{item.unitPrice.toLocaleString()}
+                        ₹{item.unitPrice.toFixed(2)}
                       </td>
                       <td className="border px-2 py-1 text-right">
-                        ₹{item.unitPrice * item.quantity}
+                        ₹{item.gst.toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1 text-right">
+                        ₹{(item.total * item.quantity).toFixed(2)}
                       </td>
                     </tr>
                   ))}
                   <tr>
                     <td
-                      colSpan="8"
+                      colSpan="9"
                       className="border px-2 py-1 text-right font-bold"
                     >
                       Total
@@ -591,36 +595,6 @@ const ProductOrderChalan = ({ order }) => {
                       {order.paymentDetails.method}
                     </div>
                   </div>
-                </div>
-                <div className="p-2">
-                  <table className="w-full">
-                    <tbody>
-                      <tr>
-                        <td colSpan="2" className="font-bold pb-2">
-                          Amounts:
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Sub Total</td>
-                        <td className="text-right">
-                          ₹{orderDetails.total.subTotal}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>GST(18%)</td>
-                        <td className="text-right">
-                          ₹{orderDetails.total.gst}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Total</td>
-                        <td className="text-right font-bold">
-                          ₹
-                          {orderDetails.total.subTotal + orderDetails.total.gst}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
                 </div>
               </div>
             </div>

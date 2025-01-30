@@ -37,7 +37,13 @@ const Register = () => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/sub-admin/register`,
-        formData
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       setSuccess("Registration successful! You can now log in.");
       navigate("/");
