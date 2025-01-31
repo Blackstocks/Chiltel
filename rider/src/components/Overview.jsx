@@ -32,7 +32,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import ActiveService from "./ActiveService";
-import AttendanceCalendar from "./AttendanceCalender";
 
 const OverviewTab = () => {
 	const { profile, loading, error } = useProfile();
@@ -221,7 +220,6 @@ const OverviewTab = () => {
 				{/* Active Service Card */}
 				{<CurrCard />}
 			</div>
-			{<AttendanceCalendar />}
 		</div>
 	);
 };

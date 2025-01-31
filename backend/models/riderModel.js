@@ -76,6 +76,18 @@ const riderSchema = {
 				date: { type: Date, required: true },
 			},
 		],
+		workingHours: [
+			{
+				date: { type: Date, required: true },
+				hours: { type: Number, required: true },
+				durations: [
+					{
+						start: { type: Date, required: true },
+						end: { type: Date, required: true },
+					},
+				],
+			},
+		],
 	},
 };
 
