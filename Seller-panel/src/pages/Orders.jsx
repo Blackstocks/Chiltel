@@ -65,7 +65,7 @@ const OrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [dateFilter, setDateFilter] = useState("ALL");
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -81,40 +81,44 @@ const OrdersPage = () => {
     // Apply search
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      result = result.filter(order => 
-        order._id.toLowerCase().includes(searchLower) ||
-        order.userId.name.toLowerCase().includes(searchLower) ||
-        order.userId.email.toLowerCase().includes(searchLower) ||
-        order.products.some(p => p.product.name.toLowerCase().includes(searchLower))
+      result = result.filter(
+        (order) =>
+          order._id.toLowerCase().includes(searchLower) ||
+          order.userId.name.toLowerCase().includes(searchLower) ||
+          order.userId.email.toLowerCase().includes(searchLower) ||
+          order.products.some((p) =>
+            p.product.name.toLowerCase().includes(searchLower)
+          )
       );
     }
 
     // Apply status filter
     if (statusFilter !== "ALL") {
-      result = result.filter(order => order.status === statusFilter);
+      result = result.filter((order) => order.status === statusFilter);
     }
 
     // Apply date filter
     if (dateFilter !== "ALL") {
       const today = new Date();
       const filterDate = new Date();
-      
-      switch(dateFilter) {
+
+      switch (dateFilter) {
         case "TODAY":
-          result = result.filter(order => 
-            new Date(order.createdAt).toDateString() === today.toDateString()
+          result = result.filter(
+            (order) =>
+              new Date(order.createdAt).toDateString() === today.toDateString()
           );
           break;
         case "WEEK":
           filterDate.setDate(today.getDate() - 7);
-          result = result.filter(order => 
-            new Date(order.createdAt) >= filterDate
+          result = result.filter(
+            (order) => new Date(order.createdAt) >= filterDate
           );
           break;
         case "MONTH":
           filterDate.setMonth(today.getMonth() - 1);
-          result = result.filter(order => 
-            new Date(order.createdAt) >= filterDate
+          result = result.filter(
+            (order) => new Date(order.createdAt) >= filterDate
           );
           break;
       }
@@ -152,8 +156,8 @@ const OrdersPage = () => {
   const Pagination = () => (
     <div className="flex items-center justify-between px-2 py-4">
       <p className="text-sm text-gray-700">
-        Showing {startIndex + 1} to {Math.min(endIndex, filteredOrders.length)} of{" "}
-        {filteredOrders.length} entries
+        Showing {startIndex + 1} to {Math.min(endIndex, filteredOrders.length)}{" "}
+        of {filteredOrders.length} entries
       </p>
       <div className="flex items-center gap-2">
         <Button
@@ -167,7 +171,7 @@ const OrdersPage = () => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
           disabled={currentPage === 1}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -178,7 +182,9 @@ const OrdersPage = () => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+          }
           disabled={currentPage === totalPages}
         >
           <ChevronRight className="h-4 w-4" />
@@ -212,7 +218,7 @@ const OrdersPage = () => {
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            {ORDER_STATUSES.map(status => (
+            {ORDER_STATUSES.map((status) => (
               <SelectItem key={status} value={status}>
                 {status === "ALL" ? "All Status" : status}
               </SelectItem>
@@ -385,7 +391,7 @@ const OrdersPage = () => {
                   )}
                   <div className="flex justify-between text-lg font-medium pt-2">
                     <span>Total Amount</span>
-                    <span>₹{order.totalAmount.toLocaleString()}</span>
+                    <span>₹{order.sellerTotal.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -461,14 +467,16 @@ const OrdersPage = () => {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{order.userId.name}</div>
+                            <div className="font-medium">
+                              {order.userId.name}
+                            </div>
                             <div className="text-sm text-gray-500">
                               {order.userId.email}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          ₹{order.totalAmount.toLocaleString()}
+                          ₹{order.sellerTotal.toLocaleString()}
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(order.status)}>

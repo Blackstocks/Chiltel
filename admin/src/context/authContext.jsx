@@ -43,6 +43,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  
+
   const logout = () => {
     setToken("");
     setUserRole("");

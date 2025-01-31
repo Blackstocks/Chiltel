@@ -1,15 +1,12 @@
 // controllers/sellerController.js
 import Seller from "../models/seller.js";
 import Order from "../models/orderModel.js";
-import Product from '../models/productModel.js';
+import Product from "../models/productModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { validateProduct } from '../utils/validateSellerProduct.js';
+import { validateProduct } from "../utils/validateSellerProduct.js";
 import bucket from "../config/firebaseConfig.js";
 import fs from "fs";
-
-
-
 
 export const register = async (req, res) => {
   try {
@@ -22,7 +19,7 @@ export const register = async (req, res) => {
       phoneNumber,
       registeredAddress,
       warehouseAddress,
-      agreementAccepted
+      agreementAccepted,
     } = req.body;
 
     // Check if seller with same email exists
@@ -30,7 +27,7 @@ export const register = async (req, res) => {
     if (existingEmailSeller) {
       return res.status(400).json({
         success: false,
-        message: 'A seller with this email already exists'
+        message: "A seller with this email already exists",
       });
     }
 
@@ -39,7 +36,7 @@ export const register = async (req, res) => {
     if (existingAadharSeller) {
       return res.status(400).json({
         success: false,
-        message: 'A seller with this Aadhar number already exists'
+        message: "A seller with this Aadhar number already exists",
       });
     }
 
@@ -54,23 +51,23 @@ export const register = async (req, res) => {
       registeredAddress,
       warehouseAddress,
       agreementAccepted,
-      registrationStatus: 'pending'
+      registrationStatus: "pending",
     });
 
     res.status(201).json({
       success: true,
-      message: 'Registration submitted successfully. Pending admin approval.',
+      message: "Registration submitted successfully. Pending admin approval.",
       data: {
         id: seller._id,
         email: seller.email,
         shopName: seller.shopName,
-        registrationStatus: seller.registrationStatus
-      }
+        registrationStatus: seller.registrationStatus,
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Registration failed'
+      message: error.message || "Registration failed",
     });
   }
 };
@@ -80,11 +77,11 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find seller and explicitly select password field (since it's deselected in schema)
-    const seller = await Seller.findOne({ email }).select('+password');
+    const seller = await Seller.findOne({ email }).select("+password");
     if (!seller) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password"
+        message: "Invalid email or password",
       });
     }
 
@@ -93,7 +90,7 @@ export const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password"
+        message: "Invalid email or password",
       });
     }
 
@@ -101,24 +98,24 @@ export const login = async (req, res) => {
     if (seller.registrationStatus !== "approved") {
       return res.status(403).json({
         success: false,
-        message: 
+        message:
           seller.registrationStatus === "pending"
             ? "Your account is pending approval"
             : seller.registrationStatus === "rejected"
             ? "Your account registration was rejected"
-            : "Your account is not active"
+            : "Your account is not active",
       });
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
-        id: seller._id,
-        email: seller.email
-      }, 
-      process.env.JWT_SECRET, 
       {
-        expiresIn: "30d"
+        id: seller._id,
+        email: seller.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "30d",
       }
     );
 
@@ -130,10 +127,10 @@ export const login = async (req, res) => {
       seller,
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     res.status(500).json({
       success: false,
-      message: "Login failed. Please try again later."
+      message: "Login failed. Please try again later.",
     });
   }
 };
@@ -248,7 +245,7 @@ export const updateCommission = async (req, res) => {
     if (commissionRate < 0 || commissionRate > 100) {
       return res.status(400).json({
         success: false,
-        message: "Commission rate must be between 0 and 100"
+        message: "Commission rate must be between 0 and 100",
       });
     }
 
@@ -257,7 +254,7 @@ export const updateCommission = async (req, res) => {
     if (!seller) {
       return res.status(404).json({
         success: false,
-        message: "Seller not found"
+        message: "Seller not found",
       });
     }
 
@@ -268,14 +265,14 @@ export const updateCommission = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Commission rate updated successfully",
-      data: seller
+      data: seller,
     });
   } catch (error) {
     console.error("Error updating commission rate:", error);
     res.status(500).json({
       success: false,
       message: "Failed to update commission rate",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -284,27 +281,26 @@ export const verifyToken = async (req, res) => {
   try {
     // Find seller by ID from req.seller (set by auth middleware) and exclude password
     const seller = await Seller.findById(req.seller._id).select("-password");
-    
+
     if (!seller) {
       return res.status(404).json({
         success: false,
-        message: "Seller not found"
+        message: "Seller not found",
       });
     }
 
     res.json({
       success: true,
-      seller
+      seller,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Token verification failed",
-      error: error.message
+      error: error.message,
     });
   }
 };
-
 
 // controllers/sellerController.js
 
@@ -331,11 +327,11 @@ export const updateProfile = async (req, res) => {
       shopName,
       proprietorName,
       phoneNumber,
-      
+
       // Addresses
       registeredAddress,
       warehouseAddress,
-      
+
       // Optional Details
       gstNumber,
       bankDetails,
@@ -354,7 +350,7 @@ export const updateProfile = async (req, res) => {
     if (registeredAddress) {
       updateData.registeredAddress = {
         ...req.seller.registeredAddress?.toObject(),
-        ...registeredAddress
+        ...registeredAddress,
       };
     }
 
@@ -362,7 +358,7 @@ export const updateProfile = async (req, res) => {
     if (warehouseAddress) {
       updateData.warehouseAddress = {
         ...req.seller.warehouseAddress?.toObject(),
-        ...warehouseAddress
+        ...warehouseAddress,
       };
     }
 
@@ -370,7 +366,7 @@ export const updateProfile = async (req, res) => {
     if (bankDetails) {
       updateData.bankDetails = {
         ...req.seller.bankDetails?.toObject(),
-        ...bankDetails
+        ...bankDetails,
       };
     }
 
@@ -379,30 +375,30 @@ export const updateProfile = async (req, res) => {
 
     // Check for unique GST if being updated
     if (gstNumber) {
-      const existingGST = await Seller.findOne({ 
-        gstNumber, 
-        _id: { $ne: req.seller.id } 
+      const existingGST = await Seller.findOne({
+        gstNumber,
+        _id: { $ne: req.seller.id },
       });
-      
+
       if (existingGST) {
         return res.status(400).json({
           success: false,
-          message: "GST number already registered with another seller"
+          message: "GST number already registered with another seller",
         });
       }
     }
 
     // Check for unique bank account if being updated
     if (bankDetails?.accountNumber) {
-      const existingAccount = await Seller.findOne({ 
-        'bankDetails.accountNumber': bankDetails.accountNumber,
-        _id: { $ne: req.seller.id }
+      const existingAccount = await Seller.findOne({
+        "bankDetails.accountNumber": bankDetails.accountNumber,
+        _id: { $ne: req.seller.id },
       });
-      
+
       if (existingAccount) {
         return res.status(400).json({
           success: false,
-          message: "Bank account number already registered with another seller"
+          message: "Bank account number already registered with another seller",
         });
       }
     }
@@ -410,16 +406,16 @@ export const updateProfile = async (req, res) => {
     const updatedSeller = await Seller.findByIdAndUpdate(
       req.seller.id,
       updateData,
-      { 
+      {
         new: true,
-        runValidators: true 
+        runValidators: true,
       }
-    ).select('-password');
+    ).select("-password");
 
     if (!updatedSeller) {
       return res.status(404).json({
         success: false,
-        message: "Seller not found"
+        message: "Seller not found",
       });
     }
 
@@ -435,15 +431,14 @@ export const updateProfile = async (req, res) => {
         warehouseAddress: updatedSeller.warehouseAddress,
         gstNumber: updatedSeller.gstNumber,
         bankDetails: updatedSeller.bankDetails,
-        lastUpdated: updatedSeller.lastUpdated
-      }
+        lastUpdated: updatedSeller.lastUpdated,
+      },
     });
-
   } catch (error) {
-    console.error('Profile update error:', error);
+    console.error("Profile update error:", error);
     res.status(500).json({
       success: false,
-      message: error.message || "Failed to update profile. Please try again."
+      message: error.message || "Failed to update profile. Please try again.",
     });
   }
 };
@@ -491,53 +486,56 @@ export const verifyBankDetails = async (req, res) => {
 };
 
 export const uploadDocument = async (req, res) => {
-    try {
-        const file = req.file;
+  try {
+    const file = req.file;
 
-        if (!file) {
-            return res.status(400).json({ message: "No file uploaded" });
-        }
-
-        console.log("File received:", file);
-
-        // Define the destination in Firebase Storage
-        const firebaseFileName = `uploads/${file.originalname}`;
-
-        // Upload file to Firebase Storage
-        await bucket.upload(file.path, {
-            destination: firebaseFileName,
-            metadata: {
-                contentType: file.mimetype,
-            },
-        });
-
-        // Get the public URL
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${firebaseFileName}`;
-
-        // Cleanup temporary file
-        fs.unlinkSync(file.path);
-
-        console.log("File uploaded to Firebase:", publicUrl);
-
-        res.status(200).json({ message: "File uploaded successfully", url: publicUrl });
-    } catch (error) {
-        console.error("Error uploading file:", error);
-        res.status(500).json({ message: "Failed to upload document", error: error.message });
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
     }
-};
 
+    console.log("File received:", file);
+
+    // Define the destination in Firebase Storage
+    const firebaseFileName = `uploads/${file.originalname}`;
+
+    // Upload file to Firebase Storage
+    await bucket.upload(file.path, {
+      destination: firebaseFileName,
+      metadata: {
+        contentType: file.mimetype,
+      },
+    });
+
+    // Get the public URL
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${firebaseFileName}`;
+
+    // Cleanup temporary file
+    fs.unlinkSync(file.path);
+
+    console.log("File uploaded to Firebase:", publicUrl);
+
+    res
+      .status(200)
+      .json({ message: "File uploaded successfully", url: publicUrl });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to upload document", error: error.message });
+  }
+};
 
 // controllers/productController.js
 
 export const addProduct = async (req, res) => {
   try {
     const sellerId = req.seller.id; // Assuming we set this in auth middleware
-    
+
     // Combine request body with seller information
     const productData = {
       ...req.body,
       seller: sellerId,
-      requestedStatus: 'pending'
+      requestedStatus: "pending",
     };
 
     // Validate the product data
@@ -545,8 +543,8 @@ export const addProduct = async (req, res) => {
     if (validationError) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: validationError
+        message: "Validation failed",
+        errors: validationError,
       });
     }
 
@@ -556,16 +554,15 @@ export const addProduct = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Product submitted successfully',
-      data: product
+      message: "Product submitted successfully",
+      data: product,
     });
-
   } catch (error) {
-    console.error('Error in addProduct:', error);
+    console.error("Error in addProduct:", error);
     res.status(500).json({
       success: false,
-      message: 'Error submitting product',
-      error: error.message
+      message: "Error submitting product",
+      error: error.message,
     });
   }
 };
@@ -575,22 +572,22 @@ export const getSellerProducts = async (req, res) => {
     const sellerId = req.seller.id;
 
     // Get all products for the seller
-    const products = await Product.find({ seller: sellerId })
-      .sort({ createdAt: -1 });
+    const products = await Product.find({ seller: sellerId }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({
       success: true,
       data: {
-        products
-      }
+        products,
+      },
     });
-
   } catch (error) {
-    console.error('Error in getSellerProducts:', error);
+    console.error("Error in getSellerProducts:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching products',
-      error: error.message
+      message: "Error fetching products",
+      error: error.message,
     });
   }
 };
@@ -600,32 +597,43 @@ export const getSellerOrders = async (req, res) => {
     const sellerId = req.seller.id;
 
     // Find products by seller
-    const products = await Product.find({ seller: sellerId }).select('_id');
-    const productIds = products.map(product => product._id);
+    const products = await Product.find({ seller: sellerId }).select("_id");
+    const productIds = products.map((product) => product._id);
 
-    // Find orders containing these products
-    const orders = await Order.find({ 'products.product': { $in: productIds } });
-    // Populate userId in orders
-    await Order.populate(orders, {
-      path: 'userId',
-      select: 'name email'
-    });
-    // Populate products.product with name
-    await Order.populate(orders, {
-      path: 'products.product',
-      select: 'name'
+    // Find orders containing these products, sorted by createdAt in descending order
+    const orders = await Order.find({ "products.product": { $in: productIds } })
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+      .populate("userId", "name email")
+      .populate("products.product");
+
+    // Filter products in each order to only include seller's products and calculate totals
+    const filteredOrders = orders.map((order) => {
+      const orderObj = order.toObject();
+      // Only keep products that belong to this seller
+      orderObj.products = orderObj.products.filter((product) =>
+        productIds.some(
+          (id) => id.toString() === product.product._id.toString()
+        )
+      );
+
+      // Calculate total amount for seller's products in this order
+      orderObj.sellerTotal = orderObj.products.reduce((total, product) => {
+        return total + product.price * product.quantity;
+      }, 0);
+
+      return orderObj;
     });
 
     res.status(200).json({
       success: true,
-      data: orders
+      data: filteredOrders,
     });
   } catch (error) {
-    console.error('Error in getSellerOrders:', error);
+    console.error("Error in getSellerOrders:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching orders',
-      error: error.message
+      message: "Error fetching orders",
+      error: error.message,
     });
   }
 };
@@ -637,21 +645,21 @@ export const deleteProduct = async (req, res) => {
 
     const product = await Product.findOne({
       _id: productId,
-      seller: sellerId
+      seller: sellerId,
     });
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found'
+        message: "Product not found",
       });
     }
 
     // Check if product can be deleted (e.g., not already approved)
-    if (product.requestedStatus === 'approved') {
+    if (product.requestedStatus === "approved") {
       return res.status(400).json({
         success: false,
-        message: 'Cannot delete approved product'
+        message: "Cannot delete approved product",
       });
     }
 
@@ -659,15 +667,14 @@ export const deleteProduct = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Product deleted successfully'
+      message: "Product deleted successfully",
     });
-
   } catch (error) {
-    console.error('Error in deleteProduct:', error);
+    console.error("Error in deleteProduct:", error);
     res.status(500).json({
       success: false,
-      message: 'Error deleting product',
-      error: error.message
+      message: "Error deleting product",
+      error: error.message,
     });
   }
 };
@@ -681,21 +688,22 @@ export const editProduct = async (req, res) => {
     // Find the product and ensure it belongs to the seller
     const product = await Product.findOne({
       _id: productId,
-      seller: sellerId
+      seller: sellerId,
     });
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found or you do not have permission to edit it'
+        message: "Product not found or you do not have permission to edit it",
       });
     }
 
     // Check if product is already approved
-    if (product.requestedStatus === 'approved') {
+    if (product.requestedStatus === "approved") {
       return res.status(400).json({
         success: false,
-        message: 'Cannot edit approved product. Please contact admin for changes.'
+        message:
+          "Cannot edit approved product. Please contact admin for changes.",
       });
     }
 
@@ -709,14 +717,14 @@ export const editProduct = async (req, res) => {
     // Validate the updated data
     const validationError = validateProduct({
       ...product.toObject(),
-      ...updateData
+      ...updateData,
     });
 
     if (validationError) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: validationError
+        message: "Validation failed",
+        errors: validationError,
       });
     }
 
@@ -724,23 +732,26 @@ export const editProduct = async (req, res) => {
     if (updateData.price && updateData.price <= 0) {
       return res.status(400).json({
         success: false,
-        message: 'Price must be greater than 0'
+        message: "Price must be greater than 0",
       });
     }
 
-    if (updateData.discount && (updateData.discount < 0 || updateData.discount > 1)) {
+    if (
+      updateData.discount &&
+      (updateData.discount < 0 || updateData.discount > 1)
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'Discount must be between 0 and 1'
+        message: "Discount must be between 0 and 1",
       });
     }
 
     // Handle specifications update
     if (updateData.specifications) {
-      if (typeof updateData.specifications !== 'object') {
+      if (typeof updateData.specifications !== "object") {
         return res.status(400).json({
           success: false,
-          message: 'Specifications must be an object'
+          message: "Specifications must be an object",
         });
       }
     }
@@ -749,59 +760,58 @@ export const editProduct = async (req, res) => {
     if (updateData.features && !Array.isArray(updateData.features)) {
       return res.status(400).json({
         success: false,
-        message: 'Features must be an array'
+        message: "Features must be an array",
       });
     }
 
     if (updateData.imageUrls && !Array.isArray(updateData.imageUrls)) {
       return res.status(400).json({
         success: false,
-        message: 'Image URLs must be an array'
+        message: "Image URLs must be an array",
       });
     }
 
     // Update the product
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
-      { 
+      {
         $set: updateData,
-        requestedStatus: 'pending' // Reset to pending since product was modified
+        requestedStatus: "pending", // Reset to pending since product was modified
       },
-      { 
+      {
         new: true, // Return the updated document
-        runValidators: true // Run model validations
+        runValidators: true, // Run model validations
       }
     );
 
     res.status(200).json({
       success: true,
-      message: 'Product updated successfully. Waiting for admin approval.',
-      data: updatedProduct
+      message: "Product updated successfully. Waiting for admin approval.",
+      data: updatedProduct,
     });
-
   } catch (error) {
-    console.error('Error in editProduct:', error);
-    
+    console.error("Error in editProduct:", error);
+
     // Handle specific MongoDB errors
-    if (error.name === 'ValidationError') {
+    if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: Object.values(error.errors).map(err => err.message)
+        message: "Validation failed",
+        errors: Object.values(error.errors).map((err) => err.message),
       });
     }
 
-    if (error.name === 'CastError') {
+    if (error.name === "CastError") {
       return res.status(400).json({
         success: false,
-        message: 'Invalid product ID format'
+        message: "Invalid product ID format",
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Error updating product',
-      error: error.message
+      message: "Error updating product",
+      error: error.message,
     });
   }
 };
