@@ -56,6 +56,11 @@ const StoreSettings = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [verificationStatus, setVerificationStatus] = useState({
+    gst: false,
+    bank: false,
+  });
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -179,12 +184,189 @@ const StoreSettings = () => {
     }
   };
 
+  const validateGSTNumber = (gstNumber) => {
+    // GST format: 2 digits, 10 characters PAN, 1 digit entity number, 1 digit Z, 1 digit checksum
+    const gstPattern =
+      /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    return gstPattern.test(gstNumber);
+  };
+
+  const validateIFSC = (ifsc) => {
+    // IFSC format: 4 characters bank code, 0, 6 digits branch code
+    const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+    return ifscPattern.test(ifsc);
+  };
+
+  const validateAccountNumber = (accountNumber) => {
+    // Account number should be between 9 and 18 digits
+    const accPattern = /^\d{9,18}$/;
+    return accPattern.test(accountNumber);
+  };
+
+  // Add this new function for GST verification
+  const verifyGSTDetails = async () => {
+    const gstVerifyResponse = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/seller/verify-gst`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ gstNumber: formData.gstNumber }),
+      }
+    );
+
+    const gstData = await gstVerifyResponse.json();
+    if (!gstVerifyResponse.ok) {
+      throw new Error(gstData.message || "GST verification failed");
+    }
+
+    // Check if GST details match with shop details
+    if (
+      gstData.data?.tradeName &&
+      !gstData.data.tradeName
+        .toLowerCase()
+        .includes(formData.shopName.toLowerCase())
+    ) {
+      throw new Error(
+        "GST registered business name doesn't match with shop name"
+      );
+    }
+
+    return gstData;
+  };
+
+  // Add this new function for bank verification
+  const verifyBankDetails = async () => {
+    // First verify bank account
+    const bankVerifyResponse = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/seller/verify-bank-details`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          beneficiaryAccount: formData.bankDetails.accountNumber,
+          beneficiaryIFSC: formData.bankDetails.ifscCode,
+          beneficiaryName: formData.bankDetails.bankName,
+          beneficiaryMobile: user.phoneNumber,
+        }),
+      }
+    );
+
+    const bankData = await bankVerifyResponse.json();
+    if (!bankVerifyResponse.ok) {
+      throw new Error(bankData.message || "Bank verification failed");
+    }
+
+    if (!bankData.data.accountExists) {
+      throw new Error(
+        "Bank account verification failed. Please check your details."
+      );
+    }
+
+    // Then verify IFSC code
+    const ifscResponse = await fetch(
+      `https://ifsc.razorpay.com/${formData.bankDetails.ifscCode}`
+    );
+
+    if (!ifscResponse.ok) {
+      throw new Error("Invalid IFSC code. Please check and try again.");
+    }
+
+    const ifscData = await ifscResponse.json();
+
+    // Verify if bank name matches
+    if (
+      !ifscData.BANK.toLowerCase().includes(
+        formData.bankDetails.bankName.toLowerCase()
+      )
+    ) {
+      throw new Error("Bank name doesn't match with IFSC code");
+    }
+
+    return { bankData, ifscData };
+  };
+
+  const handleGSTVerification = async () => {
+    try {
+      if (!validateGSTNumber(formData.gstNumber)) {
+        toast.error("Please enter a valid GST number");
+        return;
+      }
+
+      setLoading(true);
+      const gstData = await verifyGSTDetails();
+      toast.success("GST verification successful");
+      setVerificationStatus((prev) => ({ ...prev, gst: true }));
+    } catch (error) {
+      toast.error(`GST Verification Failed: ${error.message}`);
+      setVerificationStatus((prev) => ({ ...prev, gst: false }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBankVerification = async () => {
+    try {
+      if (!validateIFSC(formData.bankDetails.ifscCode)) {
+        toast.error("Please enter a valid IFSC code");
+        return;
+      }
+
+      if (!validateAccountNumber(formData.bankDetails.accountNumber)) {
+        toast.error("Please enter a valid account number (9-18 digits)");
+        return;
+      }
+
+      if (!formData.bankDetails.bankName.trim()) {
+        toast.error("Bank name is required");
+        return;
+      }
+
+      setLoading(true);
+      const bankVerificationResult = await verifyBankDetails();
+      toast.success("Bank details verification successful");
+      setVerificationStatus((prev) => ({ ...prev, bank: true }));
+    } catch (error) {
+      toast.error(`Bank Verification Failed: ${error.message}`);
+      setVerificationStatus((prev) => ({ ...prev, bank: false }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleBankDetailsSave = async () => {
     try {
+      if (!verificationStatus.gst || !verificationStatus.bank) {
+        toast.error("Please verify both GST and Bank details before saving");
+        return;
+      }
+
       setLoading(true);
+
+      // Re-verify both to ensure data hasn't changed
+      const gstData = await verifyGSTDetails();
+      const bankVerificationResult = await verifyBankDetails();
+
       const updateData = {
         gstNumber: formData.gstNumber,
-        bankDetails: formData.bankDetails,
+        gstDetails: {
+          tradeName: gstData.data.tradeName,
+          legalName: gstData.data.legalName,
+          status: gstData.data.status,
+          verifiedAt: new Date().toISOString(),
+        },
+        bankDetails: {
+          ...formData.bankDetails,
+          bankBranch: bankVerificationResult.ifscData.BRANCH,
+          bankCity: bankVerificationResult.ifscData.CITY,
+          verified: true,
+          verifiedAt: new Date().toISOString(),
+        },
       };
 
       const response = await fetch(
@@ -202,10 +384,10 @@ const StoreSettings = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      toast.success("Bank details updated successfully");
+      toast.success("Bank and GST details updated successfully");
       setEditMode((prev) => ({ ...prev, bank: false }));
     } catch (error) {
-      toast.error(error.message || "Failed to update bank details");
+      toast.error(error.message || "Failed to update details");
     } finally {
       setLoading(false);
     }
@@ -227,6 +409,7 @@ const StoreSettings = () => {
       }),
     }));
     setEditMode((prev) => ({ ...prev, [section]: false }));
+    setVerificationStatus({ gst: false, bank: false });
     toast.info("Changes discarded");
   };
 
@@ -391,12 +574,13 @@ const StoreSettings = () => {
                 </div>
               </div>
               {editMode.basic && (
-                <div className="flex justify-end gap-3 mt-4">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4">
                   <Button
                     variant="outline"
                     onClick={() => handleCancel("basic")}
                     disabled={loading}
                     size="sm"
+                    className="w-full sm:w-auto"
                   >
                     Cancel
                   </Button>
@@ -404,6 +588,7 @@ const StoreSettings = () => {
                     onClick={handleBasicDetailsSave}
                     disabled={loading}
                     size="sm"
+                    className="w-full sm:w-auto"
                   >
                     {loading ? "Saving..." : "Save Changes"}
                   </Button>
@@ -433,73 +618,144 @@ const StoreSettings = () => {
                     <Label htmlFor="gstNumber" className="text-xs">
                       GST Number
                     </Label>
-                    <Input
-                      id="gstNumber"
-                      value={formData.gstNumber}
-                      onChange={handleChange}
-                      placeholder="Enter GST number"
-                      className="h-8 text-sm"
-                      disabled={!editMode.bank}
-                    />
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        id="gstNumber"
+                        value={formData.gstNumber}
+                        onChange={handleChange}
+                        placeholder="Enter GST number"
+                        className="h-8 text-sm flex-1"
+                        disabled={!editMode.bank}
+                      />
+                      {editMode.bank && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleGSTVerification}
+                          disabled={loading}
+                          className={`whitespace-nowrap ${
+                            verificationStatus.gst ? "bg-green-50" : ""
+                          }`}
+                        >
+                          {verificationStatus.gst ? (
+                            <>
+                              <FileCheck className="h-4 w-4 mr-2 text-green-500" />
+                              <span className="hidden sm:inline">Verified</span>
+                              <span className="sm:hidden">GST ✓</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="hidden sm:inline">
+                                Verify GST
+                              </span>
+                              <span className="sm:hidden">Verify</span>
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-3">
-                    <div>
-                      <Label htmlFor="bankAccountNumber" className="text-xs">
-                        Account Number
-                      </Label>
-                      <Input
-                        id="bankAccountNumber"
-                        value={formData.bankDetails.accountNumber}
-                        onChange={handleChange}
-                        placeholder="Enter account number"
-                        className="h-8 text-sm"
-                        disabled={!editMode.bank}
-                      />
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">
+                      Bank Account Details
+                    </h4>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="bankAccountNumber" className="text-xs">
+                          Account Number
+                        </Label>
+                        <Input
+                          id="bankAccountNumber"
+                          value={formData.bankDetails.accountNumber}
+                          onChange={handleChange}
+                          placeholder="Enter account number"
+                          className="h-8 text-sm"
+                          disabled={!editMode.bank}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="bankIfscCode" className="text-xs">
+                          IFSC Code
+                        </Label>
+                        <Input
+                          id="bankIfscCode"
+                          value={formData.bankDetails.ifscCode}
+                          onChange={handleChange}
+                          placeholder="Enter IFSC code"
+                          className="h-8 text-sm"
+                          disabled={!editMode.bank}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="bankBankName" className="text-xs">
+                          Bank Name
+                        </Label>
+                        <Input
+                          id="bankBankName"
+                          value={formData.bankDetails.bankName}
+                          onChange={handleChange}
+                          placeholder="Enter bank name"
+                          className="h-8 text-sm"
+                          disabled={!editMode.bank}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="bankIfscCode" className="text-xs">
-                        IFSC Code
-                      </Label>
-                      <Input
-                        id="bankIfscCode"
-                        value={formData.bankDetails.ifscCode}
-                        onChange={handleChange}
-                        placeholder="Enter IFSC code"
-                        className="h-8 text-sm"
-                        disabled={!editMode.bank}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="bankBankName" className="text-xs">
-                        Bank Name
-                      </Label>
-                      <Input
-                        id="bankBankName"
-                        value={formData.bankDetails.bankName}
-                        onChange={handleChange}
-                        placeholder="Enter bank name"
-                        className="h-8 text-sm"
-                        disabled={!editMode.bank}
-                      />
-                    </div>
+
+                    {editMode.bank && (
+                      <div className="flex justify-end mt-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleBankVerification}
+                          disabled={loading}
+                          className={`whitespace-nowrap ${
+                            verificationStatus.bank ? "bg-green-50" : ""
+                          }`}
+                        >
+                          {verificationStatus.bank ? (
+                            <>
+                              <FileCheck className="h-4 w-4 mr-2 text-green-500" />
+                              <span className="hidden sm:inline">
+                                Bank Details Verified
+                              </span>
+                              <span className="sm:hidden">Bank ✓</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="hidden sm:inline">
+                                Verify Bank Details
+                              </span>
+                              <span className="sm:hidden">Verify Bank</span>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
               {editMode.bank && (
-                <div className="flex justify-end gap-3 mt-4">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4">
                   <Button
                     variant="outline"
                     onClick={() => handleCancel("bank")}
                     disabled={loading}
                     size="sm"
+                    className="w-full sm:w-auto"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleBankDetailsSave}
-                    disabled={loading}
+                    disabled={
+                      loading ||
+                      !verificationStatus.gst ||
+                      !verificationStatus.bank
+                    }
                     size="sm"
+                    className="w-full sm:w-auto"
                   >
                     {loading ? "Saving..." : "Save Changes"}
                   </Button>

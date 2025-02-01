@@ -485,6 +485,64 @@ export const verifyBankDetails = async (req, res) => {
   }
 };
 
+export const verifyGST = async (req, res) => {
+  try {
+    const { gstNumber } = req.body;
+
+    const options = {
+      method: "POST",
+      headers: {
+        clientId: process.env.INVINCIBLE_CLIENT_ID,
+        secretKey: process.env.INVINCIBLE_SECRET_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        gstNumber,
+      }),
+    };
+
+    const response = await fetch(
+      "https://api.invincibleocean.com/invincible/gst/verify",
+      options
+    );
+    const data = await response.json();
+
+    if (response.ok) {
+      // Check if GST is valid from the API response
+      if (data.status === "active" || data.valid) {
+        res.json({
+          message: "GST number verified successfully",
+          data: {
+            valid: true,
+            tradeName: data.tradeName,
+            legalName: data.legalName,
+            status: data.status,
+          },
+        });
+      } else {
+        res.status(400).json({
+          message: "Invalid or inactive GST number",
+          data: {
+            valid: false,
+            status: data.status,
+          },
+        });
+      }
+    } else {
+      res.status(response.status).json({
+        message: "GST verification failed",
+        error: data.message,
+      });
+    }
+  } catch (error) {
+    console.error("GST verification error:", error);
+    res.status(500).json({
+      message: "Failed to verify GST number",
+      error: error.message,
+    });
+  }
+};
+
 export const uploadDocument = async (req, res) => {
   try {
     const file = req.file;
