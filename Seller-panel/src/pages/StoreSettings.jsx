@@ -90,7 +90,7 @@ const StoreSettings = () => {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Upload failed");
-      
+
       toast.success("Certificate uploaded successfully");
     } catch (error) {
       toast.error(error.message || "Failed to upload certificate");
@@ -101,18 +101,26 @@ const StoreSettings = () => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    if (id.startsWith("bank")) {
-      const field = id.replace("bank", "").toLowerCase();
-      setFormData(prev => ({
+    if (id.includes("bank")) {
+      const field =
+        id.replace("bank", "").charAt(0).toLowerCase() +
+        id.replace("bank", "").slice(1);
+      setFormData((prev) => ({
         ...prev,
         bankDetails: {
           ...prev.bankDetails,
-          [field]: value,
+          [field === "accountNumber"
+            ? "accountNumber"
+            : field === "ifscCode"
+            ? "ifscCode"
+            : field === "bankName"
+            ? "bankName"
+            : field]: value,
         },
       }));
     } else if (id.startsWith("reg")) {
       const field = id.replace("reg", "").toLowerCase();
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         registeredAddress: {
           ...prev.registeredAddress,
@@ -121,7 +129,7 @@ const StoreSettings = () => {
       }));
     } else if (id.startsWith("warehouse")) {
       const field = id.replace("warehouse", "").toLowerCase();
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         warehouseAddress: {
           ...prev.warehouseAddress,
@@ -129,7 +137,7 @@ const StoreSettings = () => {
         },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [id]: value,
       }));
@@ -163,7 +171,7 @@ const StoreSettings = () => {
       if (!response.ok) throw new Error(data.message);
 
       toast.success("Basic details updated successfully");
-      setEditMode(prev => ({ ...prev, basic: false }));
+      setEditMode((prev) => ({ ...prev, basic: false }));
     } catch (error) {
       toast.error(error.message || "Failed to update basic details");
     } finally {
@@ -195,7 +203,7 @@ const StoreSettings = () => {
       if (!response.ok) throw new Error(data.message);
 
       toast.success("Bank details updated successfully");
-      setEditMode(prev => ({ ...prev, bank: false }));
+      setEditMode((prev) => ({ ...prev, bank: false }));
     } catch (error) {
       toast.error(error.message || "Failed to update bank details");
     } finally {
@@ -204,21 +212,21 @@ const StoreSettings = () => {
   };
 
   const handleCancel = (section) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      ...(section === 'basic' && {
+      ...(section === "basic" && {
         shopName: user?.shopName || "",
         proprietorName: user?.proprietorName || "",
         phoneNumber: user?.phoneNumber || "",
         registeredAddress: user?.registeredAddress || {},
         warehouseAddress: user?.warehouseAddress || {},
       }),
-      ...(section === 'bank' && {
+      ...(section === "bank" && {
         gstNumber: user?.gstNumber || "",
         bankDetails: user?.bankDetails || {},
       }),
     }));
-    setEditMode(prev => ({ ...prev, [section]: false }));
+    setEditMode((prev) => ({ ...prev, [section]: false }));
     toast.info("Changes discarded");
   };
 
@@ -250,13 +258,15 @@ const StoreSettings = () => {
                     <Store className="h-4 w-4" />
                     <h3 className="font-semibold text-sm">Store Information</h3>
                     <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditMode(prev => ({ ...prev, basic: !prev.basic }))}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  {editMode.basic ? "Cancel Edit" : "Edit Details"}
-                </Button>
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setEditMode((prev) => ({ ...prev, basic: !prev.basic }))
+                      }
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      {editMode.basic ? "Cancel Edit" : "Edit Details"}
+                    </Button>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-3">
@@ -384,7 +394,7 @@ const StoreSettings = () => {
                 <div className="flex justify-end gap-3 mt-4">
                   <Button
                     variant="outline"
-                    onClick={() => handleCancel('basic')}
+                    onClick={() => handleCancel("basic")}
                     disabled={loading}
                     size="sm"
                   >
@@ -407,13 +417,15 @@ const StoreSettings = () => {
                   <Receipt className="h-4 w-4" />
                   <h3 className="font-semibold text-sm">Bank & Tax Details</h3>
                   <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditMode(prev => ({ ...prev, bank: !prev.bank }))}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  {editMode.bank ? "Cancel Edit" : "Edit Details"}
-                </Button>
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setEditMode((prev) => ({ ...prev, bank: !prev.bank }))
+                    }
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    {editMode.bank ? "Cancel Edit" : "Edit Details"}
+                  </Button>
                 </div>
 
                 <div className="grid gap-3">
@@ -427,6 +439,7 @@ const StoreSettings = () => {
                       onChange={handleChange}
                       placeholder="Enter GST number"
                       className="h-8 text-sm"
+                      disabled={!editMode.bank}
                     />
                   </div>
 
@@ -441,6 +454,7 @@ const StoreSettings = () => {
                         onChange={handleChange}
                         placeholder="Enter account number"
                         className="h-8 text-sm"
+                        disabled={!editMode.bank}
                       />
                     </div>
                     <div>
@@ -453,6 +467,7 @@ const StoreSettings = () => {
                         onChange={handleChange}
                         placeholder="Enter IFSC code"
                         className="h-8 text-sm"
+                        disabled={!editMode.bank}
                       />
                     </div>
                     <div>
@@ -465,6 +480,7 @@ const StoreSettings = () => {
                         onChange={handleChange}
                         placeholder="Enter bank name"
                         className="h-8 text-sm"
+                        disabled={!editMode.bank}
                       />
                     </div>
                   </div>
@@ -474,7 +490,7 @@ const StoreSettings = () => {
                 <div className="flex justify-end gap-3 mt-4">
                   <Button
                     variant="outline"
-                    onClick={() => handleCancel('bank')}
+                    onClick={() => handleCancel("bank")}
                     disabled={loading}
                     size="sm"
                   >
