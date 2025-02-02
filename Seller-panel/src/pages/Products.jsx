@@ -43,10 +43,29 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Edit, Trash2, Plus, FilterX } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  Edit,
+  Trash2,
+  Plus,
+  FilterX,
+  Eye,
+} from "lucide-react";
 import AddProductForm from "@/components/AddProductForm";
 import { toast } from "react-toastify";
 import ProductExport from "@/components/ProductExportButton";
+import ProductDetailDialog from "@/components/ProductDetailSheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -65,6 +84,18 @@ const Products = () => {
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Add new state for selected product and sheet visibility
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
+
+  // Add state for edit dialog
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  // Add new state for delete dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingProduct, setDeletingProduct] = useState(null);
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
@@ -171,44 +202,6 @@ const Products = () => {
 
   // Updated delete function with toast notifications
   const handleDelete = async (productId) => {
-    const confirmDelete = () => {
-      return new Promise((resolve) => {
-        toast.info(
-          ({ closeToast }) => (
-            <div>
-              <p>Are you sure you want to delete this product?</p>
-              <div className="mt-2 flex justify-end gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    closeToast();
-                    resolve(false);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => {
-                    closeToast();
-                    resolve(true);
-                  }}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
-          ),
-          { autoClose: false }
-        );
-      });
-    };
-
-    const confirmed = await confirmDelete();
-    if (!confirmed) return;
-
     try {
       const response = await fetch(
         `${
@@ -231,6 +224,8 @@ const Products = () => {
 
       setProducts(products.filter((product) => product._id !== productId));
       toast.success("Product deleted successfully");
+      setIsDeleteDialogOpen(false);
+      setDeletingProduct(null);
     } catch (err) {
       toast.error("Error deleting product");
       console.error("Delete error:", err);
@@ -242,10 +237,18 @@ const Products = () => {
     try {
       await fetchProducts();
       setIsAddDialogOpen(false);
-      toast.success("Product added successfully");
+      setIsEditDialogOpen(false);
+      setEditingProduct(null);
+      toast.success(
+        editingProduct
+          ? "Product updated successfully"
+          : "Product added successfully"
+      );
     } catch (error) {
-      toast.error("Failed to add product");
-      console.error("Add product error:", error);
+      toast.error(
+        editingProduct ? "Failed to update product" : "Failed to add product"
+      );
+      console.error("Product operation error:", error);
     }
   };
 
@@ -257,6 +260,24 @@ const Products = () => {
     pending: "bg-yellow-100 text-yellow-800",
     approved: "bg-green-100 text-green-800",
     rejected: "bg-red-100 text-red-800",
+  };
+
+  // Add handler for opening product details
+  const handleViewProduct = (product) => {
+    setSelectedProduct(product);
+    setIsDetailSheetOpen(true);
+  };
+
+  // Add handler for edit button click
+  const handleEditClick = (product) => {
+    setEditingProduct(product);
+    setIsEditDialogOpen(true);
+  };
+
+  // Add handler for delete button click
+  const handleDeleteClick = (product) => {
+    setDeletingProduct(product);
+    setIsDeleteDialogOpen(true);
   };
 
   return (
@@ -462,16 +483,21 @@ const Products = () => {
                               <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() =>
-                                  (window.location.href = `/seller/products/edit/${product._id}`)
-                                }
+                                onClick={() => handleViewProduct(product)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleEditClick(product)}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() => handleDelete(product._id)}
+                                onClick={() => handleDeleteClick(product)}
                                 className="text-red-600 hover:text-red-700"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -595,6 +621,69 @@ const Products = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add ProductDetailSheet component at the end of the component, before the final closing div */}
+      <ProductDetailDialog
+        product={selectedProduct}
+        open={isDetailSheetOpen}
+        onClose={() => {
+          setIsDetailSheetOpen(false);
+          setSelectedProduct(null);
+        }}
+      />
+
+      {/* Add Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+          </DialogHeader>
+          <AddProductForm
+            initialData={{
+              ...editingProduct,
+              discount: editingProduct ? editingProduct.discount * 100 : 0,
+            }}
+            onSubmit={handleAddProduct}
+            onClose={() => {
+              setIsEditDialogOpen(false);
+              setEditingProduct(null);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Delete Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete{" "}
+              <span className="font-medium">{deletingProduct?.name}</span> and
+              remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setDeletingProduct(null);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => handleDelete(deletingProduct?._id)}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
