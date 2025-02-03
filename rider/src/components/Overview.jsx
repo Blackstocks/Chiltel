@@ -263,9 +263,11 @@ const CurrCard = () => {
 	// Function to open navigation
 	const handleNavigate = (currService) => {
 		console.log(currService);
-		if (currService?.userLocation?.coordinates) {
+		if (currService?.userLocation?.address) {
 			window.open(
-				`https://www.google.com/maps/dir/?api=1&destination=${currService.userLocation.coordinates[0]},${currService.userLocation.coordinates[1]}`,
+				`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+					currService.userLocation.address
+				)}`,
 				"_blank"
 			);
 		}

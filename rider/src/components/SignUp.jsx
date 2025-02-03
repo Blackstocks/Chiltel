@@ -229,6 +229,50 @@ const MultiStepSignupForm = () => {
 			description: "Order Payment",
 			order_id: order.id,
 			receipt: order.receipt,
+			config: {
+				display: {
+					// Payment method specific blocks
+					blocks: {
+						utib: {
+							//name for AXIS block
+							name: "Pay using AXIS Bank",
+							instruments: [
+								{ method: "card" },
+								{ method: "netbanking" },
+								{ method: "upi" },
+							],
+						},
+						other: {
+							//  name for other block
+							name: "Other Payment modes",
+							instruments: [
+								{ method: "card" },
+								{ method: "netbanking" },
+								{ method: "upi" },
+							],
+						},
+					},
+					sequence: ["block.utib", "block.other"],
+					preferences: {
+						show_default_cards: true,
+						show_saved_cards: true,
+						show_default_emi: true,
+					},
+					// Customize EMI section
+					emi: {
+						banks: ["HDFC", "ICICI", "Kotak"],
+						duration: {
+							min: 3,
+							max: 12,
+						},
+					},
+					// UPI customization
+					upi: {
+						flow: "collect",
+						apps: ["google_pay", "phonepe", "paytm", "upi"],
+					},
+				},
+			},	
 			handler: async (response) => {
 				console.log("init pay: ", response);
 				try {
