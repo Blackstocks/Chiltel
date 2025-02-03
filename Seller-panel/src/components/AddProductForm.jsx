@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "react-toastify";
 import axios from "axios";
+import PropTypes from "prop-types";
 
 const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
-  const token = localStorage.getItem("token");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -57,24 +57,24 @@ const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
 
   const categories = [
     "Air Conditioner",
-	"Water Heater",
-	"Microwave",
-	"Geyser",
-	"Refrigerator",
-	"Washing Machine",
-	"Air Cooler",
-	"Air Purifier",
-	"Water Purifier",
-	"Deep Freezer",
-	"Visi Cooler",
-	"Cassette AC",
-	"Water Cooler cum Purifier",
-	"Water Dispenser",
-	"Display Counter",
-	"Back Bar Chiller",
-	"Upright Chiller",
-	"Food Prep Chiller",
-	"Ice Maker",
+    "Water Heater",
+    "Microwave",
+    "Geyser",
+    "Refrigerator",
+    "Washing Machine",
+    "Air Cooler",
+    "Air Purifier",
+    "Water Purifier",
+    "Deep Freezer",
+    "Visi Cooler",
+    "Cassette AC",
+    "Water Cooler cum Purifier",
+    "Water Dispenser",
+    "Display Counter",
+    "Back Bar Chiller",
+    "Upright Chiller",
+    "Food Prep Chiller",
+    "Ice Maker",
   ];
 
   const validateForm = () => {
@@ -632,6 +632,34 @@ const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
       </div>
     </form>
   );
+};
+
+AddProductForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  initialData: PropTypes.shape({
+    _id: PropTypes.string,
+    name: PropTypes.string,
+    brand: PropTypes.string,
+    model: PropTypes.string,
+    mainCategory: PropTypes.string,
+    type: PropTypes.string,
+    category: PropTypes.string,
+    price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    discount: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    rating: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    reviews: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    features: PropTypes.arrayOf(PropTypes.string),
+    specifications: PropTypes.object,
+    inStock: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    availability: PropTypes.bool,
+    thumbnail: PropTypes.string,
+    imageUrls: PropTypes.arrayOf(PropTypes.string),
+  }),
+};
+
+AddProductForm.defaultProps = {
+  initialData: null,
 };
 
 export default AddProductForm;
