@@ -134,7 +134,7 @@ const riderController = {
 
 	async createOrder(req, res) {
 		try {
-			const AMOUNT = 2000;
+			const AMOUNT = 1;
 			const CURRENCY = "INR";
 			const RECEIPT = `receipt#${Math.floor(Math.random() * 1000000)}`;
 
