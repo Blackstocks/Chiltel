@@ -7,7 +7,7 @@ const ACRateChart = require("../data/AC_Rate_Charge.json");
 // Get all services
 const getAllServices = async (req, res) => {
 	try {
-		const services = await Service.find();
+		const services = await Service.find().sort({ createdAt: -1 });
 		res.status(200).json({
 			success: true,
 			message: "Services fetched successfully",
