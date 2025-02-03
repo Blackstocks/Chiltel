@@ -213,12 +213,10 @@ const ProfileTab = () => {
             </div>
           </CardHeader>
           <CardContent className="grid gap-3 pt-3">
-            <FormField 
-              label="Address" 
-              id="address" 
-              defaultValue={profile.address}
-              className="h-24"
-            />
+		  <div className="space-y-1">
+    <p className="text-sm font-medium text-gray-500">Address</p>
+    <p className="text-sm text-gray-700">{profile.address}</p>
+  </div>
             <div className="p-3 space-y-2 rounded-lg bg-blue-50">
               <h3 className="font-medium text-blue-700">Bank Information</h3>
               <div className="grid grid-cols-2 gap-2 text-sm">

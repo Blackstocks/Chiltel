@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -189,7 +190,7 @@ const RiderDashboard = () => {
                 className="bg-red-500 md:hidden hover:bg-red-600"
                 onClick={logout}
               >
-                Exit
+				Logout
               </Button>
             </div>
           </div>
