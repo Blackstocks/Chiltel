@@ -378,51 +378,50 @@ const CurrCard = () => {
     }
   };
 
-  const handleNavigate = (currService) => {
-    if (currService?.userLocation?.coordinates) {
-      window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${currService.userLocation.coordinates[0]},${currService.userLocation.coordinates[1]}`,
-        "_blank"
-      );
-    }
-  };
-
-  return (
-    <>
-      <Card className="transition-all duration-200 hover:shadow-lg">
-        <CardHeader>
-          <CardTitle>Accepted Services</CardTitle>
-          <CardDescription>Active service details</CardDescription>
-        </CardHeader>
-        {!currServices && error ? (
-          <CardDescription className="m-2 text-center">{error}</CardDescription>
-        ) : (
-          currServices?.map((currService, index) => (
-            <CardContent
-              className="space-y-6 border-t border-gray-100"
-              key={currService._id}
-            >
-              <CardTitle>Service #{index + 1}</CardTitle>
-              {/* Customer Details */}
-              <div className="p-6 space-y-4 bg-gray-50 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gray-200 rounded-full">
-                      <MapPin className="w-4 h-4 text-gray-600" />
-                    </div>
-                    <span className="text-gray-700">
-                      {currService?.userLocation?.address}
-                    </span>
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleNavigate(currService)}
-                    className="flex items-center space-x-2 hover:bg-indigo-50"
-                  >
-                    <Navigation className="w-4 h-4" />
-                    <span>Navigate</span>
-                  </Button>
-                </div>
+	// Function to open navigation
+	const handleNavigate = (currService) => {
+		console.log(currService);
+		if (currService?.userLocation?.address) {
+			window.open(
+				`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+					currService.userLocation.address
+				)}`,
+				"_blank"
+			);
+		}
+	};
+	return (
+		<>
+			{<ActiveService />}
+			<Separator className="md:col-span-2 lg:col-span-3" />
+			<Card className="md:col-span-2 lg:col-span-3">
+				<CardHeader>
+					<CardTitle>Accepted Services</CardTitle>
+					<CardDescription>Active service details</CardDescription>
+				</CardHeader>
+				{!currServices && error ? (
+					<CardDescription className="m-2 text-center">{error}</CardDescription>
+				) : (
+					currServices &&
+					currServices?.map((currService, index) => (
+						<CardContent className="space-y-6" key={currService._id}>
+							<CardTitle>Service #{index + 1}</CardTitle>
+							{/* Customer Details */}
+							<div className="space-y-4">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center space-x-2">
+										<MapPin className="w-4 h-4 text-muted-foreground" />
+										<span>{currService?.userLocation?.address}</span>
+									</div>
+									<Button
+										variant="outline"
+										onClick={() => handleNavigate(currService)}
+										className="flex items-center space-x-2"
+									>
+										<Navigation className="w-4 h-4" />
+										<span>Navigate</span>
+									</Button>
+								</div>
 
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-gray-200 rounded-full">
