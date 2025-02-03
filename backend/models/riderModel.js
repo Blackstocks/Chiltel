@@ -67,23 +67,23 @@ const riderSchema = {
 	attendance: {
 		leaves: [
 			{
-				date: { type: Date, required: true },
-				reason: { type: String, required: true },
+				date: { type: Date },
+				reason: { type: String },
 			},
 		],
 		present: [
 			{
-				date: { type: Date, required: true },
+				date: { type: Date },
 			},
 		],
 		workingHours: [
 			{
-				date: { type: Date, required: true },
-				hours: { type: Number, required: true },
+				date: { type: Date },
+				hours: { type: Number },
 				durations: [
 					{
-						start: { type: Date, required: true },
-						end: { type: Date, required: true },
+						start: { type: Date },
+						end: { type: Date },
 					},
 				],
 			},
