@@ -39,6 +39,18 @@ const ProfileTab = () => {
 		imageUrl: "",
 		address: "",
 		specializations: [],
+		bankDetails: {
+			accountNumber: "",
+			holderName: "",
+			ifscCode: "",
+			mobileNumber: "",
+		},
+		balance: 0,
+		panNumber: "",
+		rating: { average: 0, count: 0 },
+		registrationStatus: "",
+		services: { completed: 0, total: 0 },
+		status: "",
 	});
 
 	const specializations = [
@@ -74,8 +86,14 @@ const ProfileTab = () => {
 				fatherName: profile.fatherName,
 				dateOfBirth: profile.dateOfBirth,
 				address: profile.address,
-
 				specializations: profile.specializations || [],
+				bankDetails: profile.bankDetails || {},
+				balance: profile.balance || 0,
+				panNumber: profile.panNumber || "",
+				rating: profile.rating || { average: 0, count: 0 },
+				registrationStatus: profile.registrationStatus || "",
+				services: profile.services || { completed: 0, total: 0 },
+				status: profile.status || "",
 			});
 		}
 	}, [profile]);
@@ -90,21 +108,10 @@ const ProfileTab = () => {
 
 	const handleChange = (e) => {
 		const { id, value } = e.target;
-		if (id.startsWith("bankDetails.")) {
-			const key = id.split(".")[1];
-			setProfileData((prev) => ({
-				...prev,
-				bankDetails: {
-					...prev.bankDetails,
-					[key]: value,
-				},
-			}));
-		} else {
-			setProfileData((prev) => ({
-				...prev,
-				[id]: value,
-			}));
-		}
+		setProfileData((prev) => ({
+			...prev,
+			[id]: value,
+		}));
 	};
 
 	const handleSpecializationToggle = (value) => {
@@ -233,6 +240,26 @@ const ProfileTab = () => {
 				<CardFooter>
 					<Button onClick={handleSaveChanges}>Save Changes</Button>
 				</CardFooter>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<CardTitle>Additional Information</CardTitle>
+					<CardDescription>View additional details</CardDescription>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					<div className="space-y-2">
+						<Label>Bank Details</Label>
+						<p>Account Number: {profileData.bankDetails.accountNumber}</p>
+						<p>Holder Name: {profileData.bankDetails.holderName}</p>
+						<p>IFSC Code: {profileData.bankDetails.ifscCode}</p>
+						<p>Mobile Number: {profileData.bankDetails.mobileNumber}</p>
+					</div>
+					<div className="space-y-2">
+						<Label>PAN Number</Label>
+						<p>{profileData.panNumber}</p>
+					</div>
+				</CardContent>
 			</Card>
 
 			<Button variant="destructive" className="m-2" onClick={logout}>
