@@ -26,6 +26,7 @@ import { useEffect } from "react";
 import { useProfile } from "../hooks/useProfile";
 import { toast } from "react-toastify";
 import { Checkbox } from "@/components/ui/checkbox";
+import Loader from "./Loader";
 
 const ProfileTab = () => {
 	const { logout } = useAuthActions();
@@ -99,7 +100,7 @@ const ProfileTab = () => {
 	}, [profile]);
 
 	if (loading) {
-		return <div>Loading...</div>;
+		return <Loader />;
 	}
 
 	if (error) {
