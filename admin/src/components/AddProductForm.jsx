@@ -123,7 +123,7 @@ const AddProductForm = ({ onSubmit, onClose, initialData = null }) => {
           method: initialData ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
-            token: token,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           data: formattedData,
         });
