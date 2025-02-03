@@ -32,12 +32,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import ActiveService from "./ActiveService";
+import Loader from "./Loader";
 
 const OverviewTab = () => {
 	const { profile, loading, error } = useProfile();
 
 	if (loading) {
-		return <div>Loading...</div>;
+		return <Loader />;
 	}
 	if (error) {
 		return <div>Error loading your profile</div>;
@@ -150,7 +151,8 @@ const OverviewTab = () => {
 											</TooltipTrigger>
 											<TooltipContent>
 												<p>
-													5 coins will be deducted if you complete one service
+													Your ₹2000 is converted into 200 coins & 5 coins will
+													be deducted if you complete one service
 												</p>
 											</TooltipContent>
 										</Tooltip>

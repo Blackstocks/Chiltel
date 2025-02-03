@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import LocationTracker from "./components/LocationTracker";
 import Terms from "./pages/Terms";
 import RegisterServiceWorker from "./lib/pwa/RegisterServiceWorker";
+import Loader from "./components/Loader";
 
 const ProtectedRoute = ({ children }) => {
 	const { state } = useAuth();
@@ -21,7 +22,7 @@ const ProtectedRoute = ({ children }) => {
 	}, [state.loading, state.token, navigate]);
 
 	if (state.loading) {
-		return <div>Loading...</div>;
+		return <Loader />;
 	}
 
 	return state.token ? children : null;
