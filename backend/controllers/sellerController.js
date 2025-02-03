@@ -583,6 +583,12 @@ export const uploadDocument = async (req, res) => {
   }
 };
 
+
+
+
+
+
+
 // controllers/productController.js
 
 export const addProduct = async (req, res) => {
@@ -628,6 +634,7 @@ export const addProduct = async (req, res) => {
 export const getSellerProducts = async (req, res) => {
   try {
     const sellerId = req.seller.id;
+    console.log(req);
 
     // Get all products for the seller
     const products = await Product.find({ seller: sellerId }).sort({
@@ -698,13 +705,19 @@ export const getSellerOrders = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    const { productId } = req.params;
-    const sellerId = req.seller.id;
+    const {productId} = req.params;
+    const sellerId = req.seller._id;
+
+    console.log(productId);
+    console.log(sellerId);
+    //console.log(req);
 
     const product = await Product.findOne({
       _id: productId,
       seller: sellerId,
     });
+
+    console.log(product);
 
     if (!product) {
       return res.status(404).json({
