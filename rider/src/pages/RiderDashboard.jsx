@@ -100,7 +100,7 @@ const RiderDashboard = () => {
                 <div className="relative hidden sm:block">
                   <Avatar className="w-12 h-12 ring-2 ring-indigo-200 ring-offset-2">
                     <AvatarImage src="/placeholder-avatar.jpg" alt="User avatar" />
-                    <AvatarFallback className="text-indigo-600 bg-indigo-100">RD</AvatarFallback>
+                    <AvatarFallback className="text-indigo-600 bg-indigo-100">PD</AvatarFallback>
                   </Avatar>
                   <div className="absolute -bottom-1 -right-1">
                     <div className={`h-4 w-4 rounded-full border-2 border-white ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -109,7 +109,7 @@ const RiderDashboard = () => {
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
                     <h2 className="text-lg font-bold text-gray-800 sm:text-xl">
-                      Rider Dashboard
+                      Partner Dashboard
                     </h2>
                     <Badge className="hidden text-indigo-700 bg-indigo-100 border-0 sm:inline-flex">
                       Pro

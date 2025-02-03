@@ -392,8 +392,8 @@ const CurrCard = () => {
 	};
 	return (
 		<>
-			{<ActiveService />}
-			<Separator className="md:col-span-2 lg:col-span-3" />
+			{/* {<ActiveService />}
+			<Separator className="md:col-span-2 lg:col-span-3" /> */}
 			<Card className="md:col-span-2 lg:col-span-3">
 				<CardHeader>
 					<CardTitle>Accepted Services</CardTitle>
