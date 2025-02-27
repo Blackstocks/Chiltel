@@ -80,7 +80,7 @@ const PendingProductsTable = () => {
     };
 
     fetchPendingProducts();
-  }, [token]);
+  }, []);
 
   const handleAction = (product, actionType) => {
     setSelectedProduct(product);
