@@ -45,7 +45,10 @@ const riderSchema = {
 		count: { type: Number, default: 0 },
 	},
 	balance: { type: Number, default: 0 },
-
+	secuirityDeposit: {
+		amount: { type: Number, default: 0 },
+		isPaid: { type: Boolean, default: false },
+	},
 	earning: [
 		{
 			date: { type: Date, required: true },

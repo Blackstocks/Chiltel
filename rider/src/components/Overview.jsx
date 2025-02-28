@@ -38,9 +38,17 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import ActiveService from "./ActiveService";
 import Loader from "./Loader";
+import { Modal } from "@/components/ui/modal"; // Import Modal component
 
 const OverviewTab = () => {
   const { profile, loading, error } = useProfile();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (profile && !profile.securityDeposit.isPaid) {
+      setIsModalOpen(true);
+    }
+  }, [profile]);
 
   if (loading) {
     return <Loader />;
@@ -74,6 +82,19 @@ const OverviewTab = () => {
 
   return (
     <div className="space-y-8">
+      {/* Security Deposit Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => {}} isCancellable={false}>
+        <div className="p-6">
+          <h2 className="text-xl font-bold">Security Deposit Required</h2>
+          <p className="mt-4 text-gray-600">
+            Please pay the security deposit to continue using the platform.
+          </p>
+          <Button className="mt-6" onClick={() => window.location.href = '/payment'}>
+            Pay Now
+          </Button>
+        </div>
+      </Modal>
+
       {/* Earnings Section */}
       <EarningsOverview 
   profile={profile} 

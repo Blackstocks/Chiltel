@@ -8,6 +8,7 @@ import crypto, { verify } from "crypto";
 import ReferralCode from "../models/referralModel.js";
 import bucket from "../config/firebaseConfig.js";
 import fs from "fs";
+import { create } from "domain";
 
 const razorpayInstance = new razorpay({
 	key_id: process.env.RAZORPAY_KEY_ID,
@@ -128,57 +129,6 @@ const riderController = {
 			// 	},
 			// });
 		} catch (error) {
-			res.status(500).json({ message: "Server error", error: error.message });
-		}
-	},
-
-	async createOrder(req, res) {
-		try {
-			const AMOUNT = 1;
-			const CURRENCY = "INR";
-			const RECEIPT = `receipt#${Math.floor(Math.random() * 1000000)}`;
-
-			const options = {
-				amount: AMOUNT * 100,
-				currency: CURRENCY,
-				receipt: RECEIPT,
-			};
-
-			razorpayInstance.orders.create(options, (error, order) => {
-				if (error) {
-					return res.status(500).json({ message: "Order creation failed" });
-				}
-
-				console.log(order);
-
-				res.json(order);
-			});
-		} catch (error) {
-			res.status(500).json({ message: "Server error", error: error.message });
-		}
-	},
-
-	async verifyPayment(req, res) {
-		try {
-			const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-				req.body;
-			console.log(req.body);
-
-			const generatedSignature = crypto
-				.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-				.update(razorpay_order_id + "|" + razorpay_payment_id)
-				.digest("hex");
-
-			console.log("Generated Signature:", generatedSignature);
-			console.log("Received Signature:", razorpay_signature);
-
-			if (generatedSignature !== razorpay_signature) {
-				return res.status(400).json({ message: "Payment verification failed" });
-			}
-
-			res.json({ success: true, message: "Payment verified successfully" });
-		} catch (error) {
-			console.log(error);
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
 	},
@@ -401,6 +351,10 @@ const riderController = {
 				return res.status(400).json({ message: "Service cannot be accepted" });
 			}
 			const rider = await Rider.findById(req.rider._id);
+
+			if (rider.balance < 0) {
+				return res.status(400).json({ message: "Insufficient balance" });
+			}
 
 			service.rider = req.rider._id;
 			service.requestedRiders = [];
@@ -826,6 +780,116 @@ const riderController = {
 
 			res.json({ message: "OTP verified and work completed successfully" });
 		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	//payments
+	//coin balance payment
+	async createOrder(req, res) {
+		try {
+			const AMOUNT = 2000;
+			const CURRENCY = "INR";
+			const RECEIPT = `receipt#${Math.floor(Math.random() * 1000000)}`;
+
+			const options = {
+				amount: AMOUNT * 100,
+				currency: CURRENCY,
+				receipt: RECEIPT,
+			};
+
+			razorpayInstance.orders.create(options, (error, order) => {
+				if (error) {
+					return res.status(500).json({ message: "Order creation failed" });
+				}
+
+				console.log(order);
+
+				res.json(order);
+			});
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async verifyPayment(req, res) {
+		try {
+			const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+				req.body;
+			console.log(req.body);
+
+			const generatedSignature = crypto
+				.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+				.update(razorpay_order_id + "|" + razorpay_payment_id)
+				.digest("hex");
+
+			console.log("Generated Signature:", generatedSignature);
+			console.log("Received Signature:", razorpay_signature);
+
+			if (generatedSignature !== razorpay_signature) {
+				return res.status(400).json({ message: "Payment verification failed" });
+			}
+
+			res.json({ success: true, message: "Payment verified successfully" });
+		} catch (error) {
+			console.log(error);
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	//security deposit payment
+	async createSecurityDepositOrder(req, res) {
+		try {
+			const AMOUNT = 3000;
+			const CURRENCY = "INR";
+			const RECEIPT = `receipt#${Math.floor(Math.random() * 1000000)}`;
+
+			const options = {
+				amount: AMOUNT * 100,
+				currency: CURRENCY,
+				receipt: RECEIPT,
+			};
+
+			razorpayInstance.orders.create(options, (error, order) => {
+				if (error) {
+					return res.status(500).json({ message: "Order creation failed" });
+				}
+
+				console.log(order);
+
+				res.json(order);
+			});
+		} catch (error) {
+			res.status(500).json({ message: "Server error", error: error.message });
+		}
+	},
+
+	async verifySecurityDepositPayment(req, res) {
+		try {
+			const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+				req.body;
+			console.log(req.body);
+
+			const generatedSignature = crypto
+				.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+				.update(razorpay_order_id + "|" + razorpay_payment_id)
+				.digest("hex");
+
+			console.log("Generated Signature:", generatedSignature);
+			console.log("Received Signature:", razorpay_signature);
+
+			if (generatedSignature !== razorpay_signature) {
+				return res.status(400).json({ message: "Payment verification failed" });
+			}
+
+			const rider = await Rider.findById(req.rider._id);
+			rider.securityDeposit.isPaid = true;
+			rider.securityDeposit.amount = 3000;
+			await rider.save();
+
+			res.json({ success: true, message: "Payment verified successfully" });
+		} catch (error) {
+			console.log(error);
 			res.status(500).json({ message: "Server error", error: error.message });
 		}
 	},
