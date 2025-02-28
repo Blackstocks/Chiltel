@@ -1,286 +1,316 @@
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useEffect, useState } from "react";
 import { useProfile } from "../hooks/useProfile";
-import EarningsOverview from "./ui/earningOverview"
+import EarningsOverview from "./ui/earningOverview";
 import {
-  CheckCircle2,
-  Clock,
-  Navigation,
-  Phone,
-  Plus,
-  Package,
-  IndianRupee,
-  CalendarDays,
-  Info,
-  NotepadText,
-  TrendingUp,
-  ArrowUpRight,
-  ArrowDownRight,
-  Wallet,
+	CheckCircle2,
+	Clock,
+	Navigation,
+	Phone,
+	Plus,
+	Package,
+	IndianRupee,
+	CalendarDays,
+	Info,
+	NotepadText,
+	TrendingUp,
+	ArrowUpRight,
+	ArrowDownRight,
+	Wallet,
 } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import ActiveService from "./ActiveService";
 import Loader from "./Loader";
-import { Modal } from "@/components/ui/modal"; // Import Modal component
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+} from "@/components/ui/dialog"; // Import Dialog component
 
 const OverviewTab = () => {
-  const { profile, loading, error } = useProfile();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+	const { profile, loading, error } = useProfile();
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  useEffect(() => {
-    if (profile && !profile.securityDeposit.isPaid) {
-      setIsModalOpen(true);
-    }
-  }, [profile]);
+	useEffect(() => {
+		if (profile && !profile.securityDeposit.isPaid) {
+			setIsDialogOpen(true);
+		}
+	}, [profile]);
 
-  if (loading) {
-    return <Loader />;
-  }
-  if (error) {
-    return <div>Error loading your profile</div>;
-  }
+	if (loading) {
+		return <Loader />;
+	}
+	if (error) {
+		return <div>Error loading your profile</div>;
+	}
 
-  // Calculate current month's earnings
-  const currentMonthEarnings = profile.earning
-    .filter(
-      (e) =>
-        new Date(e.date).getMonth() === new Date().getMonth() &&
-        new Date(e.date).getFullYear() === new Date().getFullYear()
-    )
-    .reduce((total, e) => total + e.amount, 0);
+	// Calculate current month's earnings
+	const currentMonthEarnings = profile.earning
+		.filter(
+			(e) =>
+				new Date(e.date).getMonth() === new Date().getMonth() &&
+				new Date(e.date).getFullYear() === new Date().getFullYear()
+		)
+		.reduce((total, e) => total + e.amount, 0);
 
-  // Calculate last month's earnings
-  const lastMonthEarnings = profile.earning
-    .filter(
-      (e) =>
-        new Date(e.date).getMonth() === new Date().getMonth() - 1 &&
-        new Date(e.date).getFullYear() === new Date().getFullYear()
-    )
-    .reduce((total, e) => total + e.amount, 0);
+	// Calculate last month's earnings
+	const lastMonthEarnings = profile.earning
+		.filter(
+			(e) =>
+				new Date(e.date).getMonth() === new Date().getMonth() - 1 &&
+				new Date(e.date).getFullYear() === new Date().getFullYear()
+		)
+		.reduce((total, e) => total + e.amount, 0);
 
-  // Calculate percentage change
-  const percentageChange = lastMonthEarnings
-    ? ((currentMonthEarnings - lastMonthEarnings) / lastMonthEarnings) * 100
-    : 0;
+	// Calculate percentage change
+	const percentageChange = lastMonthEarnings
+		? ((currentMonthEarnings - lastMonthEarnings) / lastMonthEarnings) * 100
+		: 0;
 
-  return (
-    <div className="space-y-8">
-      {/* Security Deposit Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => {}} isCancellable={false}>
-        <div className="p-6">
-          <h2 className="text-xl font-bold">Security Deposit Required</h2>
-          <p className="mt-4 text-gray-600">
-            Please pay the security deposit to continue using the platform.
-          </p>
-          <Button className="mt-6" onClick={() => window.location.href = '/payment'}>
-            Pay Now
-          </Button>
-        </div>
-      </Modal>
+	return (
+		<div className="space-y-8">
+			{/* Security Deposit Dialog */}
+			<Dialog open={isDialogOpen} onOpenChange={() => {}}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Security Deposit Required</DialogTitle>
+						<DialogDescription>
+							Please pay the security deposit of ₹3000 to continue using the
+							platform.
+						</DialogDescription>
+					</DialogHeader>
+					<Button
+						className="mt-6"
+						onClick={() => (window.location.href = "/payment")}
+					>
+						Pay Now
+					</Button>
+				</DialogContent>
+			</Dialog>
 
-      {/* Earnings Section */}
-      <EarningsOverview 
-  profile={profile} 
-  currentMonthEarnings={currentMonthEarnings}
-  percentageChange={percentageChange}
-/>
+			{/* Earnings Section */}
+			<EarningsOverview
+				profile={profile}
+				currentMonthEarnings={currentMonthEarnings}
+				percentageChange={percentageChange}
+			/>
 
-      {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Coins Card */}
-        {profile?.balance > 0 && (
-          <Card className="transition-all duration-200 hover:shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-sm font-medium">
-                Coins Balance
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-6 h-6 p-0 rounded-full hover:bg-gray-100"
-                      >
-                        <Info className="w-4 h-4 text-gray-500" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs p-4 space-y-2 bg-gray-900">
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="mb-1 text-sm font-semibold text-white">
-                            Coin System
-                          </h4>
-                          <div className="space-y-1 text-xs text-gray-300">
-                            <p className="flex items-center gap-2">
-                              <span className="text-yellow-400">🪙</span>
-                              ₹2000 = 200 coins initial balance
-                            </p>
-                            <p className="flex items-center gap-2">
-                              <span className="text-yellow-400">🪙</span>5 coins
-                              deducted per service
-                            </p>
-                          </div>
-                        </div>
+			{/* Stats Grid */}
+			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				{/* Coins Card */}
+				{profile?.balance > 0 && (
+					<Card
+						className={`transition-all duration-200 hover:shadow-lg ${
+							profile.balance < 100 ? "bg-red-100" : ""
+						}`}
+					>
+						<CardHeader>
+							<CardTitle className="flex items-center justify-between text-sm font-medium">
+								Coins Balance
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="w-6 h-6 p-0 rounded-full hover:bg-gray-100"
+											>
+												<Info className="w-4 h-4 text-gray-500" />
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent className="max-w-xs p-4 space-y-2 bg-gray-900">
+											<div className="space-y-3">
+												<div>
+													<h4 className="mb-1 text-sm font-semibold text-white">
+														Coin System
+													</h4>
+													<div className="space-y-1 text-xs text-gray-300">
+														<p className="flex items-center gap-2">
+															<span className="text-yellow-400">🪙</span>
+															₹2000 = 200 coins initial balance
+														</p>
+														<p className="flex items-center gap-2">
+															<span className="text-yellow-400">🪙</span>5 coins
+															deducted per service
+														</p>
+													</div>
+												</div>
 
-                        <div>
-                          <h4 className="mb-1 text-sm font-semibold text-white">
-                            How it works
-                          </h4>
-                          <ul className="pl-4 space-y-1 text-xs text-gray-300 list-disc">
-                            <li>
-                              Coins are automatically deducted when a service is
-                              completed
-                            </li>
-                            <li>
-                              You can recharge coins through the wallet section
-                            </li>
-                            <li>Minimum balance required: 5 coins</li>
-                          </ul>
-                        </div>
+												<div>
+													<h4 className="mb-1 text-sm font-semibold text-white">
+														How it works
+													</h4>
+													<ul className="pl-4 space-y-1 text-xs text-gray-300 list-disc">
+														<li>
+															Coins are automatically deducted when a service is
+															completed
+														</li>
+														<li>
+															You can recharge coins through the wallet section
+														</li>
+														<li>Minimum balance required: 5 coins</li>
+													</ul>
+												</div>
 
-                        <div className="pt-1 text-xs text-gray-400 border-t border-gray-700">
-                          Contact support for more information about the coin
-                          system
-                        </div>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-2xl font-bold">
-                  🪙 {profile.balance / 10 || 0}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Available for services
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+												<div className="pt-1 text-xs text-gray-400 border-t border-gray-700">
+													Contact support for more information about the coin
+													system
+												</div>
+											</div>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-2">
+								<div className="flex items-center gap-2 text-2xl font-bold">
+									🪙 {profile.balance / 10 || 0}
+								</div>
+								<p className="text-sm text-muted-foreground">
+									Available for services
+								</p>
 
-        {/* Services Overview Card */}
-        <Card className="transition-all duration-200 hover:shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">
-              Services Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="text-2xl font-bold text-gray-800">
-                  {profile.services.total}
-                </div>
-                <p className="text-sm text-muted-foreground">Total Services</p>
-              </div>
+								{profile.balance < 100 && (
+									<>
+										<p className="text-sm text-red-500">
+											Low balance! Recharge now to continue using the platform
+										</p>
+										<Button
+											className="mt-2"
+											onClick={() => (window.location.href = "/recharge")}
+										>
+											Recharge Now
+										</Button>
+									</>
+								)}
+							</div>
+						</CardContent>
+					</Card>
+				)}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 rounded-lg bg-yellow-50">
-                  <div className="text-xl font-semibold text-yellow-600">
-                    {profile.services.total - profile.services.completed}
-                  </div>
-                  <p className="text-sm text-yellow-600">Pending</p>
-                </div>
+				{/* Services Overview Card */}
+				<Card className="transition-all duration-200 hover:shadow-lg">
+					<CardHeader>
+						<CardTitle className="text-sm font-medium">
+							Services Overview
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="space-y-4">
+							<div>
+								<div className="text-2xl font-bold text-gray-800">
+									{profile.services.total}
+								</div>
+								<p className="text-sm text-muted-foreground">Total Services</p>
+							</div>
 
-                <div className="p-3 rounded-lg bg-green-50">
-                  <div className="text-xl font-semibold text-green-600">
-                    {profile.services.completed}
-                  </div>
-                  <p className="text-sm text-green-600">Completed</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+							<div className="grid grid-cols-2 gap-4">
+								<div className="p-3 rounded-lg bg-yellow-50">
+									<div className="text-xl font-semibold text-yellow-600">
+										{profile.services.total - profile.services.completed}
+									</div>
+									<p className="text-sm text-yellow-600">Pending</p>
+								</div>
 
-        {/* Rating Card */}
-        <Card className="transition-all duration-200 hover:shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">
-              Performance Rating
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {profile.rating.count > 0 ? (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-2xl font-bold text-gray-800">
-                  {profile.rating.average}
-                  <span className="text-yellow-400">★</span>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Based on {profile.rating.count}{" "}
-                  {profile.rating.count > 1 ? "ratings" : "rating"}
-                </p>
-              </div>
-            ) : (
-              <div className="py-4 text-center">
-                <p className="text-sm text-gray-500">No reviews yet</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+								<div className="p-3 rounded-lg bg-green-50">
+									<div className="text-xl font-semibold text-green-600">
+										{profile.services.completed}
+									</div>
+									<p className="text-sm text-green-600">Completed</p>
+								</div>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
 
-      {/* Active Service Section */}
-      {<ActiveService />}
-      <Separator className="my-8" />
-      <CurrCard />
-    </div>
-  );
+				{/* Rating Card */}
+				<Card className="transition-all duration-200 hover:shadow-lg">
+					<CardHeader>
+						<CardTitle className="text-sm font-medium">
+							Performance Rating
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						{profile.rating.count > 0 ? (
+							<div className="space-y-2">
+								<div className="flex items-center gap-2 text-2xl font-bold text-gray-800">
+									{profile.rating.average}
+									<span className="text-yellow-400">★</span>
+								</div>
+								<p className="text-sm text-gray-500">
+									Based on {profile.rating.count}{" "}
+									{profile.rating.count > 1 ? "ratings" : "rating"}
+								</p>
+							</div>
+						) : (
+							<div className="py-4 text-center">
+								<p className="text-sm text-gray-500">No reviews yet</p>
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Active Service Section */}
+			{<ActiveService />}
+			<Separator className="my-8" />
+			<CurrCard />
+		</div>
+	);
 };
 
 // CurrCard component remains the same
 const CurrCard = () => {
-  const {
-    getAcceptedServices,
-    loading,
-    error,
-    addExtraWorks,
-    startService,
-    startWorking,
-  } = useServices();
-  const [currServices, setCurrServices] = useState(null);
+	const {
+		getAcceptedServices,
+		loading,
+		error,
+		addExtraWorks,
+		startService,
+		startWorking,
+	} = useServices();
+	const [currServices, setCurrServices] = useState(null);
 
-  useEffect(() => {
-    getAcceptedServices().then((service) => {
-      setCurrServices(service);
-    });
-  }, []);
+	useEffect(() => {
+		getAcceptedServices().then((service) => {
+			setCurrServices(service);
+		});
+	}, []);
 
-  if (loading) {
-    return (
-      <div className="mt-4 text-center text-gray-500">Loading services...</div>
-    );
-  }
+	if (loading) {
+		return (
+			<div className="mt-4 text-center text-gray-500">Loading services...</div>
+		);
+	}
 
-  const handleStartService = async (serviceId) => {
-    try {
-      await startService(serviceId);
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+	const handleStartService = async (serviceId) => {
+		try {
+			await startService(serviceId);
+			window.location.reload();
+		} catch (err) {
+			console.error(err);
+		}
+	};
 
 	// Function to open navigation
 	const handleNavigate = (currService) => {
@@ -327,89 +357,89 @@ const CurrCard = () => {
 									</Button>
 								</div>
 
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gray-200 rounded-full">
-                    <Clock className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">
-                      Duration
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {currService?.service.estimatedDuration}
-                    </p>
-                  </div>
-                </div>
+								<div className="flex items-center space-x-3">
+									<div className="p-2 bg-gray-200 rounded-full">
+										<Clock className="w-4 h-4 text-gray-600" />
+									</div>
+									<div>
+										<p className="text-sm font-medium text-gray-700">
+											Duration
+										</p>
+										<p className="text-sm text-gray-600">
+											{currService?.service.estimatedDuration}
+										</p>
+									</div>
+								</div>
 
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gray-200 rounded-full">
-                    <Package className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">
-                      Service Type
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {currService?.service.name}
-                    </p>
-                  </div>
-                </div>
+								<div className="flex items-center space-x-3">
+									<div className="p-2 bg-gray-200 rounded-full">
+										<Package className="w-4 h-4 text-gray-600" />
+									</div>
+									<div>
+										<p className="text-sm font-medium text-gray-700">
+											Service Type
+										</p>
+										<p className="text-sm text-gray-600">
+											{currService?.service.name}
+										</p>
+									</div>
+								</div>
 
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gray-200 rounded-full">
-                    <IndianRupee className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Price</p>
-                    <p className="text-sm text-gray-600">
-                      ₹{currService?.price}
-                    </p>
-                  </div>
-                </div>
+								<div className="flex items-center space-x-3">
+									<div className="p-2 bg-gray-200 rounded-full">
+										<IndianRupee className="w-4 h-4 text-gray-600" />
+									</div>
+									<div>
+										<p className="text-sm font-medium text-gray-700">Price</p>
+										<p className="text-sm text-gray-600">
+											₹{currService?.price}
+										</p>
+									</div>
+								</div>
 
-                {currService?.remarks && (
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gray-200 rounded-full">
-                      <NotepadText className="w-4 h-4 text-gray-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">
-                        Additional Notes
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {currService?.remarks}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+								{currService?.remarks && (
+									<div className="flex items-center space-x-3">
+										<div className="p-2 bg-gray-200 rounded-full">
+											<NotepadText className="w-4 h-4 text-gray-600" />
+										</div>
+										<div>
+											<p className="text-sm font-medium text-gray-700">
+												Additional Notes
+											</p>
+											<p className="text-sm text-gray-600">
+												{currService?.remarks}
+											</p>
+										</div>
+									</div>
+								)}
+							</div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-end pt-4">
-                <Button
-                  onClick={() => handleStartService(currService._id)}
-                  disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white transition-colors duration-200 min-w-[150px]"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Starting...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Start Service
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          ))
-        )}
-      </Card>
-    </>
-  );
+							{/* Action Buttons */}
+							<div className="flex justify-end pt-4">
+								<Button
+									onClick={() => handleStartService(currService._id)}
+									disabled={loading}
+									className="bg-indigo-600 hover:bg-indigo-700 text-white transition-colors duration-200 min-w-[150px]"
+								>
+									{loading ? (
+										<>
+											<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+											Starting...
+										</>
+									) : (
+										<>
+											<CheckCircle2 className="w-4 h-4 mr-2" />
+											Start Service
+										</>
+									)}
+								</Button>
+							</div>
+						</CardContent>
+					))
+				)}
+			</Card>
+		</>
+	);
 };
 
 export default OverviewTab;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -22,6 +22,13 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+} from "@/components/ui/dialog"; // Import Dialog component
 
 import ProfileTab from "@/components/Profile";
 import ServicesTab from "@/components/Services";
@@ -37,9 +44,35 @@ const RiderDashboard = () => {
 	const [activeTab, setActiveTab] = useState("overview");
 	const [isOnline, setIsOnline] = useState(true);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+	useEffect(() => {
+		if (profile && !profile.securityDeposit.isPaid) {
+			setIsDialogOpen(true);
+		}
+	}, [profile]);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+			{/* Security Deposit Dialog */}
+			<Dialog open={isDialogOpen} onOpenChange={() => {}}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Security Deposit Required</DialogTitle>
+						<DialogDescription>
+							Please pay the security deposit of ₹3000 to continue using the
+							platform.
+						</DialogDescription>
+					</DialogHeader>
+					<Button
+						className="mt-6"
+						onClick={() => (window.location.href = "/payment")}
+					>
+						Pay Now
+					</Button>
+				</DialogContent>
+			</Dialog>
+
 			{/* Mobile Navigation Drawer */}
 			<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
 				<SheetContent side="left" className="w-64 p-0 bg-white">
