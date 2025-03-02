@@ -28,6 +28,7 @@ const placeOrder = async (req, res) => {
       totalAmount,
       paymentDetails,
       phone,
+      deliveryCharge,
       orderFirstName,
       orderLastName,
       orderEmail,
@@ -35,7 +36,8 @@ const placeOrder = async (req, res) => {
       cart,
       cartId,
     } = req.body;
-    console.log("cart: ", req.body);
+
+    //console.log("cart: ", req.body);
 
     const orderData = {
       userId,
@@ -46,6 +48,7 @@ const placeOrder = async (req, res) => {
       status: "ORDERED",
       paymentDetails,
       address,
+      deliveryCharge: deliveryCharge || 0,
       orderFirstName: orderFirstName,
       orderLastName: orderLastName,
       phoneNumber: phone,

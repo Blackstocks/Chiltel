@@ -100,6 +100,7 @@ const BuyNow = () => {
 					parseInt(buyNowProduct.price * (1 - buyNowProduct.discount)) +
 					delivery_fee,
 				status: "ORDERED",
+				deliveryCharge: delivery_fee,
 				paymentDetails: {
 					method: method,
 					transactionId: "",

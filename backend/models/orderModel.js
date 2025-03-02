@@ -45,6 +45,10 @@ const orderSchema = new mongoose.Schema({
     },
     paidAt: Date,
   },
+  deliveryCharge: {
+    type: Number,
+    default: 0,
+  },
   address: {
     street: String,
     city: String,
@@ -52,12 +56,12 @@ const orderSchema = new mongoose.Schema({
     zipCode: String,
   },
   orderFirstName: {
-	type: String,
-	default: "",
+    type: String,
+    default: "",
   },
   orderLastName: {
-	type: String,
-	default: "",
+    type: String,
+    default: "",
   },
   phoneNumber: {
     type: String,
