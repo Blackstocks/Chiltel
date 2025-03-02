@@ -38,23 +38,11 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import ActiveService from "./ActiveService";
 import Loader from "./Loader";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogDescription,
-} from "@/components/ui/dialog"; // Import Dialog component
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const OverviewTab = () => {
 	const { profile, loading, error } = useProfile();
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-	useEffect(() => {
-		if (profile && !profile.securityDeposit.isPaid) {
-			setIsDialogOpen(true);
-		}
-	}, [profile]);
 
 	if (loading) {
 		return <Loader />;
@@ -86,27 +74,108 @@ const OverviewTab = () => {
 		? ((currentMonthEarnings - lastMonthEarnings) / lastMonthEarnings) * 100
 		: 0;
 
+	const initPay = (order) => {
+		const options = {
+			key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+			amount: order.amount,
+			currency: order.currency,
+			name: "Recharge Wallet",
+			description: "Recharge your wallet to continue using the platform",
+			order_id: order.id,
+			receipt: order.receipt,
+			config: {
+				display: {
+					// Payment method specific blocks
+					blocks: {
+						utib: {
+							//name for AXIS block
+							name: "Pay using AXIS Bank",
+							instruments: [
+								{ method: "card" },
+								{ method: "netbanking" },
+								{ method: "upi" },
+							],
+						},
+						other: {
+							//  name for other block
+							name: "Other Payment modes",
+							instruments: [
+								{ method: "card" },
+								{ method: "netbanking" },
+								{ method: "upi" },
+							],
+						},
+					},
+					sequence: ["block.utib", "block.other"],
+					preferences: {
+						show_default_cards: true,
+						show_saved_cards: true,
+						show_default_emi: true,
+					},
+					// Customize EMI section
+					emi: {
+						banks: ["HDFC", "ICICI", "Kotak"],
+						duration: {
+							min: 3,
+							max: 12,
+						},
+					},
+					// UPI customization
+					upi: {
+						flow: "collect",
+						apps: ["google_pay", "phonepe", "paytm", "upi"],
+					},
+				},
+			},
+			handler: async (response) => {
+				console.log("init pay: ", response);
+				try {
+					response.mode = "recharge";
+					const { data } = await axios.post(
+						import.meta.env.VITE_BACKEND_URL + "/rider/verify-recharge",
+						response,
+						{
+							headers: {
+								Authorization: `Bearer ${localStorage.getItem("riderToken")}`,
+							},
+						}
+					);
+					console.log("transaction data: ", data);
+					if (data.success) {
+						console.log("order info: ", data.message);
+						window.location.reload();
+						toast.success(res.message);
+					} else {
+						toast.error("Payment failed. Please try again.");
+					}
+				} catch (error) {
+					console.log(error);
+					toast.error(error);
+				}
+			},
+		};
+		const rzp = new window.Razorpay(options);
+		rzp.open();
+	};
+
+	const handlePayment = async () => {
+		// Add payment logic here
+		const { data } = await axios.post(
+			import.meta.env.VITE_BACKEND_URL + "/rider/create-order"
+		);
+		console.log("order data: ", data);
+		return data;
+	};
+
+	const handleRecharge = async () => {
+		const order = await handlePayment();
+		if (order) {
+			initPay(order);
+		}
+	};
+
 	return (
 		<div className="space-y-8">
-			{/* Security Deposit Dialog */}
-			<Dialog open={isDialogOpen} onOpenChange={() => {}}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Security Deposit Required</DialogTitle>
-						<DialogDescription>
-							Please pay the security deposit of ₹3000 to continue using the
-							platform.
-						</DialogDescription>
-					</DialogHeader>
-					<Button
-						className="mt-6"
-						onClick={() => (window.location.href = "/payment")}
-					>
-						Pay Now
-					</Button>
-				</DialogContent>
-			</Dialog>
-
 			{/* Earnings Section */}
 			<EarningsOverview
 				profile={profile}
@@ -195,10 +264,7 @@ const OverviewTab = () => {
 										<p className="text-sm text-red-500">
 											Low balance! Recharge now to continue using the platform
 										</p>
-										<Button
-											className="mt-2"
-											onClick={() => (window.location.href = "/recharge")}
-										>
+										<Button className="mt-2" onClick={handleRecharge}>
 											Recharge Now
 										</Button>
 									</>
