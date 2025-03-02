@@ -303,6 +303,23 @@ const OrdersPage = () => {
 
               <Separator />
 
+              {/* Shipping Address */}
+              <div>
+                <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
+                  <MapPin className="h-4 w-4" />
+                  Shipping Address
+                </h3>
+                <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                  <p className="font-medium">{order.address.street}</p>
+                  <p className="text-gray-500">
+                    {order.address.city}, {order.address.state}
+                  </p>
+                  <p className="text-gray-500">{order.address.zipCode}</p>
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Order Type & Date */}
               <div>
                 <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
@@ -413,28 +430,14 @@ const OrdersPage = () => {
                 </div>
               </div>
 
-              <Separator />
-
-              {/* Shipping Address */}
-              <div>
-                <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
-                  <MapPin className="h-4 w-4" />
-                  Shipping Address
-                </h3>
-                <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                  <p className="font-medium">{order.address.street}</p>
-                  <p className="text-gray-500">
-                    {order.address.city}, {order.address.state}
-                  </p>
-                  <p className="text-gray-500">{order.address.zipCode}</p>
-                </div>
-              </div>
+              
             </div>
           </ScrollArea>
         </SheetContent>
       </Sheet>
     );
   };
+
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -485,10 +488,10 @@ const OrdersPage = () => {
                         <TableCell>
                           <div>
                             <div className="font-medium">
-                              {order.userId.name}
+                              {order.orderFirstName + " "+ order.orderLastName}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {order.userId.email}
+                              {order.orderEmail}
                             </div>
                           </div>
                         </TableCell>
