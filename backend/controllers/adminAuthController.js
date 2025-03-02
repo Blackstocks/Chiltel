@@ -57,7 +57,6 @@ export const login = async (req, res) => {
     }
 
     const user = await Admin.findOne({ email });
-    console.log("password: ",  await user.matchPassword(password));
 
     if (user && (await user.matchPassword(password))) {
       res.status(200).json({

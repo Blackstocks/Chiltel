@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDebounce } from "use-debounce";
 import {
   Building2,
@@ -14,9 +14,20 @@ import {
   Search,
   Filter,
   User,
+  MoreVertical,
+  FileText,
+  BarChart3,
+  Percent,
   Pencil,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import {
   Select,
   SelectContent,
@@ -280,6 +291,8 @@ const getStatusBadge = (status) => {
   );
 };
 
+
+
 const Sellers = () => {
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -296,6 +309,9 @@ const Sellers = () => {
   const [selectedSellerForPayroll, setSelectedSellerForPayroll] =
     useState(null);
 
+  const [isRevenueSheetOpen, setIsRevenueSheetOpen] = useState(false);
+  const [selectedSellerForAction, setSelectedSellerForAction] = useState(null);
+
   const handleOpenPayrollDialog = (seller) => {
     setSelectedSellerForPayroll(seller);
     setIsPayrollDialogOpen(true);
@@ -311,6 +327,11 @@ const Sellers = () => {
       )
     );
     //await fetchSellers(); // Fetch fresh data from the server
+  };
+
+  const handleOpenRevenueSheet = (seller) => {
+    setSelectedSellerForAction(seller);
+    setIsRevenueSheetOpen(true);
   };
 
   const fetchSellers = async () => {
@@ -426,6 +447,263 @@ const Sellers = () => {
       </Button>
     );
   };
+
+  const RevenueDetailsSheet = ({ seller, isOpen, onClose }) => {
+    const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+    const [revenueData, setRevenueData] = useState({
+      total: 0,
+      commission: 0,
+      earnings: 0
+    });
+    
+    // Get current month in format "YYYY-MM"
+    function getCurrentMonth() {
+      const date = new Date();
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+  
+    // Sample data - in a real app, you would fetch this based on month selection
+    // MOVED UP: monthlyData needs to be defined before overallStats uses it
+    const monthlyData = {
+      "2025-03": { total: 45000, commission: 0, earnings: 0, date: "Mar 2025" },
+      "2025-02": { total: 38500, commission: 0, earnings: 0, date: "Feb 2025" },
+      "2025-01": { total: 52300, commission: 0, earnings: 0, date: "Jan 2025" },
+      "2024-12": { total: 63000, commission: 0, earnings: 0, date: "Dec 2024" },
+      "2024-11": { total: 49700, commission: 0, earnings: 0, date: "Nov 2024" },
+      "2024-10": { total: 42300, commission: 0, earnings: 0, date: "Oct 2024" },
+    };
+    
+    // Compute overall revenue statistics
+    const overallStats = useMemo(() => {
+      if (!seller) {
+        return {
+          totalRevenue: 0,
+          totalCommission: 0,
+          totalEarnings: 0,
+          chartData: [],
+          averageMonthlyRevenue: 0
+        };
+      }
+      
+      let totalRevenue = 0;
+      let totalCommission = 0;
+      let totalEarnings = 0;
+      const chartData = [];
+      
+      // Sort keys to ensure chronological order
+      const sortedMonths = Object.keys(monthlyData).sort();
+      
+      sortedMonths.forEach(month => {
+        const monthData = monthlyData[month];
+        const commissionRate = seller.commissionRate || 10;
+        const commission = monthData.total * commissionRate / 100;
+        const earnings = monthData.total - commission;
+        
+        totalRevenue += monthData.total;
+        totalCommission += commission;
+        totalEarnings += earnings;
+        
+        chartData.push({
+          name: monthData.date,
+          revenue: monthData.total
+        });
+      });
+      
+      return {
+        totalRevenue,
+        totalCommission,
+        totalEarnings,
+        chartData: chartData.reverse(), // Most recent first for chart
+        averageMonthlyRevenue: sortedMonths.length > 0 ? totalRevenue / sortedMonths.length : 0
+      };
+    }, [seller]); // FIXED: Removed monthlyData dependency since it's now a constant
+  
+    // Update revenue data when month or commission rate changes
+    useEffect(() => {
+      if (selectedMonth && seller) {
+        try {
+          const data = monthlyData[selectedMonth] || { total: 0 };
+          const commissionRate = seller.commissionRate || 10;
+          const commission = data.total * commissionRate / 100;
+          
+          setRevenueData({
+            total: data.total,
+            commission: commission,
+            earnings: data.total - commission
+          });
+        } catch (error) {
+          console.error("Error updating revenue data:", error);
+          // Set fallback data
+          setRevenueData({
+            total: 0,
+            commission: 0,
+            earnings: 0
+          });
+        }
+      }
+    }, [selectedMonth, seller]);
+  
+    // Early return if not open or no seller
+    if (!isOpen || !seller) return null;
+  
+    // Generate last 6 months for dropdown options
+    const monthOptions = useMemo(() => {
+      const options = [];
+      const currentDate = new Date();
+      
+      for (let i = 0; i < 6; i++) {
+        const date = new Date(currentDate);
+        date.setMonth(currentDate.getMonth() - i);
+        const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const label = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        
+        options.push({ value, label });
+      }
+      
+      return options;
+    }, []);
+  
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent className="w-[500px] sm:w-[750px] md:w-[850px]">
+          <SheetHeader className="mb-4">
+            <SheetTitle>Revenue Details</SheetTitle>
+            <SheetDescription>
+              Revenue and commission breakdown for {seller.shopName}
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="mb-6">
+            <label className="text-sm font-medium mb-2 block">Select Month</label>
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select month" />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOptions.map(month => (
+                  <SelectItem key={month.value} value={month.value}>
+                    {month.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <ScrollArea className="h-[calc(100vh-180px)] pr-4">
+            <div className="space-y-6">
+              {/* Overall Revenue Card */}
+              <Card>
+            <CardHeader className="pb-2">
+                  <CardTitle className="text-xl">Overall Revenue</CardTitle>
+                  <CardDescription>Total earnings until today</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-6 grid-cols-3">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                      <p className="text-md font-bold text-nowrap">₹{overallStats.totalRevenue.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
+                      <p className="text-md font-bold text-nowrap">₹{overallStats.totalEarnings.toFixed(0)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Avg. Monthly</p>
+                      <p className="text-md font-bold text-nowrap">₹{overallStats.averageMonthlyRevenue.toFixed(0)}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="h-[180px] mt-8">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={overallStats.chartData} margin={{ top: 5, right: 20, bottom: 25, left: 0 }}>
+                        <XAxis 
+                          dataKey="name" 
+                          fontSize={12} 
+                          tickLine={false} 
+                          axisLine={false}
+                          dy={10}
+                        />
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              return (
+                                <div className="bg-background border rounded p-2 shadow-sm">
+                                  <div className="text-xs text-muted-foreground">
+                                    {payload[0].payload.name}
+                                  </div>
+                                  <div className="font-medium">
+                                    ₹{payload[0].value.toLocaleString()}
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return null
+                          }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="revenue" 
+                          strokeWidth={2} 
+                          activeDot={{ r: 6 }} 
+                          stroke="#0284c7"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Monthly Revenue Card */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xl">Monthly Revenue</CardTitle>
+                  <CardDescription>
+                    For {monthOptions.find(m => m.value === selectedMonth)?.label || ''}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Total Revenue:</span>
+                      <span className="font-medium text-lg">₹{revenueData.total.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Admin Commission ({seller.commissionRate || 10}%):</span>
+                      <span className="font-medium text-lg">₹{revenueData.commission.toFixed(0)}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-t pt-3 mt-2">
+                      <span className="text-muted-foreground font-medium">Seller Earnings:</span>
+                      <span className="font-bold text-lg">₹{revenueData.earnings.toFixed(0)}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Transaction History Card */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle>Transaction History</CardTitle>
+                  <CardDescription>
+                    Showing transactions for {monthOptions.find(m => m.value === selectedMonth)?.label || ''}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground text-sm">
+                    {/* Transaction list would go here */}
+                    No transactions to display for this period.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+    );
+  };
+
+  
+
+ 
 
   useEffect(() => {
     fetchSellers();
@@ -545,7 +823,55 @@ const Sellers = () => {
                       </div>
                     </TableCell>
 
-                    <TableCell>{renderActionButtons(seller)}</TableCell>
+                    <TableCell>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuItem onClick={() => handleViewDetails(seller)}>
+                            <FileText className="h-4 w-4 mr-2" />
+                            View Seller Details
+                          </DropdownMenuItem>
+                          
+                          {seller.registrationStatus === "approved" && (
+                            <>
+                              <DropdownMenuItem onClick={() => handleOpenPayrollDialog(seller)}>
+                                <Percent className="h-4 w-4 mr-2" />
+                                Update Commission Rate
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuItem onClick={() => handleOpenRevenueSheet(seller)}>
+                                <BarChart3 className="h-4 w-4 mr-2" />
+                                View Revenue Details
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          
+                          {seller.registrationStatus === "pending" && (
+                            <>
+                              <DropdownMenuItem 
+                                className="text-green-600"
+                                onClick={() => openConfirmDialog(seller, "approve")}
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Approve Seller
+                              </DropdownMenuItem>
+                              
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => openConfirmDialog(seller, "reject")}
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Reject Seller
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))}
 
@@ -641,6 +967,16 @@ const Sellers = () => {
           setSelectedSellerForPayroll(null);
         }}
         onSave={handlePayrollUpdate}
+      />
+
+       {/* Revenue Details Sheet */}
+       <RevenueDetailsSheet
+        seller={selectedSellerForAction}
+        isOpen={isRevenueSheetOpen}
+        onClose={() => {
+          setIsRevenueSheetOpen(false);
+          setSelectedSellerForAction(null);
+        }}
       />
     </div>
   );

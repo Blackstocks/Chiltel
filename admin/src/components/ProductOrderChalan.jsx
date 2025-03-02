@@ -21,23 +21,52 @@ const ProductOrderChalan = ({ order }) => {
   const [serialNumbers, setSerialNumbers] = useState(
     order.products.map(() => "")
   );
+
   const [showChalan, setShowChalan] = useState(false);
   const printRef = useRef();
 
+  const [hsnNumbers, setHsnNumbers] = useState(
+    order.products.map(() => "84183010") // Default HSN code
+  );
+
+  // 2. Add useEffect to load HSN numbers from localStorage (right after the existing useEffect)
+  useEffect(() => {
+    const storedHsnNumbers = localStorage.getItem(`hsn_numbers_${order._id}`);
+    if (storedHsnNumbers) {
+      setHsnNumbers(JSON.parse(storedHsnNumbers));
+    }
+  }, [order._id]);
+
+  // 3. Add a function to handle HSN number changes
+  const handleHsnNumberChange = (index, value) => {
+    const newHsnNumbers = [...hsnNumbers];
+    newHsnNumbers[index] = value;
+    setHsnNumbers(newHsnNumbers);
+    // Save to localStorage
+    localStorage.setItem(
+      `hsn_numbers_${order._id}`,
+      JSON.stringify(newHsnNumbers)
+    );
+  };
+
   // Load serial numbers from localStorage on component mount
   useEffect(() => {
-    const storedSerialNumbers = localStorage.getItem(`serial_numbers_${order._id}`);
+    const storedSerialNumbers = localStorage.getItem(
+      `serial_numbers_${order._id}`
+    );
     if (storedSerialNumbers) {
       setSerialNumbers(JSON.parse(storedSerialNumbers));
       // If we have stored serial numbers, check if they're all filled to show chalan
       const parsedNumbers = JSON.parse(storedSerialNumbers);
-      const allFilled = parsedNumbers.every(num => num.trim() !== "");
+      const allFilled = parsedNumbers.every((num) => num.trim() !== "");
       setShowChalan(allFilled);
     } else {
       // Initialize with empty strings if no stored values
-      setSerialNumbers(order.products.reduce((acc, product) => {
-        return [...acc, ...Array(product.quantity).fill("")];
-      }, []));
+      setSerialNumbers(
+        order.products.reduce((acc, product) => {
+          return [...acc, ...Array(product.quantity).fill("")];
+        }, [])
+      );
     }
   }, [order._id, order.products]);
 
@@ -46,28 +75,42 @@ const ProductOrderChalan = ({ order }) => {
     newSerialNumbers[index] = value;
     setSerialNumbers(newSerialNumbers);
     // Save to localStorage whenever serial numbers change
-    localStorage.setItem(`serial_numbers_${order._id}`, JSON.stringify(newSerialNumbers));
+    localStorage.setItem(
+      `serial_numbers_${order._id}`,
+      JSON.stringify(newSerialNumbers)
+    );
   };
 
   const handleProceed = () => {
     let allFilled = true;
+    let allHsnFilled = true;
+
     for (let i = 0; i < order.products.length; i++) {
+      // Check serial numbers
       for (let j = 0; j < order.products[i].quantity; j++) {
         if (serialNumbers[i * order.products[i].quantity + j].trim() === "") {
           allFilled = false;
           break;
         }
       }
-      if (!allFilled) break;
+
+      // Check HSN numbers
+      if (hsnNumbers[i].trim() === "") {
+        allHsnFilled = false;
+        break;
+      }
     }
-  
-    if (allFilled) {
+
+    if (allFilled && allHsnFilled) {
       setShowChalan(true);
     } else {
-      alert("Please fill serial numbers for all products");
+      if (!allFilled) {
+        alert("Please fill serial numbers for all products");
+      } else {
+        alert("Please fill HSN numbers for all products");
+      }
     }
   };
-
 
   const handlePrint = () => {
     const printContent = printRef.current;
@@ -314,16 +357,16 @@ const ProductOrderChalan = ({ order }) => {
       serialNumbers: Array.from({ length: item.quantity }).map(
         (_, i) => serialNumbers[index * item.quantity + i]
       ), // Add if available
-      hsn: "84183010",
-      mrp: item.price/(0.9*1.18),
+      hsn: hsnNumbers[index],
+      mrp: item.price / (0.9 * 1.18),
       quantity: item.quantity,
       discount: item.product.discount * 100,
       unit: "Nos",
-      unitPrice: item.price/1.18,
+      unitPrice: item.price / 1.18,
       taxableAmount: item.price, // Including 18% GST
-      cgst: item.price/1.18 * 0.09, // 9% CGST
-      sgst: item.price/1.18 * 0.09, // 9% SGST
-      gst: item.price/1.18 * 0.18, // 18% GST
+      cgst: (item.price / 1.18) * 0.09, // 9% CGST
+      sgst: (item.price / 1.18) * 0.09, // 9% SGST
+      gst: (item.price / 1.18) * 0.18, // 18% GST
       total: item.price, // Including 18% GST
     })),
     total: {
@@ -347,8 +390,6 @@ const ProductOrderChalan = ({ order }) => {
     },
   };
 
-
-
   // If chalan is not yet shown, render serial number input
   if (!showChalan) {
     return (
@@ -366,6 +407,7 @@ const ProductOrderChalan = ({ order }) => {
                 <TableHead>Brand</TableHead>
                 <TableHead>Model</TableHead>
                 <TableHead>Quantity</TableHead>
+                <TableHead>HSN Code</TableHead>
                 <TableHead>Serial Numbers</TableHead>
               </TableRow>
             </TableHeader>
@@ -376,6 +418,18 @@ const ProductOrderChalan = ({ order }) => {
                   <TableCell>{item.product.brand || "N/A"}</TableCell>
                   <TableCell>{item.product.model || "N/A"}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
+                  <TableCell>
+                    <Input
+                      type="text"
+                      value={hsnNumbers[index]}
+                      onChange={(e) =>
+                        handleHsnNumberChange(index, e.target.value)
+                      }
+                      placeholder="Enter HSN code"
+                      className="w-full"
+                      required
+                    />
+                  </TableCell>
                   <TableCell>
                     {Array.from({ length: item.quantity }).map((_, i) => (
                       <Input
@@ -407,8 +461,6 @@ const ProductOrderChalan = ({ order }) => {
       </Card>
     );
   }
-
-  
 
   return (
     <div className="max-h-[80vh] bg-gray-50 rounded-lg overflow-y-auto">

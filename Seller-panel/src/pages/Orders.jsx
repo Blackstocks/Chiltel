@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,12 +46,14 @@ import {
   CalendarDays,
   Search,
   Filter,
+  FileText,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import SellerOrderChallan from "@/components/SellerOrderChallan";
 
 const ITEMS_PER_PAGE = 5;
 const ORDER_STATUSES = ["ALL", "PENDING", "ORDERED", "DELIVERED", "CANCELLED"];
@@ -60,6 +63,7 @@ const OrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isChallanOpen, setIsChallanOpen] = useState(false);
 
   // Search and Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -266,9 +270,22 @@ const OrdersPage = () => {
     return (
       <Sheet open={open} onOpenChange={onClose}>
         <SheetContent className="w-[400px] sm:w-[540px]">
-          <SheetHeader className="mb-4">
-            <SheetTitle>Order Details</SheetTitle>
-            <SheetDescription>Order #{order._id.slice(-8)}</SheetDescription>
+          <SheetHeader className="mb-4 flex justify-between items-center">
+            <div>
+              <SheetTitle>Order Details</SheetTitle>
+              <SheetDescription>Order #{order._id.slice(-8)}</SheetDescription>
+            </div>
+            <Dialog >
+              <DialogTrigger asChild>
+                <div className="flex items-center">
+                  <FileText className="w-4 h-4 mr-2" />
+                  View Chalan
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[calc(100vh-100px)]">
+                <SellerOrderChallan />
+              </DialogContent>
+            </Dialog>
           </SheetHeader>
 
           <ScrollArea className="h-[calc(100vh-100px)] pr-4">
