@@ -272,7 +272,7 @@ const MultiStepSignupForm = () => {
 						apps: ["google_pay", "phonepe", "paytm", "upi"],
 					},
 				},
-			},	
+			},
 			handler: async (response) => {
 				console.log("init pay: ", response);
 				try {
@@ -308,6 +308,7 @@ const MultiStepSignupForm = () => {
 									password: "",
 									confirmPassword: "",
 									panNumber: "",
+
 									beneficiaryAccount: "",
 									beneficiaryIFSC: "",
 									beneficiaryMobile: "",

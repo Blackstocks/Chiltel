@@ -14,6 +14,23 @@ riderRouter.get("/verify-token", verifyRider, riderController.verifyToken);
 //payment routes
 riderRouter.post("/create-order", riderController.createOrder);
 riderRouter.post("/verify-payment", riderController.verifyPayment);
+//recharge verify
+riderRouter.post(
+	"/verify-recharge",
+	verifyRider,
+	riderController.verifyPayment
+);
+
+//security deposit payment
+riderRouter.post(
+	"/create-deposit-order",
+	riderController.createSecurityDepositOrder
+);
+riderRouter.post(
+	"/verify-deposit-payment",
+	verifyRider,
+	riderController.verifySecurityDepositPayment
+);
 
 // Profile routes
 riderRouter.get("/profile", verifyRider, riderController.getProfile);

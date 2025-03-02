@@ -45,15 +45,15 @@ const riderController = {
 			console.log(req.body);
 
 			if (mode === "normal") {
-				// //verify referral code
-				// if (referralCode) {
-				// 	const storedReferralCode = await ReferralCode.findOne({ email });
-				// 	if (!storedReferralCode || referralCode !== storedReferralCode.code) {
-				// 		return res.status(400).json({ message: "Invalid referral code" });
-				// 	}
-				// } else {
-				// 	return res.status(400).json({ message: "Referral code is required" });
-				// }
+				//verify referral code
+				if (referralCode) {
+					const storedReferralCode = await ReferralCode.findOne({ email });
+					if (!storedReferralCode || referralCode !== storedReferralCode.code) {
+						return res.status(400).json({ message: "Invalid referral code" });
+					}
+				} else {
+					return res.status(400).json({ message: "Referral code is required" });
+				}
 			}
 
 			if (mode === "commission") {
@@ -354,6 +354,10 @@ const riderController = {
 
 			if (rider.balance < 0) {
 				return res.status(400).json({ message: "Insufficient balance" });
+			}
+
+			if (rider.securityDeposit.isPaid === false) {
+				return res.status(400).json({ message: "Security deposit not paid" });
 			}
 
 			service.rider = req.rider._id;
@@ -814,8 +818,12 @@ const riderController = {
 
 	async verifyPayment(req, res) {
 		try {
-			const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-				req.body;
+			const {
+				razorpay_order_id,
+				razorpay_payment_id,
+				razorpay_signature,
+				mode,
+			} = req.body;
 			console.log(req.body);
 
 			const generatedSignature = crypto
@@ -828,6 +836,12 @@ const riderController = {
 
 			if (generatedSignature !== razorpay_signature) {
 				return res.status(400).json({ message: "Payment verification failed" });
+			}
+
+			if (mode == "recharge") {
+				const rider = await Rider.findById(req.rider._id);
+				rider.balance += 2000;
+				await rider.save();
 			}
 
 			res.json({ success: true, message: "Payment verified successfully" });
