@@ -182,8 +182,11 @@ const OrderManagement = () => {
 
   const filterServices = (services) => {
     return services.filter((service) => {
+      console.log("services", service);
       const matchesSearch =
-        service.user.name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+        service.user?.name
+          .toLowerCase()
+          .includes(serviceSearch.toLowerCase()) ||
         service._id.toLowerCase().includes(serviceSearch.toLowerCase()) ||
         (service.service?.name || "")
           .toLowerCase()
@@ -323,7 +326,11 @@ const OrderManagement = () => {
   };
 
   const handleMultipleRiderAssignment = async (requestId, riderIds) => {
-    console.log("Assigning multiple riders to service request:", requestId, riderIds);
+    console.log(
+      "Assigning multiple riders to service request:",
+      requestId,
+      riderIds
+    );
     try {
       const response = await fetch(
         `${
@@ -338,23 +345,21 @@ const OrderManagement = () => {
           body: JSON.stringify({ riderIds }),
         }
       );
-  
+
       const data = await response.json();
       console.log("assigned multiple riders response:", data);
-  
+
       // Check for error before success
       if (!response.ok) {
         throw new Error(data.message || "Failed to assign riders");
       }
-  
+
       // Refresh service requests to get updated data
       await fetchServiceRequests();
-  
+
       // Show success message with number of riders assigned
-      toast.success(
-        `Successfully assigned multiple riders`
-      );
-  
+      toast.success(`Successfully assigned multiple riders`);
+
       return data;
     } catch (error) {
       console.error("Error assigning multiple riders:", error);
@@ -541,12 +546,20 @@ const OrderManagement = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {order.seller ? order.seller.name : "Admin"}
+                        {order.products.map((item) => (
+                          <div key={item._id}>
+                            <div className="font-medium">
+                              {item.product.seller?.shopName || "Chiltel"}
+                            </div>
+                          </div>
+                        ))}
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium">{order.userId.name}</div>
+                        <div className="font-medium">
+                          {order.orderFirstName + " " + order.orderLastName}
+                        </div>
                         <div className="text-sm text-gray-500">
-                          {order.userId.email}
+                          {order.orderEmail}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -773,7 +786,9 @@ const OrderManagement = () => {
                             <RiderAssignmentCell
                               service={service}
                               riders={riders}
-                              handleMultipleRiderAssignment={handleMultipleRiderAssignment}
+                              handleMultipleRiderAssignment={
+                                handleMultipleRiderAssignment
+                              }
                             />
                           )}
                         </TableCell>

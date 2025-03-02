@@ -78,11 +78,13 @@ const OrderDetailsSheet = ({ order }) => {
                 <CardTitle>Customer Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <p className="text-sm">Name: {order.userId.name}</p>
-                <p className="text-sm">
-                  Contact number: {order.userId.phoneNumber}
-                </p>
+                <p className="text-sm">User Account Name: {order.userId.name}</p>
                 <p className="text-sm">Email: {order.userId.email}</p>
+                <p className="text-sm">Delivered To: {order.orderFirstName} {order.orderLastName}</p>
+                <p className="text-sm">Deliver To email: {order.orderEmail}</p>
+                <p className="text-sm">
+                  Contact number: {order.phoneNumber}
+                </p>
                 <div className="pt-2">
                   <p className="font-medium text-sm">Shipping Address:</p>
                   <p className="text-sm">{order.address.street}</p>
