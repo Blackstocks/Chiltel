@@ -63,6 +63,7 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
         }
       );
       setPendingRiders(response.data.data || []);
+      console.log(response.data.data);
     } catch (error) {
       toast.error("Failed to fetch pending riders");
     } finally {
@@ -115,22 +116,27 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
     try {
       setVerificationLoading((prev) => ({ ...prev, [riderId]: "bank" }));
       // Find the rider to get their bank details
-      const rider = pendingRiders.find(r => r._id === riderId);
-      
+      const rider = pendingRiders.find((r) => r._id === riderId);
+
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/rider/verify/bank`,
         {
-          beneficiaryAccount: rider.bankAccount,
-          beneficiaryIFSC: rider.ifscCode,
-          beneficiaryMobile: rider.phoneNumber,
-          beneficiaryName: `${rider.firstName} ${rider.lastName}`
-        },
+          beneficiaryAccount: rider.bankDetails.accountNumber,
+          beneficiaryIFSC: rider.bankDetails.ifscCode,
+          beneficiaryMobile: rider.bankDetails.mobileNumber,
+          beneficiaryName: rider.bankDetails.holderName,
+          riderId,
+        }
       );
 
-      if (response.data.verified) {
+      console.log(response.data);
+
+      if (response.data.data.result.accountStatus == "VALID") {
         setPendingRiders((prev) =>
           prev.map((rider) =>
-            rider._id === riderId ? { ...rider, bankVerified: true } : rider
+            rider._id === riderId
+              ? { ...rider, bankDetails: { isVerified: true } }
+              : rider
           )
         );
         toast.success("Bank details verified successfully");
@@ -150,23 +156,20 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
     try {
       setVerificationLoading((prev) => ({ ...prev, [riderId]: "criminal" }));
       // Find the rider to get their details
-    const rider = pendingRiders.find(r => r._id === riderId);
-    
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/rider/verify/court`,
-      {
-        name: `${rider.firstName} ${rider.lastName}`,
-        fatherName: rider.fatherName,
-        address: rider.address,
-        dob: rider.dateOfBirth,  // Assuming the date is in the correct format
-        panNumber: rider.panNumber
-      },
-    );
 
-      if (response.data.verified) {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/rider/verify/court`,
+        {
+          riderId,
+        }
+      );
+
+      console.log(response.data);
+
+      if (response.data.data.code == 200) {
         setPendingRiders((prev) =>
           prev.map((rider) =>
-            rider._id === riderId ? { ...rider, criminalChecked: true } : rider
+            rider._id === riderId ? { ...rider, isCourtVerified: true } : rider
           )
         );
         toast.success("Criminal background check completed");
@@ -183,7 +186,7 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
   };
 
   const isVerificationComplete = (rider) => {
-    return rider.bankVerified && rider.criminalChecked;
+    return rider.bankDetails.isVerified && rider.isCourtVerified;
   };
 
   return (
@@ -276,7 +279,8 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
                         <DropdownMenuLabel>Verifications</DropdownMenuLabel>
                         <DropdownMenuItem
                           disabled={
-                            rider.bankVerified || verificationLoading[rider._id]
+                            rider.bankDetails.isVerified ||
+                            verificationLoading[rider._id]
                           }
                           onClick={() => handleBankVerification(rider._id)}
                           className="gap-2"
@@ -287,13 +291,13 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
                             <Building2 className="h-4 w-4" />
                           )}
                           <span>Bank Verification</span>
-                          {rider.bankVerified && (
+                          {rider.bankDetails.isVerified && (
                             <CheckCircle className="h-4 w-4 ml-auto text-green-600" />
                           )}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           disabled={
-                            rider.criminalChecked ||
+                            rider.isCourtVerified ||
                             verificationLoading[rider._id]
                           }
                           onClick={() => handleCriminalCheck(rider._id)}
@@ -305,7 +309,7 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
                             <ShieldAlert className="h-4 w-4" />
                           )}
                           <span>Criminal Check</span>
-                          {rider.criminalChecked && (
+                          {rider.isCourtVerified && (
                             <CheckCircle className="h-4 w-4 ml-auto text-green-600" />
                           )}
                         </DropdownMenuItem>
