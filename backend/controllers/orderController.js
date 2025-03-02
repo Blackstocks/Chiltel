@@ -259,6 +259,11 @@ const allOrders = async (req, res) => {
       .populate({
         path: "products.product", // Path to populate
         model: "Product", // Model to populate from
+        // Add nested populate here
+        populate: {
+          path: "seller",
+          model: "Seller",
+        },
       });
     res.json({ success: true, orders });
   } catch (error) {

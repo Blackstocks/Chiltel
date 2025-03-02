@@ -309,7 +309,10 @@ const getProduct = async (req, res) => {
 const listProducts = async (req, res) => {
   try {
     // Fetch all products from the database
-    const products = await Product.find();
+    const products = await Product.find().sort({ createdAt: -1 }).populate({
+      path: "seller",
+      select: "-password", // Only select the fields you need
+    });
     // Filter products by requestedStatus
     const filteredProducts = products.filter(
       (product) =>
