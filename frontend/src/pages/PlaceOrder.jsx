@@ -1,306 +1,431 @@
-import React, { useContext, useState } from 'react'
-import Title from '../components/Title'
-import CartTotal from '../components/CartTotal'
-import { assets } from '../assets/assets'
-import { ShopContext } from '../context/ShopContext'
-import axios from 'axios'
-import { toast } from 'react-toastify'
-import AuthContext from '../context/AuthContext'
-import CartContext from '../context/CartContext'
+import React, { useContext, useState } from "react";
+import Title from "../components/Title";
+import CartTotal from "../components/CartTotal";
+import { assets } from "../assets/assets";
+import { ShopContext } from "../context/ShopContext";
+import axios from "axios";
+import { toast } from "react-toastify";
+import AuthContext from "../context/AuthContext";
+import CartContext from "../context/CartContext";
 
-const PlaceOrder = ({buyNowProduct=null}) => {
+const PlaceOrder = ({ buyNowProduct = null }) => {
+	const [method, setMethod] = useState("cod");
+	const [orderProcessing, setOrderProcessing] = useState(false);
+	const {
+		navigate,
+		backendUrl,
+		token,
+		cartItems,
+		setCartItems,
+		getCartAmount,
+		delivery_fee,
+		products,
+	} = useContext(ShopContext);
+	const { cart, cartId, fetchCart } = useContext(CartContext);
+	const { user } = useContext(AuthContext);
+	const [street, setStreet] = useState("");
+	const [city, setCity] = useState("");
+	const [state, setState] = useState("");
+	const [zipCode, setZipCode] = useState("");
+	const [formData, setFormData] = useState({
+		firstName: "",
+		lastName: "",
+		email: user.email,
+		street: "",
+		city: "",
+		state: "",
+		zipcode: "",
+		country: "India",
+		phone: "",
+	});
 
-    const [method, setMethod] = useState('cod');
-    const [orderProcessing, setOrderProcessing] = useState(false);
-    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
-    const { cart, cartId, fetchCart } = useContext(CartContext);
-    const { user } = useContext(AuthContext);
-    const [street, setStreet] = useState('');
-    const [city, setCity] = useState('');
-    const [state, setState] = useState('');
-    const [zipCode, setZipCode] = useState('');
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: user.email,
-        street: '',
-        city: '',
-        state: '',
-        zipcode: '',
-        country: 'India',
-        phone: ''
-    })
+	const fetchStateByPincode = async (pincode) => {
+		try {
+			const response = await fetch(
+				`https://api.postalpincode.in/pincode/${pincode}`
+			);
+			const data = await response.json();
+			if (data[0].Status === "Success") {
+				return data[0].PostOffice[0].State; // Get the state
+			}
+			return null;
+		} catch (error) {
+			console.error("Error fetching state:", error);
+			return null;
+		}
+	};
 
-    const fetchStateByPincode = async (pincode) => {
-        try {
-          const response = await fetch(
-            `https://api.postalpincode.in/pincode/${pincode}`
-          );
-          const data = await response.json();
-          if (data[0].Status === "Success") {
-            return data[0].PostOffice[0].State; // Get the state
-          }
-          return null;
-        } catch (error) {
-          console.error("Error fetching state:", error);
-          return null;
-        }
-      };
-    
-      const handleZipCodeChange = async (e) => {
-        const zipcode = e.target.value;
-        setFormData(data => ({ ...data, zipcode }))
-    
-        if (zipcode.length === 6) {
-            const state = await fetchStateByPincode(zipcode);
-            setFormData(data => ({ ...data, state }))
-        }
-      };
+	const handleZipCodeChange = async (e) => {
+		const zipcode = e.target.value;
+		setFormData((data) => ({ ...data, zipcode }));
 
-    const onChangeHandler = (event) => {
-        const name = event.target.name
-        const value = event.target.value
-        setFormData(data => ({ ...data, [name]: value }))
-    }
+		if (zipcode.length === 6) {
+			const state = await fetchStateByPincode(zipcode);
+			setFormData((data) => ({ ...data, state }));
+		}
+	};
 
-    const initPay = (order, newOrder) => {
-        console.log('Entered init pay');
-        const options = {
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-            amount: order.amount,
-            currency: order.currency,
-            name:'Order Payment',
-            description:'Order Payment',
-            order_id: order.id,
-            receipt: order.receipt,
-            handler: async (response) => {
-                console.log('init pay: ', response)
-                setOrderProcessing(false);
-                response.cart = true;
-                response.cartId = cartId;
-                try {
-                    const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers: { Authorization: `Bearer ${token}` }})
-                    console.log('transaction data: ', data);
-                    if (data.success) {
-                        console.log('order info: ', data.orderInfo);
-                        fetchCart();
-                        navigate('/order-success')
-                        setCartItems({})
-                    }
-                } catch (error) {
-                    console.log('Failed placing order: ', error)
-                    toast.error(error)
-                }
-            },
-            modal: {
-                ondismiss: async () => {
-                    setOrderProcessing(false);
-                    console.log('Payment window was closed by the user.');
-                    toast.error('Payment window closed. Cancelling the order...');
-    
-                    // Cancel the order when the modal is closed
-                    try {
-                        await axios.post(
-                            `${backendUrl}/api/order/delete`,
-                            { orderId: newOrder._id },
-                            { headers: { Authorization: `Bearer ${token}` } }
-                        );
-                        console.log('Order canceled successfully');
-                    } catch (error) {
-                        console.error('Error while canceling order:', error);
-                        toast.error('Failed to cancel the order. Please contact support.');
-                    }
-                },
-            },
-        }
-        const rzp = new window.Razorpay(options)
+	const onChangeHandler = (event) => {
+		const name = event.target.name;
+		const value = event.target.value;
+		setFormData((data) => ({ ...data, [name]: value }));
+	};
 
-        rzp.on('payment.failed', async (response) => {
-            console.log('Payment failed or user closed dialog:', response);
-            toast.error('Payment failed or was canceled by the user.');
-    
-            try {
-                await axios.post(
-                    `${backendUrl}/api/order/delete`,
-                    { orderId: newOrder._id },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-                console.log('Order canceled successfully');
-            } catch (error) {
-                console.error('Error while canceling order:', error);
-                toast.error('Failed to cancel the order. Please contact support.');
-            }
-        });
+	const initPay = (order, newOrder) => {
+		console.log("Entered init pay");
+		const options = {
+			key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+			amount: order.amount,
+			currency: order.currency,
+			name: "Order Payment",
+			description: "Order Payment",
+			order_id: order.id,
+			receipt: order.receipt,
+			handler: async (response) => {
+				console.log("init pay: ", response);
+				setOrderProcessing(false);
+				response.cart = true;
+				response.cartId = cartId;
+				try {
+					const { data } = await axios.post(
+						backendUrl + "/api/order/verifyRazorpay",
+						response,
+						{ headers: { Authorization: `Bearer ${token}` } }
+					);
+					console.log("transaction data: ", data);
+					if (data.success) {
+						console.log("order info: ", data.orderInfo);
+						fetchCart();
+						navigate("/order-success");
+						setCartItems({});
+					}
+				} catch (error) {
+					console.log("Failed placing order: ", error);
+					toast.error(error);
+				}
+			},
+			modal: {
+				ondismiss: async () => {
+					setOrderProcessing(false);
+					console.log("Payment window was closed by the user.");
+					toast.error("Payment window closed. Cancelling the order...");
 
-        rzp.open()
-    }
+					// Cancel the order when the modal is closed
+					try {
+						await axios.post(
+							`${backendUrl}/api/order/delete`,
+							{ orderId: newOrder._id },
+							{ headers: { Authorization: `Bearer ${token}` } }
+						);
+						console.log("Order canceled successfully");
+					} catch (error) {
+						console.error("Error while canceling order:", error);
+						toast.error("Failed to cancel the order. Please contact support.");
+					}
+				},
+			},
+		};
+		const rzp = new window.Razorpay(options);
 
-    const onSubmitHandler = async (event) => {
-        setOrderProcessing(true);
-        event.preventDefault()
-        try {
+		rzp.on("payment.failed", async (response) => {
+			console.log("Payment failed or user closed dialog:", response);
+			toast.error("Payment failed or was canceled by the user.");
 
-            let orderItems = []
+			try {
+				await axios.post(
+					`${backendUrl}/api/order/delete`,
+					{ orderId: newOrder._id },
+					{ headers: { Authorization: `Bearer ${token}` } }
+				);
+				console.log("Order canceled successfully");
+			} catch (error) {
+				console.error("Error while canceling order:", error);
+				toast.error("Failed to cancel the order. Please contact support.");
+			}
+		});
 
-            for (const item of cart.items) {
-                let itemInfo = {
-                    product: item.productId,
-                    quantity: item.quantity,
-                    price: parseInt(item.price)
-                };
-                orderItems.push(itemInfo);
-            }
+		rzp.open();
+	};
 
-            console.log('order items: ', orderItems);
-            
-            console.log('user: ', user);
-            let orderData = {
-                userId: user._id,
-                orderType: 'product',
-                products: orderItems,
-                services: [],
-                totalAmount: cart.totalAmount + delivery_fee,
-                status: "ORDERED",
-                paymentDetails: {
-                    method: method,
-                    transactionId: "",
-                    paidAt: new Date()
-                },
-                address: {
-                    street: formData.street,
-                    city: formData.city,
-                    state: formData.state,
-                    zipCode: formData.zipcode,
-                },
-                createdAt: new Date(),
-                updatedAt: new Date()
-            }
-           
-            switch (method) {
+	const onSubmitHandler = async (event) => {
+		setOrderProcessing(true);
+		event.preventDefault();
+		try {
+			let orderItems = [];
 
-                // API Calls for COD
-                case 'cod':
-                    orderData.cart = true;
-                    orderData.cartId = cartId;
-                    const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{ Authorization: `Bearer ${token}` }})
-                    if (response.data.success) {
-                        fetchCart();
-                        setCartItems({})
-                        navigate('/order-success')
-                    } else {
-                        toast.error(response.data.message)
-                    }
-                    break;
+			for (const item of cart.items) {
+				let itemInfo = {
+					product: item.productId,
+					quantity: item.quantity,
+					price: parseInt(item.price),
+				};
+				orderItems.push(itemInfo);
+			}
 
-                case 'stripe':
-                    const responseStripe = await axios.post(backendUrl + '/api/order/stripe',orderData,{headers:{ Authorization: `Bearer ${token}` }})
-                    if (responseStripe.data.success) {
-                        const {session_url} = responseStripe.data
-                        window.location.replace(session_url)
-                    } else {
-                        toast.error(responseStripe.data.message)
-                    }
-                    break;
+			console.log("order items: ", orderItems);
 
-                case 'razorpay':
-                    console.log('order data: ', orderData);
-                    const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers: { Authorization: `Bearer ${token}` }})
-                    // const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
-                    console.log(responseRazorpay);
-                    if (responseRazorpay.data.success) {
-                        console.log('razorpay init success');
-                        console.log('razorpay response: ', responseRazorpay.data);
-                        setOrderProcessing(false);
-                        initPay(responseRazorpay.data.order, responseRazorpay.data.newOrder)
-                    }
+			console.log("user: ", user);
+			let orderData = {
+				userId: user._id,
+				orderFirstName: formData.firstName,
+				orderLastName: formData.lastName,
+				orderType: "product",
+				products: orderItems,
+				services: [],
+				totalAmount: cart.totalAmount + delivery_fee,
+				status: "ORDERED",
+				paymentDetails: {
+					method: method,
+					transactionId: "",
+					paidAt: new Date(),
+				},
+				address: {
+					street: formData.street,
+					city: formData.city,
+					state: formData.state,
+					zipCode: formData.zipcode,
+				},
+				phone: formData.phone,
+				orderEmail: formData.email,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			};
 
-                    break;
+			switch (method) {
+				// API Calls for COD
+				case "cod":
+					orderData.cart = true;
+					orderData.cartId = cartId;
+					const response = await axios.post(
+						backendUrl + "/api/order/place",
+						orderData,
+						{ headers: { Authorization: `Bearer ${token}` } }
+					);
+					if (response.data.success) {
+						fetchCart();
+						setCartItems({});
+						navigate("/order-success");
+					} else {
+						toast.error(response.data.message);
+					}
+					break;
 
-                default:
-                    break;
-            }
+				case "stripe":
+					const responseStripe = await axios.post(
+						backendUrl + "/api/order/stripe",
+						orderData,
+						{ headers: { Authorization: `Bearer ${token}` } }
+					);
+					if (responseStripe.data.success) {
+						const { session_url } = responseStripe.data;
+						window.location.replace(session_url);
+					} else {
+						toast.error(responseStripe.data.message);
+					}
+					break;
 
+				case "razorpay":
+					console.log("order data: ", orderData);
+					const responseRazorpay = await axios.post(
+						backendUrl + "/api/order/razorpay",
+						orderData,
+						{ headers: { Authorization: `Bearer ${token}` } }
+					);
+					// const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
+					console.log(responseRazorpay);
+					if (responseRazorpay.data.success) {
+						console.log("razorpay init success");
+						console.log("razorpay response: ", responseRazorpay.data);
+						setOrderProcessing(false);
+						initPay(
+							responseRazorpay.data.order,
+							responseRazorpay.data.newOrder
+						);
+					}
 
-        } catch (error) {
-            console.log(error)
-            toast.error(error.message)
-        }
-    }
+					break;
 
-    console.log('cart: ', cart);
+				default:
+					break;
+			}
+		} catch (error) {
+			console.log(error);
+			toast.error(error.message);
+		}
+	};
 
-    return (
-        <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t'>
-            {/* ------------- Left Side ---------------- */}
-            <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
+	console.log("cart: ", cart);
 
-                <div className='text-xl sm:text-2xl my-3'>
-                    <Title text1={'DELIVERY'} text2={'INFORMATION'} />
-                </div>
-                <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First name' />
-                    <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Last name' />
-                </div>
-                <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="email" placeholder='Email address' />
-                <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Street' />
-                <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='City' />
-                    <input required onChange={handleZipCodeChange} name='zipcode' value={formData.zipcode} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Zipcode' />
-                </div>
-                <div className='flex gap-3'>
-                    <input disabled onChange={onChangeHandler} name='state' value={formData.state} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State' />
-                    <input disabled  onChange={onChangeHandler} name='country' value={formData.country} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country' />
-                </div>
-                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone' />
-            </div>
+	return (
+		<form
+			onSubmit={onSubmitHandler}
+			className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t"
+		>
+			{/* ------------- Left Side ---------------- */}
+			<div className="flex flex-col gap-4 w-full sm:max-w-[480px]">
+				<div className="text-xl sm:text-2xl my-3">
+					<Title text1={"DELIVERY"} text2={"INFORMATION"} />
+				</div>
+				<div className="flex gap-3">
+					<input
+						required
+						onChange={onChangeHandler}
+						name="firstName"
+						value={formData.firstName}
+						className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+						type="text"
+						placeholder="First name"
+					/>
+					<input
+						required
+						onChange={onChangeHandler}
+						name="lastName"
+						value={formData.lastName}
+						className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+						type="text"
+						placeholder="Last name"
+					/>
+				</div>
+				<input
+					required
+					onChange={onChangeHandler}
+					name="email"
+					value={formData.email}
+					className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+					type="email"
+					placeholder="Email address"
+				/>
+				<input
+					required
+					onChange={onChangeHandler}
+					name="street"
+					value={formData.street}
+					className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+					type="text"
+					placeholder="Street"
+				/>
+				<div className="flex gap-3">
+					<input
+						required
+						onChange={onChangeHandler}
+						name="city"
+						value={formData.city}
+						className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+						type="text"
+						placeholder="City"
+					/>
+					<input
+						required
+						onChange={handleZipCodeChange}
+						name="zipcode"
+						value={formData.zipcode}
+						className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+						type="number"
+						placeholder="Zipcode"
+					/>
+				</div>
+				<div className="flex gap-3">
+					<input
+						disabled
+						onChange={onChangeHandler}
+						name="state"
+						value={formData.state}
+						className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+						type="text"
+						placeholder="State"
+					/>
+					<input
+						disabled
+						onChange={onChangeHandler}
+						name="country"
+						value={formData.country}
+						className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+						type="text"
+						placeholder="Country"
+					/>
+				</div>
+				<input
+					required
+					onChange={onChangeHandler}
+					name="phone"
+					value={formData.phone}
+					className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+					type="number"
+					placeholder="Phone"
+				/>
+			</div>
 
-            {/* ------------- Right Side ------------------ */}
-            <div className='mt-8'>
+			{/* ------------- Right Side ------------------ */}
+			<div className="mt-8">
+				<div className="mt-8 min-w-80">
+					<CartTotal />
+				</div>
 
-                <div className='mt-8 min-w-80'>
-                    <CartTotal />
-                </div>
+				<div className="mt-12">
+					<Title text1={"PAYMENT"} text2={"METHOD"} />
+					{/* --------------- Payment Method Selection ------------- */}
+					<div className="flex gap-3 flex-col lg:flex-row">
+						<div
+							onClick={() => setMethod("stripe")}
+							className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
+						>
+							<p
+								className={`min-w-3.5 h-3.5 border rounded-full ${
+									method === "stripe" ? "bg-green-400" : ""
+								}`}
+							></p>
+							<img className="h-5 mx-4" src={assets.stripe_logo} alt="" />
+						</div>
+						<div
+							onClick={() => setMethod("razorpay")}
+							className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
+						>
+							<p
+								className={`min-w-3.5 h-3.5 border rounded-full ${
+									method === "razorpay" ? "bg-green-400" : ""
+								}`}
+							></p>
+							<img className="h-5 mx-4" src={assets.razorpay_logo} alt="" />
+						</div>
+						<div
+							onClick={() => setMethod("cod")}
+							className="flex items-center gap-3 border p-2 px-3 cursor-pointer"
+						>
+							<p
+								className={`min-w-3.5 h-3.5 border rounded-full ${
+									method === "cod" ? "bg-green-400" : ""
+								}`}
+							></p>
+							<p className="text-gray-500 text-sm font-medium mx-4">
+								CASH ON DELIVERY
+							</p>
+						</div>
+					</div>
 
-                <div className='mt-12'>
-                    <Title text1={'PAYMENT'} text2={'METHOD'} />
-                    {/* --------------- Payment Method Selection ------------- */}
-                    <div className='flex gap-3 flex-col lg:flex-row'>
-                        <div onClick={() => setMethod('stripe')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'stripe' ? 'bg-green-400' : ''}`}></p>
-                            <img className='h-5 mx-4' src={assets.stripe_logo} alt="" />
-                        </div>
-                        <div onClick={() => setMethod('razorpay')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'razorpay' ? 'bg-green-400' : ''}`}></p>
-                            <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
-                        </div>
-                        <div onClick={() => setMethod('cod')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'cod' ? 'bg-green-400' : ''}`}></p>
-                            <p className='text-gray-500 text-sm font-medium mx-4'>CASH ON DELIVERY</p>
-                        </div>
-                    </div>
+					<div className="w-full text-end mt-8">
+						<button
+							type="submit"
+							// className='bg-black text-white px-16 py-3 text-sm'
+							className={`bg-black text-white px-16 py-3 text-sm ${
+								orderProcessing
+									? "opacity-70 cursor-not-allowed"
+									: "hover:bg-green-600"
+							}`}
+						>
+							{orderProcessing ? (
+								<>
+									Processing
+									<span className="loader inline-block ml-2 w-4 h-4 border-2 border-t-2 border-white border-t-transparent rounded-full animate-spin"></span>
+								</>
+							) : (
+								"PLACE ORDER"
+							)}
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	);
+};
 
-                    <div className='w-full text-end mt-8'>
-                        <button 
-                            type='submit' 
-                            // className='bg-black text-white px-16 py-3 text-sm'
-                            className={`bg-black text-white px-16 py-3 text-sm ${
-                                orderProcessing ? 'opacity-70 cursor-not-allowed' : 'hover:bg-green-600'
-                            }`}
-                        >
-                            {orderProcessing ? (
-                                <>
-                                    Processing
-                                    <span className="loader inline-block ml-2 w-4 h-4 border-2 border-t-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                                </>
-                            ) : (
-                                'PLACE ORDER'
-                            )}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    )
-}
-
-export default PlaceOrder
+export default PlaceOrder;

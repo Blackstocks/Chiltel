@@ -28,47 +28,48 @@ export const AuthProvider = ({ children }) => {
 	// };
 
 	const checkAuthStatus = async () => {
-		console.log('checking');
+		console.log("checking");
 		setLoading(true);
 		setIsAuthenticated(false);
 		try {
-		  const token = localStorage.getItem('token');	
-		  setToken(token);
-		  if (token) {
-			const response = await axios.get(backendUrl + '/api/user/verify', {
-			  headers: {
-				Authorization: `Bearer ${token}`,
-			  },
-			});
-	  
-			console.log('response: ', response);
-			if (response.status === 200) {
-			  // If the token is valid, store user data
-			  console.log('user data: ', response.data);
-			  setUser(response.data); // assuming the user data is in response.data
-			  setIsAuthenticated(true);
+			const token = localStorage.getItem("chiltel-user-token");
+			console.log(token);
+			setToken(token);
+			if (token) {
+				const response = await axios.get(backendUrl + "/api/user/verify", {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+
+				console.log("response: ", response);
+				if (response.status === 200) {
+					// If the token is valid, store user data
+					console.log("user data: ", response.data);
+					setUser(response.data); // assuming the user data is in response.data
+					setIsAuthenticated(true);
+				} else {
+					// If the token is invalid, remove it and reset auth state
+					localStorage.removeItem("chiltel-user-token");
+					setUser(null);
+					setIsAuthenticated(false);
+				}
 			} else {
-			  // If the token is invalid, remove it and reset auth state
-			  localStorage.removeItem('token');
-			  setUser(null);
-			  setIsAuthenticated(false);
+				// If no token exists, reset auth state
+				setUser(null);
+				setIsAuthenticated(false);
 			}
-		  } else {
-			// If no token exists, reset auth state
-			setUser(null);
-			setIsAuthenticated(false);
-		  }
 		} catch (error) {
-		  console.error('Error checking authentication status:', error);
-		  // Optionally, you could show a toast here to notify the user about the error.
-		  toast.error('Failed to check authentication. Please try again.');
+			console.error("Error checking authentication status:", error);
+			// Optionally, you could show a toast here to notify the user about the error.
+			toast.error("Failed to check authentication. Please try again.");
 		} finally {
-		  setLoading(false); // Set loading to false once the check is done
+			setLoading(false); // Set loading to false once the check is done
 		}
-	  };
+	};
 
 	useEffect(() => {
-		console.log('useEffect triggered');
+		console.log("useEffect triggered");
 		checkAuthStatus();
 	}, []);
 
@@ -79,12 +80,12 @@ export const AuthProvider = ({ children }) => {
 				password,
 			});
 
-			if (response.status === 200) {
+			if (response.data.success) {
 				// Store the token and user data in local storage and state
+				console.log("response: ", response.data);
 				localStorage.setItem("chiltel-user-token", response.data.token);
-				localStorage.setItem("token", response.data.token);
 				setToken(response.data.token);
-				console.log('user: ', response.data);
+				console.log("user: ", response.data);
 				setUser(response.data.user);
 				setIsAuthenticated(true);
 				toast.success("Logged in successfully");
@@ -105,7 +106,7 @@ export const AuthProvider = ({ children }) => {
 				name,
 			});
 
-			console.log('signup response: ', response);
+			console.log("signup response: ", response);
 
 			if (response.data.success) {
 				// Store the token and user data in local storage and state
@@ -127,7 +128,6 @@ export const AuthProvider = ({ children }) => {
 
 	const logout = () => {
 		localStorage.removeItem("chiltel-user-token");
-		localStorage.removeItem('token');
 		setToken(null);
 		toast.success("Logged out successfully");
 		setUser(null);
