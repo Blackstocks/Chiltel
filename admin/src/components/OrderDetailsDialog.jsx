@@ -167,16 +167,23 @@ const OrderDetailsSheet = ({ order }) => {
                   ))}
                   <TableRow>
                     <TableCell colSpan={3} className="text-right font-medium">
+                      Delivery Amount:
+                    </TableCell>
+                    <TableCell className="text-right font-bold">
+                      ₹ {order.deliveryCharge}                   
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-right font-medium">
                       Total Amount:
                     </TableCell>
                     <TableCell className="text-right font-bold">
-                      ₹
-                      {order.products
+                      ₹ {order.products
                         .reduce(
-                          (sum, item) => sum + item.price * item.quantity,
+                          (sum, item) => sum + item.price * item.quantity + order.deliveryCharge,
                           0
                         )
-                        .toFixed(2)}
+                        .toFixed(2)}                  
                     </TableCell>
                   </TableRow>
                 </TableBody>

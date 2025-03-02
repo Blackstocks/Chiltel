@@ -371,7 +371,7 @@ const ProductOrderChalan = ({ order }) => {
     })),
     total: {
       subTotal: order.products.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+        (sum, item) => sum + item.price * item.quantity + order.deliveryCharge,
         0
       ),
       cgst: order.products.reduce(
@@ -594,6 +594,14 @@ const ProductOrderChalan = ({ order }) => {
                     </tr>
                   ))}
                   <tr>
+                    <td colSpan="9" className="border px-2 py-1 text-right">
+                      Delivery Charges
+                    </td>
+                    <td className="border px-2 py-1 text-right">
+                      ₹{order.deliveryCharge}
+                    </td>
+                  </tr>
+                  <tr>
                     <td
                       colSpan="9"
                       className="border px-2 py-1 text-right font-bold"
@@ -637,7 +645,7 @@ const ProductOrderChalan = ({ order }) => {
                     </div>
                     <div className="p-2 border-x border-b">
                       {convertNumberToWords(
-                        orderDetails.total.subTotal + orderDetails.total.gst
+                        orderDetails.total.subTotal
                       )}
                     </div>
                     <div className="bg-cyan-500 text-white p-2 font-medium mt-2">
@@ -710,7 +718,7 @@ const ProductOrderChalan = ({ order }) => {
                   <div>INVOICE DATE : {orderDetails.invoiceDate}</div>
                   <div className="font-bold">
                     INVOICE AMOUNT : ₹
-                    {orderDetails.total.subTotal + orderDetails.total.gst}
+                    {orderDetails.total.subTotal}
                   </div>
                 </div>
               </div>

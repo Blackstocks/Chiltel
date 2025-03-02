@@ -37,7 +37,7 @@ const placeOrder = async (req, res) => {
       cartId,
     } = req.body;
 
-    //console.log("cart: ", req.body);
+    console.log("cart: ", req.body);
 
     const orderData = {
       userId,

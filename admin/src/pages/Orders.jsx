@@ -566,7 +566,7 @@ const OrderManagement = () => {
                         ₹
                         {order.products
                           .reduce(
-                            (sum, item) => sum + item.price * item.quantity,
+                            (sum, item) => sum + item.price * item.quantity + order.deliveryCharge,
                             0
                           )
                           .toFixed(2)}

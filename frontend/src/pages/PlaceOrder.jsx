@@ -171,6 +171,7 @@ const PlaceOrder = ({ buyNowProduct = null }) => {
 				orderLastName: formData.lastName,
 				orderType: "product",
 				products: orderItems,
+				deliveryCharge: delivery_fee,
 				services: [],
 				totalAmount: cart.totalAmount + delivery_fee,
 				status: "ORDERED",
