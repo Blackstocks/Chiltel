@@ -57,10 +57,10 @@ export const ServiceCartProvider = ({ children }) => {
   const addToServiceCart = async (scheduleService, serviceRequest) => {
     const token = localStorage.getItem("token");
 
+    console.log(serviceRequest);
     if (!isAuthenticated) {
       toast.info("Please log in to add this service to your cart.");
     } else {
-      console.log("Service: ", scheduleService);
       try {
         console.log("Scheduled Service:", scheduleService);
         const response = await axios.post(

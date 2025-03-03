@@ -40,6 +40,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     zipCode: "",
   });
   const [acMode, setAcMode] = useState("Split AC");
+  const [serviceCounts, setServiceCounts] = useState({});
 
   const toggleAcMode = () => {
     setAcMode((prevMode) =>
@@ -152,6 +153,43 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     )}`;
   };
 
+  const incrementServiceCount = (serviceId) => {
+    setServiceCounts((prevCounts) => ({
+      ...prevCounts,
+      [serviceId]: (prevCounts[serviceId] || 0) + 1,
+    }));
+  };
+
+  const decrementServiceCount = (serviceId) => {
+    setServiceCounts((prevCounts) => ({
+      ...prevCounts,
+      [serviceId]: Math.max((prevCounts[serviceId] || 0) - 1, 0),
+    }));
+  };
+
+  const handleScheduleAllClick = () => {
+    const servicesToSchedule = Object.entries(serviceCounts)
+      .filter(([_, count]) => count > 0)
+      .map(([serviceId, count]) => {
+        const service = Object.values(services)
+          .flatMap((product) => Object.values(product))
+          .flat()
+          .find((s) => s._id === serviceId);
+        return {
+          serviceId,
+          count,
+          price: service.price,
+        };
+      });
+
+    if (servicesToSchedule.length === 0) {
+      alert("Please select at least one service.");
+      return;
+    }
+
+    setScheduleService({ services: servicesToSchedule });
+  };
+
   const handleScheduleConfirm = async () => {
     if (!selectedDay || !selectedTime) {
       alert("Please select both date and time.");
@@ -169,41 +207,30 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     }
 
     try {
-      console.log("Scheduled Service:", scheduleService);
-      console.log(
-        "Some info: ",
-        scheduleService.service.name.includes("AC"),
-        scheduleService.categoryName !== "Installation",
-        acMode === "Window AC"
-      );
       const time24hr = convertTo24HourFormat(selectedTime);
       const scheduledDateTime = new Date(
         `${selectedDay}T${time24hr}:00`
       ).toISOString();
-      // const scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
+
+      const totalPrice = scheduleService.services.reduce(
+        (sum, service) => sum + service.price * service.count,
+        0
+      );
+
       const serviceRequest = {
         user: user._id,
-        service: scheduleService.service._id,
+        services: scheduleService.services,
         userLocation: {
           type: "Point",
           coordinates: [0.0, 0.0], // Replace with actual coordinates if available
           address: `${address.street}, ${address.city}, ${address.state}, ${address.zipCode}`,
         },
         scheduledFor: scheduledDateTime,
-        // scheduledFor: `${selectedDate}T${selectedTime}:00`,
-        // price: scheduleService.service.price,
-        price:
-          scheduleService.categoryName !== "Installation" &&
-          acMode === "Window AC"
-            ? scheduleService.service.price + 300
-            : scheduleService.service.price,
-        remarks:
-          scheduleService.categoryName !== "Installation" &&
-          acMode === "Window AC"
-            ? "Window AC service" + remarks
-            : remarks,
+        remarks,
+        totalPrice,
       };
-      await addToServiceCart(scheduleService, serviceRequest);
+
+      await addToServiceCart(scheduleService.services, serviceRequest);
       onClose();
     } catch (err) {
       console.error("Error scheduling service:", err);
@@ -212,6 +239,8 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
   };
 
   const renderServiceCard = (service, categoryName, productName) => {
+    const serviceCount = serviceCounts[service._id] || 0;
+
     if (productName.includes("Air Conditioner")) {
       return (
         <>
@@ -235,12 +264,21 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => setScheduleService({ service, categoryName })}
-                  className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
-                >
-                  Schedule
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => decrementServiceCount(service._id)}
+                    className="px-2 py-1 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white"
+                  >
+                    -
+                  </button>
+                  <span>{serviceCount}</span>
+                  <button
+                    onClick={() => incrementServiceCount(service._id)}
+                    className="px-2 py-1 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -267,12 +305,21 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => setScheduleService({ service, categoryName })}
-                  className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
-                >
-                  Schedule
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => decrementServiceCount(service._id)}
+                    className="px-2 py-1 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white"
+                  >
+                    -
+                  </button>
+                  <span>{serviceCount}</span>
+                  <button
+                    onClick={() => incrementServiceCount(service._id)}
+                    className="px-2 py-1 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -297,12 +344,21 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
               <div className="font-medium text-gray-900">₹{service.price}</div>
             </div>
           </div>
-          <button
-            onClick={() => setScheduleService({ service, categoryName })}
-            className="px-4 py-2 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white whitespace-nowrap"
-          >
-            Schedule
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => decrementServiceCount(service._id)}
+              className="px-2 py-1 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white"
+            >
+              -
+            </button>
+            <span>{serviceCount}</span>
+            <button
+              onClick={() => incrementServiceCount(service._id)}
+              className="px-2 py-1 text-sm text-black transition-all duration-300 bg-white border border-black rounded-md hover:bg-black hover:text-white"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -384,6 +440,16 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     };
 
     const validTimeSlots = getValidTimeSlots();
+
+    const totalPrice = scheduleService.services.reduce(
+      (sum, service) => sum + service.price * service.count,
+      0
+    );
+
+    const totalServices = scheduleService.services.reduce(
+      (sum, service) => sum + service.count,
+      0
+    );
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
@@ -514,6 +580,16 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
                 onChange={(e) => setRemarks(e.target.value)}
               />
             </div>
+
+            {/* Total Price and Services */}
+            <div className="mt-4">
+              <p className="text-lg font-semibold">
+                Total Price: ₹{totalPrice}
+              </p>
+              <p className="text-sm text-gray-700">
+                Number of Services: {totalServices}
+              </p>
+            </div>
           </div>
           <div className="flex items-center justify-end gap-4 mt-6">
             <button
@@ -536,7 +612,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
               Cancel
             </button>
             <button
-              onClick={() => handleScheduleConfirm(scheduleService.service)}
+              onClick={handleScheduleConfirm}
               className="px-4 py-2 text-sm text-white bg-black rounded-md hover:bg-gray-800"
             >
               Confirm
@@ -601,6 +677,14 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
         <div className="max-h-[calc(100vh-16rem)] overflow-y-auto p-6">
           {servicesLoading && <ModalLoader />}
           {renderProductServices(category?.name || "Unknown")}
+        </div>
+        <div className="flex items-center justify-end gap-4 p-6">
+          <button
+            onClick={handleScheduleAllClick}
+            className="px-4 py-2 text-sm text-white bg-black rounded-md hover:bg-gray-800"
+          >
+            Schedule All
+          </button>
         </div>
       </div>
       {scheduleService && renderScheduleModal()}

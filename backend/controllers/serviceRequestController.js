@@ -7,15 +7,23 @@ export const serviceRequestController = {
   createServiceRequest: async (req, res) => {
     try {
       console.log(req.body);
-      const { user, services, userLocation, scheduledFor, price, remarks } =
-        req.body;
+      const {
+        user,
+        services,
+        userLocation,
+        scheduledFor,
+        totalPrice,
+        remarks,
+      } = req.body;
+
+      console.log("services: ", services);
 
       const serviceRequest = new ServiceRequest({
         user,
         services,
         userLocation,
         scheduledFor: new Date(scheduledFor),
-        price,
+        price: totalPrice,
         remarks,
       });
 
