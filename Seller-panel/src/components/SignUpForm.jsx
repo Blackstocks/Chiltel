@@ -230,7 +230,7 @@ const StoreInfoStep = ({ onSubmit, onBack }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Firm/Shop Name</label>
+          <label className="block text-sm font-medium mb-1">Legal Name of Bussiness</label>
           <input
             {...register('shopName', { required: 'Shop name is required' })}
             placeholder="Enter shop name"

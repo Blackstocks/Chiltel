@@ -99,33 +99,19 @@ const sellerSchema = new mongoose.Schema({
         return /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/.test(v);
       },
       message: props => `${props.value} is not a valid GST number!`
-    }
+    },
+  },
+  isGstVerified: {
+    type: Boolean,
+    default: false
   },
   bankDetails: {
-    accountNumber: {
-      type: String,
-      validate: {
-        validator: function(v) {
-          return /^\d{9,18}$/.test(v);
-        },
-        message: props => `${props.value} is not a valid account number!`
-      }
-    },
-    ifscCode: {
-      type: String,
-      validate: {
-        validator: function(v) {
-          return /^[A-Z]{4}0[A-Z0-9]{6}$/.test(v);
-        },
-        message: props => `${props.value} is not a valid IFSC code!`
-      }
-    },
-    bankName: {
-      type: String,
-      trim: true
-    }
-  },
-
+		accountNumber: { type: String },
+		ifscCode: { type: String, required: false },
+		mobileNumber: { type: String, required: false },
+		holderName: { type: String, required: false },
+		isVerified: { type: Boolean, default: false },
+	},
   // Document Upload
   dealerCertificate: {
     url: { type: String},

@@ -47,9 +47,10 @@ const StoreSettings = () => {
     },
     gstNumber: user?.gstNumber || "",
     bankDetails: {
-      accountNumber: user?.bankDetails?.accountNumber || "",
-      ifscCode: user?.bankDetails?.ifscCode || "",
-      bankName: user?.bankDetails?.bankName || "",
+      beneficiaryAccount: user?.bankDetails?.accountNumber || "",
+      beneficiaryIFSC: user?.bankDetails?.ifscCode || "",
+      beneficiaryName: user?.bankDetails?.holderName || "",
+      beneficiaryMobile: user?.bankDetails?.mobileNumber || "",
     },
   });
 
@@ -223,16 +224,16 @@ const StoreSettings = () => {
     }
 
     // Check if GST details match with shop details
-    if (
-      gstData.data?.tradeName &&
-      !gstData.data.tradeName
-        .toLowerCase()
-        .includes(formData.shopName.toLowerCase())
-    ) {
-      throw new Error(
-        "GST registered business name doesn't match with shop name"
-      );
-    }
+    // if (
+    //   gstData.data?.tradeName &&
+    //   !gstData.data.tradeName
+    //     .toLowerCase()
+    //     .includes(formData.shopName.toLowerCase())
+    // ) {
+    //   throw new Error(
+    //     "GST registered business name doesn't match with shop name"
+    //   );
+    // }
 
     return gstData;
   };
@@ -661,14 +662,14 @@ const StoreSettings = () => {
                       Bank Account Details
                     </h4>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label htmlFor="bankAccountNumber" className="text-xs">
+                        <Label htmlFor="beneficiaryAccount" className="text-xs">
                           Account Number
                         </Label>
                         <Input
-                          id="bankAccountNumber"
-                          value={formData.bankDetails.accountNumber}
+                          id="beneficiaryAccount"
+                          value={formData.bankDetails.beneficiaryAccount}
                           onChange={handleChange}
                           placeholder="Enter account number"
                           className="h-8 text-sm"
@@ -676,12 +677,12 @@ const StoreSettings = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="bankIfscCode" className="text-xs">
+                        <Label htmlFor="beneficiaryIFSC" className="text-xs">
                           IFSC Code
                         </Label>
                         <Input
-                          id="bankIfscCode"
-                          value={formData.bankDetails.ifscCode}
+                          id="beneficiaryIFSC"
+                          value={formData.bankDetails.beneficiaryIFSC}
                           onChange={handleChange}
                           placeholder="Enter IFSC code"
                           className="h-8 text-sm"
@@ -689,14 +690,27 @@ const StoreSettings = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="bankBankName" className="text-xs">
-                          Bank Name
+                        <Label htmlFor="beneficiaryName" className="text-xs">
+                          Beneficiary Name
                         </Label>
                         <Input
-                          id="bankBankName"
-                          value={formData.bankDetails.bankName}
+                          id="beneficiaryName"
+                          value={formData.bankDetails.beneficiaryName}
                           onChange={handleChange}
-                          placeholder="Enter bank name"
+                          placeholder="Enter beneficiary name"
+                          className="h-8 text-sm"
+                          disabled={!editMode.bank}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="beneficiaryMobile" className="text-xs">
+                          Mobile Number
+                        </Label>
+                        <Input
+                          id="beneficiaryMobile"
+                          value={formData.bankDetails.beneficiaryMobile}
+                          onChange={handleChange}
+                          placeholder="Enter mobile number"
                           className="h-8 text-sm"
                           disabled={!editMode.bank}
                         />
