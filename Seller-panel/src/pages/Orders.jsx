@@ -15,6 +15,8 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Card,
   CardContent,
@@ -53,7 +55,8 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import SellerOrderChallan from "@/components/SellerOrderChallan";
+import ProductOrderChalan from "@/components/SellerOrderChallan";
+import OrderDetailsSheet from "@/components/OrderDetailsDialog";
 
 const ITEMS_PER_PAGE = 5;
 const ORDER_STATUSES = ["ALL", "PENDING", "ORDERED", "DELIVERED", "CANCELLED"];
@@ -264,180 +267,6 @@ const OrdersPage = () => {
     return colors[status] || "bg-gray-100 text-gray-800";
   };
 
-  const OrderDetailsSheet = ({ order, open, onClose }) => {
-    if (!order) return null;
-
-    return (
-      <Sheet open={open} onOpenChange={onClose}>
-        <SheetContent className="w-[400px] sm:w-[540px]">
-          <SheetHeader className="mb-4 flex justify-between items-center">
-            <div>
-              <SheetTitle>Order Details</SheetTitle>
-              <SheetDescription>Order #{order._id.slice(-8)}</SheetDescription>
-            </div>
-            <Dialog >
-              <DialogTrigger asChild>
-                <div className="flex items-center">
-                  <FileText className="w-4 h-4 mr-2" />
-                  View Chalan
-                </div>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[calc(100vh-100px)]">
-                <SellerOrderChallan />
-              </DialogContent>
-            </Dialog>
-          </SheetHeader>
-
-          <ScrollArea className="h-[calc(100vh-100px)] pr-4">
-            <div className="space-y-6">
-              {/* Order Status */}
-              <div>
-                <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
-                  <Clock className="h-4 w-4" />
-                  Order Status
-                </h3>
-                <Badge className={getStatusColor(order.status)}>
-                  {order.status}
-                </Badge>
-              </div>
-
-              <Separator />
-
-              {/* Shipping Address */}
-              <div>
-                <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
-                  <MapPin className="h-4 w-4" />
-                  Shipping Address
-                </h3>
-                <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                  <p className="font-medium">{order.address.street}</p>
-                  <p className="text-gray-500">
-                    {order.address.city}, {order.address.state}
-                  </p>
-                  <p className="text-gray-500">{order.address.zipCode}</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Order Type & Date */}
-              <div>
-                <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
-                  <CalendarDays className="h-4 w-4" />
-                  Order Information
-                </h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <label className="text-gray-500">Order Type</label>
-                    <p className="font-medium capitalize">{order.orderType}</p>
-                  </div>
-                  <div>
-                    <label className="text-gray-500">Order Date</label>
-                    <p className="font-medium">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Products */}
-              {order.products && order.products.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
-                      <Package className="h-4 w-4" />
-                      Products
-                    </h3>
-                    <div className="space-y-3">
-                      {order.products.map((item, index) => (
-                        <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{item.product.name}</p>
-                              <p className="text-sm text-gray-500">
-                                Qty: {item.quantity} × ₹{item.price}
-                              </p>
-                            </div>
-                            <p className="font-medium">
-                              ₹{(item.quantity * item.price).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Services */}
-              {order.services && order.services.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
-                      <Truck className="h-4 w-4" />
-                      Services
-                    </h3>
-                    <div className="space-y-3">
-                      {order.services.map((item, index) => (
-                        <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{item.service.name}</p>
-                              <p className="text-sm text-gray-500">
-                                Qty: {item.quantity} × ₹{item.price}
-                              </p>
-                            </div>
-                            <p className="font-medium">
-                              ₹{(item.quantity * item.price).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              <Separator />
-
-              {/* Payment Details */}
-              <div>
-                <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
-                  <CreditCard className="h-4 w-4" />
-                  Payment Details
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Payment Method</span>
-                    <span className="font-medium">
-                      {order.paymentDetails.method}
-                    </span>
-                  </div>
-                  {order.paymentDetails.transactionId && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Transaction ID</span>
-                      <span className="font-medium">
-                        {order.paymentDetails.transactionId}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-lg font-medium pt-2">
-                    <span>Total Amount</span>
-                    <span>₹{order.sellerTotal.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-
-              
-            </div>
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
-    );
-  };
-
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -507,17 +336,31 @@ const OrdersPage = () => {
                           {new Date(order.createdAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setIsDetailsOpen(true);
-                            }}
-                          >
-                            <Info className="h-4 w-4 mr-2" />
-                            Details
-                          </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <OrderDetailsSheet order={order} />
+                            <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <div className="flex items-center">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    View Chalan
+                                  </div>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl">
+                                  <ProductOrderChalan order={order} />
+                                </DialogContent>
+                              </Dialog>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -528,15 +371,6 @@ const OrdersPage = () => {
             </>
           )}
         </CardContent>
-
-        <OrderDetailsSheet
-          order={selectedOrder}
-          open={isDetailsOpen}
-          onClose={() => {
-            setIsDetailsOpen(false);
-            setSelectedOrder(null);
-          }}
-        />
       </Card>
     </div>
   );

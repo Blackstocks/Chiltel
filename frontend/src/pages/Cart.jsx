@@ -716,6 +716,16 @@ const Cart = () => {
 																{service.paymentStatus}
 															</span>
 														</div>
+
+														{/*Otp */}
+														<div className="flex flex-col">
+															<span className="font-semibold text-gray-700">
+																Happy Code: 
+															</span>
+															<span className="text-gray-600">{service.OTP}</span>
+														</div>
+														
+
 													</div>
 
 													{/* Action Buttons */}

@@ -468,7 +468,7 @@ export const verifyBankDetails = async (req, res) => {
 
   try {
     const response = await fetch(
-      "https://api.invincibleocean.com/invincible/bankAccount/verify",
+      "https://api.invincibleocean.com/invincible/bankAccountValidation/v1",
       options
     );
     const data = await response.json();
