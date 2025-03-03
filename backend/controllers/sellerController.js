@@ -449,7 +449,10 @@ export const verifyBankDetails = async (req, res) => {
 		beneficiaryIFSC,
 		beneficiaryMobile,
 		beneficiaryName,
+		riderId,
 	} = req.body;
+
+	console.log(req.body);
 
 	const options = {
 		method: "POST",
@@ -459,10 +462,10 @@ export const verifyBankDetails = async (req, res) => {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			beneficiaryAccount,
-			beneficiaryIFSC,
-			beneficiaryMobile,
-			beneficiaryName,
+			bankAccount: beneficiaryAccount,
+			ifsc: beneficiaryIFSC,
+			phone: beneficiaryMobile,
+			name: beneficiaryName,
 		}),
 	};
 
@@ -473,7 +476,16 @@ export const verifyBankDetails = async (req, res) => {
 		);
 		const data = await response.json();
 
+		console.log(data);
+
 		if (response.ok) {
+			const rider = await Rider.findById(riderId);
+			rider.bankDetails = {
+				...rider.bankDetails,
+				isVerified: true,
+			};
+			await rider.save();
+
 			res.json({ message: "Bank details verified successfully", data });
 		} else {
 			res
@@ -497,26 +509,27 @@ export const verifyGST = async (req, res) => {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				gstNumber,
+				gstin: gstNumber,
 			}),
 		};
 
 		const response = await fetch(
-			"https://api.invincibleocean.com/invincible/gst/verify",
+			"https://api.invincibleocean.com/invincible/gstinSearch",
 			options
 		);
 		const data = await response.json();
 
 		if (response.ok) {
+			console.log(data.result.result.gstnDetailed);
 			// Check if GST is valid from the API response
-			if (data.status === "active" || data.valid) {
+			if (data.result.result.gstnDetailed.gstinStatus == "Active") {
 				res.json({
 					message: "GST number verified successfully",
 					data: {
 						valid: true,
-						tradeName: data.tradeName,
-						legalName: data.legalName,
-						status: data.status,
+						tradeName: data.result.result.gstnDetailed.tradeNameOfBusiness,
+						legalName: data.result.result.gstnDetailed.legalNameOfBusiness,
+						status: data.result.result.gstnDetailed.gstinStatus,
 					},
 				});
 			} else {
