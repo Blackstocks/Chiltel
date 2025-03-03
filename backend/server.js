@@ -16,6 +16,7 @@ import sellerRoutes from "./routes/sellerRoutes.js";
 import referralRouter from "./routes/referralCodeRoute.js";
 import ticketRoutes from "./routes/ticketRoute.js";
 import adminRoutes from "./routes/adminRoute.js";
+import revenueRouter from "./routes/revenueRoute.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { protect, authorize } from "./middleware/adminAuthMiddleware.js";
@@ -55,6 +56,8 @@ app.use("/api/tickets", ticketRoutes);
 
 
 app.use("/api/admin", adminRoutes);
+
+app.use("/api/revenue", revenueRouter);
 
 app.get("/", (req, res) => {
 	res.send("API Working");

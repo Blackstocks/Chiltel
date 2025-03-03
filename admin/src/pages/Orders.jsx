@@ -55,6 +55,7 @@ import RiderAssignmentCell from "../components/RiderAssignmentCell";
 import ExportButtons from "../components/OrderExportButtons";
 import RiderLocationTracker from "../components/RiderLocationTracker";
 import ProductOrderChalan from "../components/ProductOrderChalan";
+import DeliveryChalan from "../components/DeliveryChalan";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -106,7 +107,7 @@ const calculateTotalAmount = (service) => {
       ?.filter((work) => work.approved === true)
       .reduce((sum, work) => sum + (work.price || 0), 0) || 0;
 
-  return basePrice + additionalWorkTotal;
+  return ((basePrice + additionalWorkTotal)*1.18).toFixed(2);
 };
 
 const OrderManagement = () => {
@@ -600,6 +601,21 @@ const OrderManagement = () => {
                                 </DialogTrigger>
                                 <DialogContent className="max-w-4xl">
                                   <ProductOrderChalan order={order} />
+                                </DialogContent>
+                              </Dialog>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <div className="flex items-center">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    View delivery Chalan
+                                  </div>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl">
+                                  <DeliveryChalan order={order} />
                                 </DialogContent>
                               </Dialog>
                             </DropdownMenuItem>

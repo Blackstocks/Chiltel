@@ -17,7 +17,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-const ProductOrderChalan = ({ order }) => {
+const DeliveryChalan = ({ order }) => {
   const [serialNumbers, setSerialNumbers] = useState(
     order.products.map(() => "")
   );
@@ -516,7 +516,7 @@ const ProductOrderChalan = ({ order }) => {
             </div>
 
             {/* Bill To, Transportation Details, Invoice Details */}
-            <div className="grid grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-3 gap-8 mb-8">
               <div className="border">
                 <h2 className="font-bold text-lg bg-cyan-500 text-white p-2 mt-0 mb-0">
                   Bill To
@@ -529,6 +529,22 @@ const ProductOrderChalan = ({ order }) => {
                   <p>Contact No.: {orderDetails.customer.contact}</p>
                   <p>State: {orderDetails.customer.state}</p>
                   <p>Place of supply: {orderDetails.customer.state}</p>
+                </div>
+              </div>
+              <div className="border">
+                <h2 className="font-bold text-lg bg-cyan-500 text-white p-2 mt-0 mb-0">
+                  Delivery Details
+                </h2>
+                <div className="p-4 mt-0 pt-0">
+                  <p className="font-medium">
+                    Transport: {orderDetails?.transport?.name}
+                  </p>
+                  <p>Vehicle No.: {orderDetails?.transport?.vehicleNumber}</p>
+                  <p>Delivery Date: {orderDetails?.transport?.deliveryDate}</p>
+                  <p>
+                    Delivery Location:{" "}
+                    {orderDetails?.transport?.deliveryLocation}
+                  </p>
                 </div>
               </div>
               <div className="text-right border p-4">
@@ -751,4 +767,4 @@ const ProductOrderChalan = ({ order }) => {
   );
 };
 
-export default ProductOrderChalan;
+export default DeliveryChalan;

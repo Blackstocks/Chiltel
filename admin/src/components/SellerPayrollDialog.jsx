@@ -27,7 +27,7 @@ const SellerPayrollDialog = ({ seller, isOpen, onClose, onSave }) => {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            token: localStorage.getItem("token"),
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ commissionRate: commission }),
         }
@@ -63,31 +63,6 @@ const SellerPayrollDialog = ({ seller, isOpen, onClose, onSave }) => {
                 className="w-32"
               />
               <span className="text-sm text-gray-500">%</span>
-            </div>
-          </div>
-
-          <Separator className="my-4" />
-
-          <div className="space-y-4">
-            <h3 className="font-medium">Payment Overview</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Total Orders</span>
-                <span className="font-medium">{seller?.payroll?.totalOrders || 0}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Total Amount</span>
-                <span className="font-medium">₹{totalAmount}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between items-center text-green-600">
-                <span className="text-sm">Seller Earnings</span>
-                <span className="font-medium">₹{sellerEarnings}</span>
-              </div>
-              <div className="flex justify-between items-center text-blue-600">
-                <span className="text-sm">Admin Commission</span>
-                <span className="font-medium">₹{adminCommission}</span>
-              </div>
             </div>
           </div>
 
