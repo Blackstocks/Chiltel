@@ -10,12 +10,13 @@ const serviceRequestSchema = {
 		ref: userModel,
 		required: true,
 	},
-	service: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: Service,
-		required: true,
-		// type: Number
-	},
+	services: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: Service,
+			required: true,
+		},
+	],
 	rider: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Rider",
