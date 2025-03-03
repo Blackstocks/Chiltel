@@ -1,23 +1,23 @@
 // routes/sellerRoutes.js
 import express from "express";
 import {
-  register,
-  login,
-  verifyToken,
-  getProfile,
-  updateProfile,
-  addProduct,
-  deleteProduct,
-  approveSeller,
-  rejectSeller,
-  getSellers,
-  getSellerProducts,
-  editProduct,
-  getSellerOrders,
-  uploadDocument,
-  updateCommission,
-  verifyBankDetails,
-  verifyGST,
+	register,
+	login,
+	verifyToken,
+	getProfile,
+	updateProfile,
+	addProduct,
+	deleteProduct,
+	approveSeller,
+	rejectSeller,
+	getSellers,
+	getSellerProducts,
+	editProduct,
+	getSellerOrders,
+	uploadDocument,
+	updateCommission,
+	verifyBankDetails,
+	verifyGST,
 } from "../controllers/sellerController.js";
 import { protectSeller } from "../middleware/sellerAuth.js";
 import { validateSellerRegistration } from "../middleware/sellerValidation.js";
@@ -32,28 +32,28 @@ router.post("/register", validateSellerRegistration, register);
 router.post("/login", login);
 
 router.put(
-  "/approve/:id",
-  protect,
-  authorize(["super-admin", "sub-admin"]),
-  approveSeller
+	"/approve/:id",
+	protect,
+	authorize(["super-admin", "sub-admin"]),
+	approveSeller
 );
 router.put(
-  "/reject/:id",
-  protect,
-  authorize(["super-admin", "sub-admin"]),
-  rejectSeller
+	"/reject/:id",
+	protect,
+	authorize(["super-admin", "sub-admin"]),
+	rejectSeller
 );
 router.get(
-  "/list",
-  protect,
-  authorize(["super-admin", "sub-admin"]),
-  getSellers
+	"/list",
+	protect,
+	authorize(["super-admin", "sub-admin"]),
+	getSellers
 );
 router.put(
-  "/update-commision/:id",
-  protect,
-  authorize(["super-admin", "sub-admin"]),
-  updateCommission
+	"/update-commision/:id",
+	protect,
+	authorize(["super-admin", "sub-admin"]),
+	updateCommission
 );
 
 // Protected routes
@@ -68,7 +68,7 @@ router.post("/addProduct", addProduct);
 router.get("/getSellerProducts", getSellerProducts);
 router.get("/getSellerOrders", getSellerOrders);
 router.delete("/deleteSellerProduct/:id", deleteProduct);
-router.put("/editSellerProducts/:id", editProduct);
+router.put("/editSellerProduct/:id", editProduct);
 router.post("/verify-gst", verifyGST);
 
 export default router;
