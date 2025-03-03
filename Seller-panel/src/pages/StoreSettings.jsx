@@ -107,20 +107,20 @@ const StoreSettings = () => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    if (id.includes("bank")) {
-      const field =
-        id.replace("bank", "").charAt(0).toLowerCase() +
-        id.replace("bank", "").slice(1);
+    if (id.includes("beneficiary") || id.includes("account")) {
+      const field = id;
       setFormData((prev) => ({
         ...prev,
         bankDetails: {
           ...prev.bankDetails,
           [field === "accountNumber"
-            ? "accountNumber"
+            ? "beneficiaryAccount"
             : field === "ifscCode"
-            ? "ifscCode"
-            : field === "bankName"
-            ? "bankName"
+            ? "beneficiaryIFSC"
+            : field === "beneficiaryName"
+            ? "beneficiaryName"
+            : field === "beneficiaryMobile"
+            ? "beneficiaryMobile"
             : field]: value,
         },
       }));
@@ -192,12 +192,6 @@ const StoreSettings = () => {
     return gstPattern.test(gstNumber);
   };
 
-  const validateIFSC = (ifsc) => {
-    // IFSC format: 4 characters bank code, 0, 6 digits branch code
-    const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-    return ifscPattern.test(ifsc);
-  };
-
   const validateAccountNumber = (accountNumber) => {
     // Account number should be between 9 and 18 digits
     const accPattern = /^\d{9,18}$/;
@@ -250,10 +244,11 @@ const StoreSettings = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
-          beneficiaryAccount: formData.bankDetails.accountNumber,
-          beneficiaryIFSC: formData.bankDetails.ifscCode,
-          beneficiaryName: formData.bankDetails.bankName,
-          beneficiaryMobile: user.phoneNumber,
+          beneficiaryAccount: formData.bankDetails.beneficiaryAccount,
+          beneficiaryIFSC: formData.bankDetails.beneficiaryIFSC,
+          beneficiaryName: formData.bankDetails.beneficiaryName,
+          beneficiaryMobile: formData.bankDetails.beneficiaryMobile,
+          sellerId: user?._id,
         }),
       }
     );
@@ -268,28 +263,6 @@ const StoreSettings = () => {
         "Bank account verification failed. Please check your details."
       );
     }
-
-    // Then verify IFSC code
-    const ifscResponse = await fetch(
-      `https://ifsc.razorpay.com/${formData.bankDetails.ifscCode}`
-    );
-
-    if (!ifscResponse.ok) {
-      throw new Error("Invalid IFSC code. Please check and try again.");
-    }
-
-    const ifscData = await ifscResponse.json();
-
-    // Verify if bank name matches
-    if (
-      !ifscData.BANK.toLowerCase().includes(
-        formData.bankDetails.bankName.toLowerCase()
-      )
-    ) {
-      throw new Error("Bank name doesn't match with IFSC code");
-    }
-
-    return { bankData, ifscData };
   };
 
   const handleGSTVerification = async () => {
@@ -313,23 +286,23 @@ const StoreSettings = () => {
 
   const handleBankVerification = async () => {
     try {
-      if (!validateIFSC(formData.bankDetails.ifscCode)) {
-        toast.error("Please enter a valid IFSC code");
+      if (
+        !formData.bankDetails.beneficiaryIFSC.trim() ||
+        !formData.bankDetails.beneficiaryAccount.trim() ||
+        !formData.bankDetails.beneficiaryName.trim() ||
+        !formData.bankDetails.beneficiaryMobile.trim()
+      ) {
+        toast.error("Please enter all bank details");
         return;
       }
 
-      if (!validateAccountNumber(formData.bankDetails.accountNumber)) {
+      if (!validateAccountNumber(formData.bankDetails.beneficiaryAccount)) {
         toast.error("Please enter a valid account number (9-18 digits)");
         return;
       }
 
-      if (!formData.bankDetails.bankName.trim()) {
-        toast.error("Bank name is required");
-        return;
-      }
-
       setLoading(true);
-      const bankVerificationResult = await verifyBankDetails();
+      await verifyBankDetails();
       toast.success("Bank details verification successful");
       setVerificationStatus((prev) => ({ ...prev, bank: true }));
     } catch (error) {
@@ -350,8 +323,7 @@ const StoreSettings = () => {
       setLoading(true);
 
       // Re-verify both to ensure data hasn't changed
-      const gstData = await verifyGSTDetails();
-      const bankVerificationResult = await verifyBankDetails();
+      await verifyBankDetails();
 
       const updateData = {
         gstNumber: formData.gstNumber,
@@ -363,8 +335,6 @@ const StoreSettings = () => {
         },
         bankDetails: {
           ...formData.bankDetails,
-          bankBranch: bankVerificationResult.ifscData.BRANCH,
-          bankCity: bankVerificationResult.ifscData.CITY,
           verified: true,
           verifiedAt: new Date().toISOString(),
         },
