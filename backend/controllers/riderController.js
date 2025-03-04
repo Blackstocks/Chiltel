@@ -99,25 +99,25 @@ const riderController = {
 				}),
 			};
 
-			try {
-				const response = await fetch(
-					"https://api.invincibleocean.com/invincible/courtCase/V2",
-					options
-				);
-				const data = await response.json();
-				console.log(data);
+			// try {
+			// 	const response = await fetch(
+			// 		"https://api.invincibleocean.com/invincible/courtCase/V2",
+			// 		options
+			// 	);
+			// 	const data = await response.json();
+			// 	console.log(data);
 
-				if (response.ok) {
-					rider.requestId = data.result.requestId;
-					await rider.save();
-				} else {
-					res
-						.status(response.status)
-						.json({ message: "Court case not verified, Check your details" });
-				}
-			} catch (error) {
-				res.status(500).json({ message: "Server error", error: error.message });
-			}
+			// 	if (response.ok) {
+			// 		rider.requestId = data.result.requestId;
+			// 		await rider.save();
+			// 	} else {
+			// 		res
+			// 			.status(response.status)
+			// 			.json({ message: "Court case not verified, Check your details" });
+			// 	}
+			// } catch (error) {
+			// 	res.status(500).json({ message: "Server error", error: error.message });
+			// }
 
 			// Create new rider
 			rider = new Rider({
