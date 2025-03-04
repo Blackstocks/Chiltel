@@ -27,6 +27,7 @@ const RiderAssignmentCell = ({
 			service.services.some((s) =>
 				rider.specializations.includes(s.serviceId.product)
 			)
+			&& ((rider.securityDeposit.isPaid) && ((rider.balance>0 && rider.mode == "COMMISION") || rider.mode=="NORMAL"))
 	);
 
 	const handleSelect = useCallback((riderId) => {

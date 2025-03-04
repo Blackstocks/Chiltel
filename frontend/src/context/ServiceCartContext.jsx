@@ -13,11 +13,6 @@ export const ServiceCartProvider = ({ children }) => {
   const [serviceCartLoading, setServiceCartLoading] = useState(false);
   const { isAuthenticated, loading, user } = useContext(AuthContext);
 
-  //   useEffect(() => {
-  //     if (isAuthenticated) {
-  //       getServiceCartCount(user._id);
-  //     }
-  //   }, [loading]);
 
   useEffect(() => {
     if (isAuthenticated && user) {

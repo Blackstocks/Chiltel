@@ -329,12 +329,12 @@ const SellerSupportTickets = () => {
                         <div className="flex flex-col">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-gray-900">
-                              {ticket.seller.shopName}
+                              {ticket.seller?.shopName}
                             </span>
                           </div>
                           <div className="flex items-center gap-1 text-sm text-gray-500">
                             <User className="h-3 w-3" />
-                            <span>{ticket.seller.proprietorName}</span>
+                            <span>{ticket.seller?.proprietorName}</span>
                           </div>
                         </div>
                       </div>
