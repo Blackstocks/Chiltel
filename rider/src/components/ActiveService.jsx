@@ -330,8 +330,10 @@ const ActiveService = () => {
 											"No address provided"}
 									</p>
 									<p className="text-sm text-green-600">
-										Service:{" "}
-										{activeService?.service?.name || "No service specified"}
+										Services:{" "}
+										{activeService?.services
+											.map((serviceDetail) => serviceDetail.serviceId.name)
+											.join(", ")}
 									</p>
 								</div>
 								{activeService?.userLocation?.address && (
@@ -356,6 +358,18 @@ const ActiveService = () => {
 										Status: {workStarted ? "In Progress" : "Not Started"}
 									</p>
 								</div>
+							</div>
+							<div className="flex items-center space-x-2">
+								<Clock className="w-6 h-6 text-green-600" />
+								<span className="text-green-700">
+									Estimated time:{" "}
+									{activeService?.services
+										.map(
+											(serviceDetail) =>
+												serviceDetail.serviceId.estimatedDuration
+										)
+										.join(", ")}
+								</span>
 							</div>
 							<div className="flex items-center space-x-2">
 								<IndianRupee className="w-6 h-6 text-green-600" />

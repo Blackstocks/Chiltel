@@ -14,13 +14,18 @@ const riderSchema = {
 	address: { type: String, required: true },
 	panNumber: { type: String, required: true },
 	isCourtVerified: { type: Boolean, default: false },
-	requestId : { type: String, required: true },
+	requestId: { type: String, required: true },
 	bankDetails: {
 		accountNumber: { type: String, required: true },
 		ifscCode: { type: String, required: true },
 		mobileNumber: { type: String, required: true },
 		holderName: { type: String, required: true },
 		isVerified: { type: Boolean, default: false },
+	},
+	mode: {
+		type: String,
+		enum: ["NORMAL", "COMMISSION"],
+		required: true,
 	},
 	specializations: [
 		{
