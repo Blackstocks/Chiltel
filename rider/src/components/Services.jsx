@@ -55,12 +55,23 @@ const ServicesTab = () => {
 								<div className="flex items-center space-x-2">
 									<Clock className="w-4 h-4" />
 									<span>
-										Estimated time: {service.service.estimatedDuration}
+										Estimated time:{" "}
+										{service.services
+											.map(
+												(serviceDetail) =>
+													serviceDetail.serviceId.estimatedDuration
+											)
+											.join(", ")}
 									</span>
 								</div>
 								<div className="flex items-center space-x-2">
 									<Package className="w-4 h-4" />
-									<span>Service: {service.service.name}</span>
+									<span>
+										Services:{" "}
+										{service.services
+											.map((serviceDetail) => serviceDetail.serviceId.name)
+											.join(", ")}
+									</span>
 								</div>
 								<div className="flex items-center space-x-2">
 									<IndianRupee className="w-4 h-4" />
@@ -85,8 +96,8 @@ const ServicesTab = () => {
 								Decline
 							</Button>
 							<Button
-								onClick={() => {
-									acceptService(service._id);
+								onClick={async () => {
+									await acceptService(service._id);
 									setTimeout(() => {
 										window.location.reload();
 									}, 500);

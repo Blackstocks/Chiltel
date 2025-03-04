@@ -253,7 +253,7 @@ const OverviewTab = () => {
 						<CardContent>
 							<div className="space-y-2">
 								<div className="flex items-center gap-2 text-2xl font-bold">
-									🪙 {profile.balance / 10 || 0}
+									{profile.balance / 10 || 0}
 								</div>
 								<p className="text-sm text-muted-foreground">
 									Available for services
@@ -432,7 +432,12 @@ const CurrCard = () => {
 											Duration
 										</p>
 										<p className="text-sm text-gray-600">
-											{currService?.service.estimatedDuration}
+											{currService?.services
+												.map(
+													(serviceDetail) =>
+														serviceDetail.serviceId.estimatedDuration
+												)
+												.join(", ")}
 										</p>
 									</div>
 								</div>
@@ -446,7 +451,9 @@ const CurrCard = () => {
 											Service Type
 										</p>
 										<p className="text-sm text-gray-600">
-											{currService?.service.name}
+											{currService?.services
+												.map((serviceDetail) => serviceDetail.serviceId.name)
+												.join(", ")}
 										</p>
 									</div>
 								</div>
