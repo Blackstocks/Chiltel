@@ -246,196 +246,210 @@ const Orders = () => {
 
             {/* Service Orders */}
             <div className="min-h-[40rem] bg-white border rounded-lg overflow-auto">
-              {view === "services" &&
-                serviceCart.map(
-                  (service, index) =>
-                    service.status === "COMPLETED" && (
-                      <div
-                        key={service._id}
-                        className={`grid sm:grid grid-cols-[2fr_2fr_1fr_1fr_1fr_1fr] gap-4 items-center border-b border-gray-200 py-4 px-4 text-sm ${
-                          service.status === "REQUESTED"
-                            ? "border-yellow-500 bg-yellow-50"
-                            : ""
-                        }`}
-                      >
-                        <div>
-                          <p className="text-xs sm:text-lg font-medium">
-                            {service.service.name}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm">
-                            {service.service.description}
-                          </p>
-                        </div>
-                        <div>
-                          <p>₹ {service.price}</p>
-                        </div>
-                        <div>
-                          <p>{service.service.estimatedDuration}</p>
-                        </div>
-                        <div>
-                          <span
-                            className={`px-2 py-1 text-sm font-medium rounded ${
-                              service.status === "REQUESTED"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : service.status === "CREATED"
-                                ? "bg-gray-200 text-gray-700"
-                                : service.status === "IN_PROGRESS"
-                                ? "bg-blue-100 text-blue-700"
-                                : service.status === "COMPLETED"
-                                ? "bg-green-100 text-green-700"
-                                : service.status === "CANCELLED"
-                                ? "bg-red-100 text-red-700"
-                                : ""
-                            }`}
-                          >
-                            {service.status}
-                          </span>
-                        </div>
-                        <div>
-                          {service.status === "REQUESTED" ? (
-                            <button
-                              onClick={() => handlePayment(service)}
-                              className="px-4 py-2 text-sm text-white bg-red-500 rounded hover:bg-red-600"
-                            >
-                              Pay Now
-                            </button>
-                          ) : (
-                            <span
-                              className={`px-2 py-1 text-sm font-medium rounded ${
-                                service.paymentStatus === "PAID"
-                                  ? "bg-green-100 text-green-700"
-                                  : service.paymentStatus === "REFUNDED"
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-gray-200 text-gray-700"
-                              }`}
-                            >
-                              {service.paymentStatus}
-                            </span>
-                          )}
-                        </div>
-                        {/* More Options */}
-                        <div className="relative">
-                          <button
-                            onClick={() => toggleRow(service._id)}
-                            className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200 focus:outline-none"
-                          >
-                            {expandedRow === service._id
-                              ? "Less Info"
-                              : "More Info"}{" "}
-                            {expandedRow === service._id ? (
-                              <ChevronUp />
-                            ) : (
-                              <ChevronDown />
-                            )}
-                          </button>
-                          {expandedRow === service._id && (
-                            <div className="absolute mt-2 z-10 w-full p-4 text-sm bg-white border rounded-lg shadow-md">
-                              <div className="grid grid-cols-2 gap-4">
-                                {/* Scheduled Date and Time */}
-                                <div className="flex flex-col">
-                                  <span className="font-semibold text-gray-700">
-                                    Scheduled Date
-                                  </span>
-                                  <p className="text-gray-600">
-                                    {new Date(
-                                      service.scheduledFor
-                                    ).toLocaleDateString()}
-                                  </p>
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className="font-semibold text-gray-700">
-                                    Scheduled Time
-                                  </span>
-                                  <p className="text-gray-600">
-                                    {new Date(
-                                      service.scheduledFor
-                                    ).toLocaleTimeString()}
-                                  </p>
-                                </div>
+            {view === "services" &&
+  serviceCart.map(
+    (serviceItem, index) =>
+      serviceItem.status === "COMPLETED" && (
+        <div key={serviceItem._id} className="mb-8 border rounded-lg shadow-sm overflow-hidden">
+          {/* Service Header */}
+          <div className="bg-gray-50 p-4 border-b">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-medium">Service #{index + 1}</h3>
+                <p className="text-sm text-gray-500">Completed on {new Date(serviceItem.completedAt).toLocaleDateString()}</p>
+              </div>
+              <div className="flex gap-4 items-center">
+                <div>
+                  <span className="font-semibold">Total:</span> ₹ {serviceItem.price}
+                </div>
+                <div>
+                  {serviceItem.paymentStatus === "PENDING" ? (
+                    <button
+                      onClick={() => handlePayment(serviceItem)}
+                      className="px-4 py-2 text-sm text-white bg-red-500 rounded hover:bg-red-600"
+                    >
+                      Pay Now
+                    </button>
+                  ) : (
+                    <span
+                      className={`px-2 py-1 text-sm font-medium rounded ${
+                        serviceItem.paymentStatus === "PAID"
+                          ? "bg-green-100 text-green-700"
+                          : serviceItem.paymentStatus === "REFUNDED"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {serviceItem.paymentStatus}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
-                                {/* Status */}
-                                <div className="flex flex-col">
-                                  <span className="font-semibold text-gray-700">
-                                    Status
-                                  </span>
-                                  <span
-                                    className={`px-2 py-1 mt-1 text-sm font-medium text-center rounded-md ${
-                                      service.status === "CREATED"
-                                        ? "bg-gray-200 text-gray-700"
-                                        : service.status === "IN_PROGRESS"
-                                        ? "bg-blue-100 text-blue-700"
-                                        : service.status === "COMPLETED"
-                                        ? "bg-green-100 text-green-700"
-                                        : service.status === "CANCELLED"
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-yellow-100 text-yellow-700"
-                                    }`}
-                                  >
-                                    {service.status}
-                                  </span>
-                                </div>
+          {/* Services Table */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Service
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Quantity
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Unit Price
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Duration
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {serviceItem.services.map((service) => (
+                  <tr key={service._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {service.serviceId.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {service.serviceId.description}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {service.count}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      ₹ {service.serviceId.price}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {service.serviceId.estimatedDuration}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-                                {/* Payment Status */}
-                                <div className="flex flex-col">
-                                  <span className="font-semibold text-gray-700">
-                                    Payment Status
-                                  </span>
-                                  <span
-                                    className={`px-2 py-1 mt-1 text-sm font-medium text-center rounded-md ${
-                                      service.paymentStatus === "PENDING"
-                                        ? "bg-yellow-100 text-yellow-700"
-                                        : service.paymentStatus === "PAID"
-                                        ? "bg-green-100 text-green-700"
-                                        : service.paymentStatus === "REFUNDED"
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-gray-200 text-gray-700"
-                                    }`}
-                                  >
-                                    {service.paymentStatus}
-                                  </span>
-                                </div>
-                              </div>
+          {/* More Info Expansion Panel */}
+          <div className="p-4 border-t">
+            <button
+              onClick={() => toggleRow(serviceItem._id)}
+              className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200 focus:outline-none"
+            >
+              {expandedRow === serviceItem._id
+                ? "Less Info"
+                : "More Info"}{" "}
+              {expandedRow === serviceItem._id ? (
+                <ChevronUp />
+              ) : (
+                <ChevronDown />
+              )}
+            </button>
 
-                              {/* Action Buttons */}
-                              <div className="mt-4 flex flex-col gap-2">
-                                {service.status === "CREATED" && (
-                                  <button
-                                    onClick={() => handleCancel(service._id)}
-                                    className="w-full px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
-                                  >
-                                    Cancel Service
-                                  </button>
-                                )}
-                                {service.status === "REQUESTED" && (
-                                  <button
-                                    onClick={() => handlePayment(service._id)}
-                                    className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                                  >
-                                    Pay Now
-                                  </button>
-                                )}
-                              </div>
+            {expandedRow === serviceItem._id && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Scheduled Date and Time */}
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-700">
+                      Scheduled Date
+                    </span>
+                    <p className="text-gray-600">
+                      {new Date(
+                        serviceItem.scheduledFor
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-700">
+                      Scheduled Time
+                    </span>
+                    <p className="text-gray-600">
+                      {new Date(
+                        serviceItem.scheduledFor
+                      ).toLocaleTimeString()}
+                    </p>
+                  </div>
 
-                              <div>
-                                {service.status === "COMPLETED" && (
-                                  <button
-                                    onClick={() =>
-                                      openPDF(`/rate_charts/ac_rate_chart.pdf`)
-                                    }
-                                    className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 w-full"
-                                  >
-                                    View Rate Chart
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )
+                  {/* Status */}
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-700">
+                      Status
+                    </span>
+                    <span
+                      className={`px-2 py-1 mt-1 text-sm font-medium text-center rounded-md ${
+                        serviceItem.status === "CREATED"
+                          ? "bg-gray-200 text-gray-700"
+                          : serviceItem.status === "IN_PROGRESS"
+                          ? "bg-blue-100 text-blue-700"
+                          : serviceItem.status === "COMPLETED"
+                          ? "bg-green-100 text-green-700"
+                          : serviceItem.status === "CANCELLED"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {serviceItem.status}
+                    </span>
+                  </div>
+
+                  {/* Payment Status */}
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-700">
+                      Payment Status
+                    </span>
+                    <span
+                      className={`px-2 py-1 mt-1 text-sm font-medium text-center rounded-md ${
+                        serviceItem.paymentStatus === "PENDING"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : serviceItem.paymentStatus === "PAID"
+                          ? "bg-green-100 text-green-700"
+                          : serviceItem.paymentStatus === "REFUNDED"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {serviceItem.paymentStatus}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Remarks */}
+                {serviceItem.remarks && (
+                  <div className="mt-4">
+                    <span className="font-semibold text-gray-700">Remarks</span>
+                    <p className="mt-1 text-gray-600">{serviceItem.remarks}</p>
+                  </div>
                 )}
+
+                {/* Action Buttons */}
+                <div className="mt-4 flex flex-col gap-2">
+                  {serviceItem.paymentStatus === "PENDING" && (
+                    <button
+                      onClick={() => handlePayment(serviceItem)}
+                      className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                    >
+                      Pay Now
+                    </button>
+                  )}
+                  
+                  <button
+                    onClick={() => openPDF(`/rate_charts/ac_rate_chart.pdf`)}
+                    className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                  >
+                    View Rate Chart
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )
+  )}
             </div>
           </div>
         </div>
