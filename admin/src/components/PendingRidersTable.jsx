@@ -326,7 +326,7 @@ const PendingRidersDialog = ({ onRiderApproved }) => {
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
-                          disabled={!isVerificationComplete(rider)}
+                          // disabled={!isVerificationComplete(rider)}
                           onClick={() => handleApproveRider(rider._id)}
                           className="gap-2 text-green-600"
                         >
