@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CardFooter } from "@/components/ui/card";
-import { MapPin, Clock, PackageOpen } from "lucide-react";
+import { MapPin, Clock, PackageOpen, Server } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import {
 	CheckCircle2,
@@ -75,6 +75,7 @@ const ActiveService = () => {
 
 	useEffect(() => {
 		getActiveService().then((service) => {
+			console.log(service);
 			setActiveService(service);
 			setExtraWorks(service?.addedWorks || []);
 			setWorkStarted(service?.status === "IN_PROGRESS" || false);
@@ -190,7 +191,8 @@ const ActiveService = () => {
 	console.log(activeService);
 
 	const RateChartContent = () => {
-		if (!activeService?.service?.rateChart) {
+		console.log(activeService.services[0].serviceId.rateChart);
+		if (!activeService?.services[0]?.serviceId?.rateChart) {
 			return (
 				<div className="p-4 text-center text-gray-500">
 					No rate chart available
@@ -205,7 +207,7 @@ const ActiveService = () => {
 				onValueChange={setOpenAccordions}
 				className="w-full"
 			>
-				{Object.entries(activeService.service.rateChart).map(
+				{Object.entries(activeService?.services[0]?.serviceId?.rateChart).map(
 					([category, items]) => (
 						<AccordionItem key={category} value={category}>
 							<AccordionTrigger className="text-lg font-semibold capitalize">
