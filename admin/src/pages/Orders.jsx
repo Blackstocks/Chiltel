@@ -823,13 +823,13 @@ const OrderManagement = () => {
 														</DropdownMenuTrigger>
 														<DropdownMenuContent align="end">
 															<ServiceDetailsDialog service={service} />
-															<DropdownMenuItem
+															{/* <DropdownMenuItem
 																onClick={handleTrackLocation}
 																className="cursor-pointer"
 															>
 																<MapPin className="mr-2 h-4 w-4" />
 																<span>Track Location</span>
-															</DropdownMenuItem>
+															</DropdownMenuItem> */}
 														</DropdownMenuContent>
 													</DropdownMenu>
 

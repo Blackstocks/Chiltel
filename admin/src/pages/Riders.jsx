@@ -218,13 +218,13 @@ const RiderManagement = () => {
                           <User className="h-4 w-4" />
                           <span>View Profile</span>
                         </DropdownMenuItem>
-                          <DropdownMenuItem
+                          {/* <DropdownMenuItem
                             onClick={() => handleViewAttendance(rider)}
                             className="cursor-pointer"
                           >
                             <CalendarCheck className="mr-2 h-4 w-4" />
                             <span>Attendance details</span>
-                          </DropdownMenuItem>
+                          </DropdownMenuItem> */}
                           <DropdownMenuItem
                             onClick={() => handleDeleteRider(rider._id)}
                             className="cursor-pointer"
