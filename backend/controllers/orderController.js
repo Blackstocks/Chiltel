@@ -254,7 +254,7 @@ const verifyRazorpay = async (req, res) => {
 const allOrders = async (req, res) => {
   try {
     const orders = await orderModel
-      .find({})
+      .find({orderType: "product"})
       .populate({
         path: "userId", // Path to populate
         model: "User",
