@@ -249,7 +249,7 @@ const Orders = () => {
             {view === "services" &&
   serviceCart.map(
     (serviceItem, index) =>
-      serviceItem.status === "COMPLETED" && (
+      (serviceItem.status === "COMPLETED" || serviceItem.status === "CANCELLED") && (
         <div key={serviceItem._id} className="mb-8 border rounded-lg shadow-sm overflow-hidden">
           {/* Service Header */}
           <div className="bg-gray-50 p-4 border-b">

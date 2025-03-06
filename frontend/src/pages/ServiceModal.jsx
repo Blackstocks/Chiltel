@@ -190,7 +190,76 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
     setScheduleService({ services: servicesToSchedule });
   };
 
-  const handleScheduleConfirm = async () => {
+  const initPay = (order, newOrder) => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Order Payment",
+      description: "Order Payment",
+      order_id: order.id,
+      receipt: order.receipt,
+      handler: async (response) => {
+        console.log("init pay: ", response);
+        try {
+          const { data } = await axios.post(
+            backendUrl + "/api/order/verifyRazorpay",
+            response,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          // const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers:{token}})
+          console.log("transaction data: ", data);
+          if (data.success) {
+            handleScheduleConfirm(data.orderInfo.id);
+          }
+        } catch (error) {
+          console.log(error);
+          toast.error(error);
+        }
+      },
+      modal: {
+        ondismiss: async () => {
+          console.log("Payment window was closed by the user.");
+          toast.error("Payment window closed. Cancelling the order...");
+
+          // Cancel the order when the modal is closed
+          try {
+            await axios.post(
+              `${backendUrl}/api/order/delete`,
+              { orderId: newOrder._id },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            console.log("Order canceled successfully");
+          } catch (error) {
+            console.error("Error while canceling order:", error);
+            toast.error("Failed to cancel the order. Please contact support.");
+          }
+        },
+      },
+    };
+    const rzp = new window.Razorpay(options);
+
+    rzp.on("payment.failed", async (response) => {
+      console.log("Payment failed or user closed dialog:", response);
+      toast.error("Payment failed or was canceled by the user.");
+
+      try {
+        await axios.post(
+          `${backendUrl}/api/order/delete`,
+          { orderId: newOrder._id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log("Order canceled successfully");
+      } catch (error) {
+        console.error("Error while canceling order:", error);
+        toast.error("Failed to cancel the order. Please contact support.");
+      }
+    });
+
+    rzp.open();
+  };
+
+  const handlePayment = async () => {
     if (!selectedDay || !selectedTime) {
       alert("Please select both date and time.");
       return;
@@ -206,6 +275,58 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
       return;
     }
 
+    toast.info("Initiating Payment");
+    try {
+      console.log("order services: ", services);
+      const totalPrice = scheduleService.services.reduce(
+        (sum, service) => sum + service.price * service.count,
+        0
+      );
+
+      console.log("user: ", user);
+      let orderData = {
+        userId: user._id,
+        orderType: "service",
+        products: [],
+        services: [],
+        totalAmount: (totalPrice * 1.18).toFixed(2),
+        // totalAmount: serviceRequest.price,
+        status: "ORDERED",
+        paymentDetails: {
+          method: "Razorpay",
+          transactionId: "",
+          paidAt: new Date(),
+        },
+        address: {
+          street: address.street,
+          city: address.city,
+          state: address.state,
+          zipCode: address.zipCode,
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      console.log("order data: ", orderData);
+      const responseRazorpay = await axios.post(
+        backendUrl + "/api/order/razorpay",
+        orderData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
+      console.log(responseRazorpay);
+      if (responseRazorpay.data.success) {
+        console.log("razorpay init success");
+        console.log("razorpay response: ", responseRazorpay.data);
+        initPay(responseRazorpay.data.order, responseRazorpay.data.newOrder);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  const handleScheduleConfirm = async (paymentId) => {
     try {
       const time24hr = convertTo24HourFormat(selectedTime);
       const scheduledDateTime = new Date(
@@ -228,6 +349,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
         scheduledFor: scheduledDateTime,
         remarks,
         totalPrice,
+        paymentId,
       };
 
       await addToServiceCart(scheduleService.services, serviceRequest);
@@ -584,7 +706,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
             {/* Total Price and Services */}
             <div className="mt-4">
               <p className="text-lg font-semibold">
-                Total Price: ₹{totalPrice}
+                Total Price: ₹{(totalPrice * 1.18).toFixed(2)} (Incl. 18% GST)
               </p>
               <p className="text-sm text-gray-700">
                 Number of Services: {totalServices}
@@ -612,10 +734,10 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
               Cancel
             </button>
             <button
-              onClick={handleScheduleConfirm}
+              onClick={() => handlePayment()}
               className="px-4 py-2 text-sm text-white bg-black rounded-md hover:bg-gray-800"
             >
-              Confirm
+              Confirm & Pay
             </button>
           </div>
         </div>
