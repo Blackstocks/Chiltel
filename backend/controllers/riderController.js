@@ -2,7 +2,7 @@
 import Rider from "../models/riderModel.js";
 import ServiceRequest from "../models/serviceRequestModel.js";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import razorpay from "razorpay";
 import crypto, { verify } from "crypto";
 import ReferralCode from "../models/referralModel.js";
