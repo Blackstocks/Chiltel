@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import React, { useState } from "react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
-const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId, handlePaymentModal }) => {
+const ServiceCartView = ({
+  serviceCart,
+  setShowCancelModal,
+  setSelectedServiceId,
+  handlePaymentModal,
+}) => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [view, setView] = useState("services");
 
@@ -29,13 +34,16 @@ const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId
               <div
                 key={serviceItem._id}
                 className={`py-4 border-b text-gray-700 grid grid-cols-[2fr_2fr_1fr_1fr_1fr] sm:grid-cols-[2fr_2fr_1fr_1fr_1fr] items-center gap-4 ${
-                  serviceItem.status === "REQUESTED" ? "border-yellow-500 bg-yellow-50" : ""
+                  serviceItem.status === "REQUESTED"
+                    ? "border-yellow-500 bg-yellow-50"
+                    : ""
                 }`}
               >
                 {/* Service Request ID / Scheduled Date */}
                 <div>
                   <p className="text-xs sm:text-base font-medium">
-                    Scheduled: {new Date(serviceItem.scheduledFor).toLocaleDateString()}
+                    Scheduled:{" "}
+                    {new Date(serviceItem.scheduledFor).toLocaleDateString()}
                   </p>
                   <p className="text-xs text-gray-500">
                     {new Date(serviceItem.scheduledFor).toLocaleTimeString()}
@@ -47,7 +55,8 @@ const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId
                   <ul className="text-sm space-y-1">
                     {serviceItem.services.map((service, idx) => (
                       <li key={idx}>
-                        {service.serviceId.name} {service.count > 1 ? `(×${service.count})` : ''}
+                        {service.serviceId.name}{" "}
+                        {service.count > 1 ? `(×${service.count})` : ""}
                       </li>
                     ))}
                   </ul>
@@ -76,7 +85,9 @@ const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId
                         : ""
                     }`}
                   >
-                    {serviceItem.status}
+                    {serviceItem.workStarted && serviceItem.status == "ASSIGNED"
+                      ? "RIDER ON THE WAY"
+                      : serviceItem.status}
                   </span>
                 </div>
 
@@ -110,15 +121,23 @@ const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId
                     onClick={() => toggleRow(serviceItem._id)}
                     className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200 focus:outline-none"
                   >
-                    {expandedRow === serviceItem._id ? "Less Details" : "More Details"}{" "}
-                    {expandedRow === serviceItem._id ? <ChevronUp /> : <ChevronDown />}
+                    {expandedRow === serviceItem._id
+                      ? "Less Details"
+                      : "More Details"}{" "}
+                    {expandedRow === serviceItem._id ? (
+                      <ChevronUp />
+                    ) : (
+                      <ChevronDown />
+                    )}
                   </button>
-                  
+
                   {/* Expanded Details */}
                   {expandedRow === serviceItem._id && (
                     <div className="absolute mt-2 z-10 w-full p-4 text-sm bg-white border rounded-lg shadow-md">
                       <div className="mb-4">
-                        <h3 className="font-semibold text-lg mb-2">Service Details</h3>
+                        <h3 className="font-semibold text-lg mb-2">
+                          Service Details
+                        </h3>
                         <div className="bg-gray-50 p-3 rounded-md">
                           <table className="w-full">
                             <thead>
@@ -132,23 +151,55 @@ const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId
                             <tbody>
                               {serviceItem.services.map((service, idx) => (
                                 <tr key={idx} className="border-b">
-                                  <td className="py-2">{service.serviceId.name} {service.count > 1 ? `(×${service.count})` : ''}</td>
-                                  <td className="py-2">{service.serviceId.description}</td>
-                                  <td className="py-2">{service.serviceId.estimatedDuration}</td>
-                                  <td className="py-2 text-right">Rs {service.serviceId.price * service.count}</td>
+                                  <td className="py-2">
+                                    {service.serviceId.name}{" "}
+                                    {service.count > 1
+                                      ? `(×${service.count})`
+                                      : ""}
+                                  </td>
+                                  <td className="py-2">
+                                    {service.serviceId.description}
+                                  </td>
+                                  <td className="py-2">
+                                    {service.serviceId.estimatedDuration}
+                                  </td>
+                                  <td className="py-2 text-right">
+                                    Rs {service.serviceId.price * service.count}
+                                  </td>
                                 </tr>
                               ))}
                               <tr>
-                                <td colSpan="3" className="py-2 text-right font-medium">Base Price:</td>
-                                <td className="py-2 text-right font-medium">Rs {serviceItem.price}</td>
+                                <td
+                                  colSpan="3"
+                                  className="py-2 text-right font-medium"
+                                >
+                                  Base Price:
+                                </td>
+                                <td className="py-2 text-right font-medium">
+                                  Rs {serviceItem.price}
+                                </td>
                               </tr>
                               <tr>
-                                <td colSpan="3" className="py-2 text-right font-medium">GST (18%):</td>
-                                <td className="py-2 text-right font-medium">Rs {Math.round(serviceItem.price * 0.18)}</td>
+                                <td
+                                  colSpan="3"
+                                  className="py-2 text-right font-medium"
+                                >
+                                  GST (18%):
+                                </td>
+                                <td className="py-2 text-right font-medium">
+                                  Rs {Math.round(serviceItem.price * 0.18)}
+                                </td>
                               </tr>
                               <tr className="border-t">
-                                <td colSpan="3" className="py-2 text-right font-medium">Total:</td>
-                                <td className="py-2 text-right font-medium">Rs {Math.round(serviceItem.price * 1.18)}</td>
+                                <td
+                                  colSpan="3"
+                                  className="py-2 text-right font-medium"
+                                >
+                                  Total:
+                                </td>
+                                <td className="py-2 text-right font-medium">
+                                  Rs {Math.round(serviceItem.price * 1.18)}
+                                </td>
                               </tr>
                             </tbody>
                           </table>
@@ -158,7 +209,9 @@ const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId
                       <div className="grid grid-cols-2 gap-4">
                         {/* Status */}
                         <div className="flex flex-col">
-                          <span className="font-semibold text-gray-700">Status</span>
+                          <span className="font-semibold text-gray-700">
+                            Status
+                          </span>
                           <span
                             className={`px-2 py-1 mt-1 text-sm font-medium text-center rounded-md ${
                               serviceItem.status === "CREATED"
@@ -172,14 +225,18 @@ const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId
                                 : "bg-yellow-100 text-yellow-700"
                             }`}
                           >
-                            {serviceItem.status}
+                            {serviceItem.workStarted &&
+                            serviceItem.status == "ASSIGNED"
+                              ? "RIDER ON THE WAY"
+                              : serviceItem.status}
                           </span>
                         </div>
 
-
                         {/* Payment Status */}
                         <div className="flex flex-col">
-                          <span className="font-semibold text-gray-700">Payment Status</span>
+                          <span className="font-semibold text-gray-700">
+                            Payment Status
+                          </span>
                           <span
                             className={`px-2 py-1 mt-1 text-sm font-medium text-center rounded-md ${
                               serviceItem.paymentStatus === "PENDING"
@@ -197,28 +254,44 @@ const ServiceCartView = ({ serviceCart, setShowCancelModal, setSelectedServiceId
 
                         {/* Remarks */}
                         <div className="flex flex-col">
-                          <span className="font-semibold text-gray-700">Remarks</span>
-                          <span className="text-gray-600">{serviceItem.remarks}</span>
+                          <span className="font-semibold text-gray-700">
+                            Remarks
+                          </span>
+                          <span className="text-gray-600">
+                            {serviceItem.remarks}
+                          </span>
                         </div>
 
                         {/* User Information */}
                         <div className="flex flex-col">
-                          <span className="font-semibold text-gray-700">Customer</span>
-                          <span className="text-gray-600">{serviceItem.user.name}</span>
+                          <span className="font-semibold text-gray-700">
+                            Customer
+                          </span>
+                          <span className="text-gray-600">
+                            {serviceItem.user.name}
+                          </span>
                         </div>
 
                         {/* Happy Code - if exists */}
                         {serviceItem.OTP && (
                           <div className="flex flex-col">
-                            <span className="font-semibold text-gray-700">Happy Code:</span>
-                            <span className="text-gray-600">{serviceItem.OTP}</span>
+                            <span className="font-semibold text-gray-700">
+                              Happy Code:
+                            </span>
+                            <span className="text-gray-600">
+                              {serviceItem.OTP}
+                            </span>
                           </div>
                         )}
-                        
+
                         {/* Location */}
                         <div className="flex flex-col col-span-2">
-                          <span className="font-semibold text-gray-700">Service Location</span>
-                          <span className="text-gray-600">{serviceItem.userLocation?.address}</span>
+                          <span className="font-semibold text-gray-700">
+                            Service Location
+                          </span>
+                          <span className="text-gray-600">
+                            {serviceItem.userLocation?.address}
+                          </span>
                         </div>
                       </div>
 
