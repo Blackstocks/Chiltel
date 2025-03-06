@@ -437,12 +437,12 @@ const Orders = () => {
                     </button>
                   )}
                   
-                  <button
+                  {/* <button
                     onClick={() => openPDF(`/rate_charts/ac_rate_chart.pdf`)}
                     className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
                   >
                     View Rate Chart
-                  </button>
+                  </button> */}
                 </div>
               </div>
             )}

@@ -523,12 +523,12 @@ const Cart = () => {
         </>
       )}
 
-      <ServiceCartView
+      {view === "services" && (<ServiceCartView
         serviceCart={serviceCart}
         setShowCancelModal={setShowCancelModal}
         setSelectedServiceId={setSelectedServiceId}
         handlePaymentModal={handlePaymentModal}
-      />
+      />)}
     </div>
   );
 };

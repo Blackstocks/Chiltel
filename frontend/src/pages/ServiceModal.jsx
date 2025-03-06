@@ -581,7 +581,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 						<div className="flex items-center space-x-4">
 							<h2 className="text-lg font-bold">Schedule Service</h2>
 						</div>
-						<button
+						{/*<button
 							onClick={() => openPDFInViewer(`/rate_charts/ac_rate_chart.pdf`)}
 							className="flex items-center px-4 py-2 text-sm font-medium text-blue-500 bg-white rounded-md shadow-md hover:bg-blue-100 hover:shadow-lg"
 						>
@@ -600,7 +600,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 								/>
 							</svg>
 							View Rate Chart
-						</button>
+						</button>*/}
 					</div>
 					{isPdfViewerOpen && (
 						<PdfViewerWindow pdfPath={`/rate_charts/ac_rate_chart.pdf`} />
