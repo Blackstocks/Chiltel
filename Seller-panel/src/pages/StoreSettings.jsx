@@ -254,15 +254,18 @@ const StoreSettings = () => {
     );
 
     const bankData = await bankVerifyResponse.json();
-    if (!bankVerifyResponse.ok) {
-      throw new Error(bankData.message || "Bank verification failed");
+    console.log("bankData: ", bankData);
+    if (bankData.data.result.accountStatus=="VALID") {
+      toast.success("Bank account details are valid.");
+    }else{
+      toast.error("Bank account details are not valid. Please check your details.");
     }
 
-    if (!bankData.data.accountExists) {
-      throw new Error(
-        "Bank account verification failed. Please check your details."
-      );
-    }
+    // if (bankData.data.accountStatus!="VALID") {
+    //   throw new Error(
+    //     "Bank account details are not valid. Please check your details."
+    //   );
+    // }
   };
 
   const handleGSTVerification = async () => {
@@ -303,7 +306,7 @@ const StoreSettings = () => {
 
       setLoading(true);
       await verifyBankDetails();
-      toast.success("Bank details verification successful");
+      //toast.success("Bank details verification successful");
       setVerificationStatus((prev) => ({ ...prev, bank: true }));
     } catch (error) {
       toast.error(`Bank Verification Failed: ${error.message}`);

@@ -848,7 +848,7 @@ const riderController = {
   //coin balance payment
   async createOrder(req, res) {
     try {
-      const AMOUNT = 1;
+      const AMOUNT = 2000;
       const CURRENCY = "INR";
       const RECEIPT = `receipt#${Math.floor(Math.random() * 1000000)}`;
 

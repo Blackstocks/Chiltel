@@ -276,7 +276,7 @@ const RiderProfileDialog = ({ isOpen, onClose, rider }) => {
                   {rider.attendance?.workingHours?.slice(0, 3).map((day, index) => (
                     <div key={index} className="text-sm text-muted-foreground mb-2">
                       <p>{new Date(day.date).toLocaleDateString()}</p>
-                      <p className="text-xs">Hours: {day.hours}</p>
+                      <p className="text-xs">Hours: {Math.floor(day.hours)}h {Math.round((day.hours % 1) * 60)}m</p>
                     </div>
                   ))}
                 </div>
