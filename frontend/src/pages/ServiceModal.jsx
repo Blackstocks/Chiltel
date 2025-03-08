@@ -21,7 +21,6 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 
 	const today = new Date();
 
-	const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
 	const [services, setServices] = useState({});
 	const [isLoading, setIsLoading] = useState(false);
 	const [servicesLoading, setServicesLoading] = useState(true);
@@ -41,15 +40,12 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 	});
 	const [acMode, setAcMode] = useState("Split AC");
 	const [serviceCounts, setServiceCounts] = useState({});
+	const [rateChartModalOpen, setRateChartModalOpen] = useState(false);
 
 	const toggleAcMode = () => {
 		setAcMode((prevMode) =>
 			prevMode === "Split AC" ? "Window AC" : "Split AC"
 		);
-	};
-
-	const openPDFInViewer = (pdfPath) => {
-		setIsPdfViewerOpen(true);
 	};
 
 	console.log("Schedule service: ", scheduleService);
@@ -107,6 +103,7 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 						name: item.name,
 						price: item.price,
 						duration: item.estimatedDuration,
+						rateChart: item?.rateChart,
 						description: item.description,
 					});
 				});
@@ -573,6 +570,11 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 			0
 		);
 
+		const handleRateChartClick = () => {
+			console.log("services: ", services);
+			setRateChartModalOpen(true);
+		};
+
 		return (
 			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
 				<div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
@@ -581,8 +583,8 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 						<div className="flex items-center space-x-4">
 							<h2 className="text-lg font-bold">Schedule Service</h2>
 						</div>
-						{/*<button
-							onClick={() => openPDFInViewer(`/rate_charts/ac_rate_chart.pdf`)}
+						<button
+							onClick={handleRateChartClick}
 							className="flex items-center px-4 py-2 text-sm font-medium text-blue-500 bg-white rounded-md shadow-md hover:bg-blue-100 hover:shadow-lg"
 						>
 							<svg
@@ -600,11 +602,8 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 								/>
 							</svg>
 							View Rate Chart
-						</button>*/}
+						</button>
 					</div>
-					{isPdfViewerOpen && (
-						<PdfViewerWindow pdfPath={`/rate_charts/ac_rate_chart.pdf`} />
-					)}
 					<div className="mt-4 space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto p-6">
 						{/* Day Selection */}
 						<div>
@@ -727,7 +726,6 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 								setSelectedDate("");
 								setSelectedDay(today.toISOString().split("T")[0]);
 								setSelectedTime("");
-								setIsPdfViewerOpen(false);
 							}}
 							className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
 						>
@@ -741,13 +739,92 @@ const ServiceModal = ({ isOpen, onClose, category }) => {
 						</button>
 					</div>
 				</div>
+
+				{rateChartModalOpen && (
+					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+						<div className="relative w-full max-w-3xl mx-4 my-6 bg-white rounded-lg shadow-xl">
+							<div className="flex items-center justify-between sticky top-0 z-10 p-6 shadow-md rounded-t-lg">
+								<h2 className="text-2xl font-semibold tracking-wide">
+									Rate Chart
+								</h2>
+								<button
+									onClick={() => setRateChartModalOpen(false)}
+									className="p-2 text-black-200 transition-colors bg-white rounded-full shadow-md hover:bg-gray-100 hover:shadow-lg"
+								>
+									<svg
+										className="w-6 h-6"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth="2"
+											d="M6 18L18 6M6 6l12 12"
+										/>
+									</svg>
+								</button>
+							</div>
+
+							<div className="max-h-[80vh] overflow-y-auto p-6">
+								<div className="space-y-6">
+									{services["Air Conditioner"].Service[0].rateChart &&
+										Object.entries(
+											services["Air Conditioner"].Service[0].rateChart
+										).map(([serviceType, items]) => (
+											<div
+												key={serviceType}
+												className="border rounded-lg shadow-sm overflow-hidden"
+											>
+												<div className="bg-gray-50 px-4 py-3 border-b">
+													<h3 className="text-lg font-medium capitalize">
+														{serviceType.replace(/_/g, " ")}
+													</h3>
+												</div>
+												<div className="overflow-x-auto">
+													<table className="min-w-full divide-y divide-gray-200">
+														<thead className="bg-gray-100">
+															<tr>
+																<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+																	Description
+																</th>
+																<th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+																	Service Charge
+																</th>
+															</tr>
+														</thead>
+														<tbody className="bg-white divide-y divide-gray-200">
+															{Array.isArray(items) &&
+																items.map((item, index) => (
+																	<tr
+																		key={index}
+																		className={
+																			index % 2 === 0
+																				? "bg-white"
+																				: "bg-gray-50"
+																		}
+																	>
+																		<td className="px-6 py-4 text-sm text-gray-900">
+																			{item.description}
+																		</td>
+																		<td className="px-6 py-4 text-sm text-gray-900 text-right font-medium">
+																			{item.service_charge}
+																		</td>
+																	</tr>
+																))}
+														</tbody>
+													</table>
+												</div>
+											</div>
+										))}
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		);
-	};
-
-	const openPDF = (pdfPath) => {
-		const pdfUrl = `${window.location.origin}${pdfPath}`;
-		window.open(pdfUrl, "_blank", "noopener,noreferrer");
 	};
 
 	return (
