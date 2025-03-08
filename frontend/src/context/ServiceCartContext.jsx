@@ -30,14 +30,16 @@ export const ServiceCartProvider = ({ children }) => {
       try {
         setServiceCartLoading(true);
         const response = await axios.get(
-          backendUrl +
-            `/api/serviceRequests/user/${user._id ? user._id : user.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+					backendUrl +
+						`/api/serviceRequests/user/${user._id ? user._id : user.id}`,
+					{
+						headers: {
+							Authorization: `Bearer ${localStorage.getItem(
+								"chiltel-user-token"
+							)}`,
+						},
+					}
+				);
         console.log("serviceCart: ", response.data.data);
         setServiceCart(response.data.data);
         console.log("Requested services: ", response.data.data);
@@ -50,7 +52,7 @@ export const ServiceCartProvider = ({ children }) => {
   };
 
   const addToServiceCart = async (scheduleService, serviceRequest) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("chiltel-user-token");
 
     console.log(serviceRequest);
     if (!isAuthenticated) {
@@ -74,7 +76,7 @@ export const ServiceCartProvider = ({ children }) => {
 
   const removeFromServiceCart = async (userId, serviceId) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("chiltel-user-token");
       const response = await axios.post(
         `${backendUrl}/api/service-cart/remove`,
         { userId, serviceId },
@@ -99,7 +101,7 @@ export const ServiceCartProvider = ({ children }) => {
 
   const updateServiceQuantity = async (userId, serviceId, quantity) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("chiltel-user-token");
       const response = await axios.post(
         `${backendUrl}/api/service-cart/update`,
         { userId, serviceId, quantity },
@@ -120,7 +122,7 @@ export const ServiceCartProvider = ({ children }) => {
 
   const getServiceCartAmount = async (userId) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("chiltel-user-token");
       const response = await axios.post(
         backendUrl + "/api/service-cart/get",
         {
@@ -141,7 +143,7 @@ export const ServiceCartProvider = ({ children }) => {
 
   const getServiceCartCount = async (userId) => {
     let totalCount = 0;
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("chiltel-user-token");
     const response = await axios.post(
       backendUrl + "/api/service-cart/get",
       {
